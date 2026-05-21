@@ -12,5 +12,12 @@
     </parent>
 
     <artifactId>quizup-profile-domain</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.quizup</groupId>
+            <artifactId>quizup-common</artifactId>
+        </dependency>
+    </dependencies>
 </project>
 
