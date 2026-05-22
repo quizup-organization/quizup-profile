@@ -13,6 +13,9 @@ create table if not exists profile_entry (
 	updated_at timestamptz not null
 );
 
+create index if not exists idx_profile_total_xp on profile_entry(global_total_experience);
+create index if not exists idx_profile_wins on profile_entry(global_wins);
+
 create table if not exists profile_topic_statistics_entry (
 	profile_id varchar(255) not null,
 	topic_id varchar(255) not null,
@@ -20,6 +23,7 @@ create table if not exists profile_topic_statistics_entry (
 	wins integer not null,
 	losses integer not null,
 	draws integer not null,
+	win_streak integer not null,
 	primary key (profile_id, topic_id),
 	constraint fk_profile_topic_stats_profile
 		foreign key (profile_id) references profile_entry(profile_id)
@@ -39,9 +43,7 @@ create table if not exists profile_game_result_entry (
 	position_idx integer not null,
 	game_id varchar(255) not null,
 	topic_id varchar(255) not null,
-	topic_name varchar(255) not null,
 	opponent_id varchar(255) not null,
-	opponent_name varchar(255) not null,
 	player_score integer not null,
 	opponent_score integer not null,
 	result_type varchar(20) not null,

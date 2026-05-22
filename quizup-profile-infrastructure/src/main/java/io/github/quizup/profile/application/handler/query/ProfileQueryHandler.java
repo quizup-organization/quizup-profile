@@ -1,5 +1,6 @@
 package io.github.quizup.profile.application.handler.query;
 
+import io.github.quizup.common.domain.model.search.PageResult;
 import io.github.quizup.profile.domain.exception.ProfileProblems;
 import io.github.quizup.profile.domain.model.Profile;
 import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
@@ -25,6 +26,11 @@ public class ProfileQueryHandler {
     @QueryHandler
     public boolean handle(ProfileQuery.ProfileExistsByIdQuery query) {
         return profileRepositoryPort.existsById(query.profileId());
+    }
+
+    @QueryHandler
+    public PageResult<Profile> handle(ProfileQuery.SearchProfileQuery query) {
+        return profileRepositoryPort.findAll(query);
     }
 }
 

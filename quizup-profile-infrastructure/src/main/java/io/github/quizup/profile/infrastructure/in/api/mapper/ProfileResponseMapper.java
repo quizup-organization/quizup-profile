@@ -1,5 +1,8 @@
 package io.github.quizup.profile.infrastructure.in.api.mapper;
 
+import io.github.quizup.common.domain.model.search.PageResult;
+import io.github.quizup.common.infrastructure.in.api.response.PageResponse;
+import io.github.quizup.common.infrastructure.mapper.SearchResponseMapper;
 import io.github.quizup.profile.domain.model.*;
 import io.github.quizup.profile.infrastructure.in.api.response.*;
 
@@ -36,6 +39,10 @@ public final class ProfileResponseMapper {
         );
     }
 
+    public static PageResponse<ProfileResponse> toResponse(PageResult<Profile> pageResult) {
+        return SearchResponseMapper.toSearchResponse(pageResult, ProfileResponseMapper::toResponse);
+    }
+
     private static ProfileStatisticsResponse toStatisticsResponse(Statistics statistics) {
         return new ProfileStatisticsResponse(
                 statistics.totalExperience(),
@@ -62,9 +69,7 @@ public final class ProfileResponseMapper {
         return new GameResultResponse(
                 gameResult.gameId(),
                 gameResult.topicId(),
-                gameResult.topicName(),
                 gameResult.opponentId(),
-                gameResult.opponentName(),
                 gameResult.playerScore(),
                 gameResult.opponentScore(),
                 gameResult.result(),

@@ -15,7 +15,7 @@ public final class ProfileEntityMapper {
         entity.getTopicStatistics().forEach((topicId, value) ->
                 topicStatistics.put(
                         topicId,
-                        new TopicStatistics(topicId, value.getTotalExperience(), value.getWins(), value.getLosses(), value.getDraws())
+                        new TopicStatistics(topicId, value.getTotalExperience(), value.getWins(), value.getLosses(), value.getDraws(), value.getWinStreak())
                 )
         );
 
@@ -63,6 +63,7 @@ public final class ProfileEntityMapper {
             embeddable.setWins(stats.wins());
             embeddable.setLosses(stats.losses());
             embeddable.setDraws(stats.draws());
+            embeddable.setWinStreak(stats.winStreak());
             topicStatistics.put(topicId, embeddable);
         });
         entity.setTopicStatistics(topicStatistics);
@@ -89,9 +90,7 @@ public final class ProfileEntityMapper {
         return new GameResult(
                 embeddable.getGameId(),
                 embeddable.getTopicId(),
-                embeddable.getTopicName(),
                 embeddable.getOpponentId(),
-                embeddable.getOpponentName(),
                 embeddable.getPlayerScore(),
                 embeddable.getOpponentScore(),
                 embeddable.getResult(),
@@ -103,9 +102,7 @@ public final class ProfileEntityMapper {
         GameResultEmbeddable embeddable = new GameResultEmbeddable();
         embeddable.setGameId(gameResult.gameId());
         embeddable.setTopicId(gameResult.topicId());
-        embeddable.setTopicName(gameResult.topicName());
         embeddable.setOpponentId(gameResult.opponentId());
-        embeddable.setOpponentName(gameResult.opponentName());
         embeddable.setPlayerScore(gameResult.playerScore());
         embeddable.setOpponentScore(gameResult.opponentScore());
         embeddable.setResult(gameResult.result());

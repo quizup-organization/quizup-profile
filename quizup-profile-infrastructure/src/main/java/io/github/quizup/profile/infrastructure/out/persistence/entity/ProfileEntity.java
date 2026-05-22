@@ -13,7 +13,10 @@ import java.util.*;
 @Setter
 @Getter
 @Entity
-@Table(name = "profile_entry")
+@Table(name = "profile_entry", indexes = {
+        @Index(name = "idx_profile_total_xp", columnList = "global_total_experience"),
+        @Index(name = "idx_profile_wins", columnList = "global_wins")
+})
 public class ProfileEntity {
 
     @Id
@@ -30,9 +33,11 @@ public class ProfileEntity {
     @Column(name = "draw_streak", nullable = false)
     private int drawStreak;
 
+    @Searchable(type = FieldType.NUMBER)
     @Column(name = "global_total_experience", nullable = false)
     private int globalTotalExperience;
 
+    @Searchable(type = FieldType.NUMBER)
     @Column(name = "global_wins", nullable = false)
     private int globalWins;
 

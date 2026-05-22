@@ -8,9 +8,7 @@ import java.time.Instant;
 public record GameResult(
         String gameId,
         String topicId,
-        String topicName,
         String opponentId,
-        String opponentName,
         int playerScore,
         int opponentScore,
         GameResultType result,

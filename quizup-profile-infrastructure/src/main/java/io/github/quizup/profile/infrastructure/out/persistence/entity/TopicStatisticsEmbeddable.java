@@ -21,5 +21,8 @@ public class TopicStatisticsEmbeddable {
 
     @Column(name = "draws", nullable = false)
     private int draws;
+
+    @Column(name = "win_streak", nullable = false)
+    private int winStreak;
 }
 

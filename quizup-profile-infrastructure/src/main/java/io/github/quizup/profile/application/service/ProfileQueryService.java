@@ -1,8 +1,10 @@
 package io.github.quizup.profile.application.service;
 
+import io.github.quizup.common.domain.model.search.PageResult;
+import io.github.quizup.common.infrastructure.axon.PageResponseTypes;
 import io.github.quizup.profile.domain.model.Profile;
-import io.github.quizup.profile.domain.port.in.CheckProfileUseCase;
 import io.github.quizup.profile.domain.port.in.GetProfileUseCase;
+import io.github.quizup.profile.domain.port.in.SearchProfileUseCase;
 import io.github.quizup.profile.domain.query.ProfileQuery;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.queryhandling.QueryGateway;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-public class ProfileQueryService implements GetProfileUseCase, CheckProfileUseCase {
+public class ProfileQueryService implements GetProfileUseCase, SearchProfileUseCase {
 
     private final QueryGateway queryGateway;
 
@@ -25,8 +27,8 @@ public class ProfileQueryService implements GetProfileUseCase, CheckProfileUseCa
     }
 
     @Override
-    public CompletableFuture<Boolean> existsById(ProfileQuery.ProfileExistsByIdQuery query) {
-        return queryGateway.query(query, ResponseTypes.instanceOf(Boolean.class));
+    public CompletableFuture<PageResult<Profile>> search(ProfileQuery.SearchProfileQuery query) {
+        return queryGateway.query(query, PageResponseTypes.pageResultOf(Profile.class));
     }
 }
 

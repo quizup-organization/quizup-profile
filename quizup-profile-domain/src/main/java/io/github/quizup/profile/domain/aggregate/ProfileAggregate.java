@@ -5,6 +5,7 @@ import io.github.quizup.profile.domain.event.ProfileEvent;
 import io.github.quizup.profile.domain.exception.ProfileProblems;
 import io.github.quizup.profile.domain.model.*;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
@@ -13,7 +14,6 @@ import org.axonframework.spring.stereotype.Aggregate;
 import java.time.Instant;
 import java.util.*;
 
-import static io.github.quizup.profile.domain.model.ProfileRules.MAX_RECENT_GAMES;
 import static io.github.quizup.profile.domain.model.ProfileRules.*;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
@@ -28,186 +28,165 @@ public class ProfileAggregate {
     private int lossStreak;
     private int drawStreak;
 
+    private int totalExperience;
+
+    private int wins;
+    private int losses;
+    private int draws;
+
     private Map<BadgeType, Badge> badges;
-
-    private GlobalStatistics globalStatistics;
-
     private Map<String, TopicStatistics> topicStatistics;
-    private Deque<GameResult> recentGameResults;
 
     private Instant createdAt;
-    private Instant updatedAt;
 
     protected ProfileAggregate() {
     }
 
     @CommandHandler
     public ProfileAggregate(ProfileCommand.CreateProfileCommand command) {
-        if (command.profileId() == null || command.profileId().isBlank()) {
-            throw new ProfileProblems.MissingProfileIdProblem(command.profileId());
-        }
-
-        Instant now = Instant.now();
-        Profile profile = Profile.empty(command.profileId(), now);
-
         apply(
                 new ProfileEvent.ProfileCreatedEvent(
                         command.profileId(),
-                        profile,
-                        now
+                        Instant.now()
                 )
         );
     }
 
     @CommandHandler
     public void handle(ProfileCommand.AddGameResultCommand command) {
-        if (command.profileId() == null || command.profileId().isBlank()) {
-            throw new ProfileProblems.MissingProfileIdProblem(command.profileId());
-        }
-
-        if (command.gameResult() == null) {
-            throw new ProfileProblems.MissingGameResultProblem(command.profileId());
-        }
-
-        if (command.gameResult().gameId() == null || command.gameResult().gameId().isBlank()) {
+        if (StringUtils.isBlank(command.gameId())) {
             throw new ProfileProblems.MissingGameIdProblem(command.profileId());
         }
-
-        if (command.gameResult().topicId() == null || command.gameResult().topicId().isBlank()) {
+        if (StringUtils.isBlank(command.topicId())) {
             throw new ProfileProblems.MissingTopicIdProblem(command.profileId());
         }
-
-        if (command.gameResult().playerScore() < 0) {
-            throw new ProfileProblems.InvalidGameScoreProblem(command.profileId(), command.gameResult().playerScore());
+        if (command.result() == null) {
+            throw new ProfileProblems.MissingGameResultProblem(command.profileId());
+        }
+        if (command.playerScore() < 0) {
+            throw new ProfileProblems.InvalidGameScoreProblem(command.profileId(), command.playerScore());
         }
 
-        int xpEarned = ProfileRules.computeXpEarned(command.gameResult().playerScore(), command.gameResult().result());
+        int xpEarned = ProfileRules.computeXpEarned(command.playerScore(), command.result());
 
-        GlobalStatistics newGlobal = globalStatistics.addGame(xpEarned, command.gameResult().result());
+        int newGlobalXp = this.totalExperience + xpEarned;
 
-        Map<String, TopicStatistics> newTopicStatistics = new HashMap<>(topicStatistics);
-        TopicStatistics currentTopicStats = newTopicStatistics.getOrDefault(
-                command.gameResult().topicId(),
-                TopicStatistics.empty(command.gameResult().topicId())
-        );
-        TopicStatistics updatedTopicStats = currentTopicStats.addGame(xpEarned, command.gameResult().result());
-        newTopicStatistics.put(command.gameResult().topicId(), updatedTopicStats);
+        int newGlobalWins = command.result() == GameResultType.WIN ? wins + 1 : wins;
+        int newGlobalLosses = command.result() == GameResultType.LOSS ? losses + 1 : losses;
+        int newGlobalDraws = command.result() == GameResultType.DRAW ? draws + 1 : draws;
 
-        int newWinStreak = winStreak;
-        int newLossStreak = lossStreak;
-        int newDrawStreak = drawStreak;
+        int newWinStreak = command.result() == GameResultType.WIN ? winStreak + 1 : 0;
+        int newLossStreak = command.result() == GameResultType.LOSS ? lossStreak + 1 : 0;
+        int newDrawStreak = command.result() == GameResultType.DRAW ? drawStreak + 1 : 0;
 
-        switch (command.gameResult().result()) {
-            case WIN -> {
-                newWinStreak++;
-                newLossStreak = 0;
-                newDrawStreak = 0;
-            }
-            case LOSS -> {
-                newLossStreak++;
-                newWinStreak = 0;
-                newDrawStreak = 0;
-            }
-            case DRAW -> {
-                newDrawStreak++;
-                newWinStreak = 0;
-                newLossStreak = 0;
-            }
-        }
+        TopicStatistics currentTopicStats = topicStatistics.getOrDefault(command.topicId(), TopicStatistics.empty(command.topicId()));
 
-        Map<BadgeType, Badge> newBadges = new EnumMap<>(BadgeType.class);
-        newBadges.putAll(badges);
-        unlockNewBadges(newBadges, command.gameResult(), newGlobal, updatedTopicStats, newWinStreak);
+        int newTopicXp = currentTopicStats.totalExperience() + xpEarned;
+        int newTopicWins = command.result() == GameResultType.WIN ? currentTopicStats.wins() + 1 : currentTopicStats.wins();
+        int newTopicLosses = command.result() == GameResultType.LOSS ? currentTopicStats.losses() + 1 : currentTopicStats.losses();
+        int newTopicDraws = command.result() == GameResultType.DRAW ? currentTopicStats.draws() + 1 : currentTopicStats.draws();
+        int newTopicWinStreak = command.result() == GameResultType.WIN ? currentTopicStats.winStreak() + 1 : 0;
 
-        List<GameResult> newRecentResults = new ArrayList<>(recentGameResults);
+        int newTotalGames = newGlobalWins + newGlobalLosses + newGlobalDraws;
+        int newTopicLevel = ProfileRules.computeLevelFromXp(newTopicXp);
+        Set<BadgeType> newBadges = computeNewBadges(command, newTotalGames, newWinStreak, newTopicWinStreak, newTopicLevel);
 
-        if (newRecentResults.size() >= MAX_RECENT_GAMES) {
-            newRecentResults.remove(0);
-        }
+        boolean leveledUp = ProfileRules.computeLevelFromXp(newGlobalXp)
+                > ProfileRules.computeLevelFromXp(this.totalExperience);
 
-        newRecentResults.add(command.gameResult());
-
-        Instant now = Instant.now();
-        Profile profile = new Profile(
+        apply(new ProfileEvent.GameResultRecordedEvent(
                 profileId,
+                command.gameId(),
+                command.topicId(),
+                command.opponentId(),
+                command.playerScore(),
+                command.opponentScore(),
+                command.result(),
+                xpEarned,
+                newGlobalXp,
+                newGlobalWins,
+                newGlobalLosses,
+                newGlobalDraws,
                 newWinStreak,
                 newLossStreak,
                 newDrawStreak,
-                newGlobal,
-                Map.copyOf(newTopicStatistics),
-                Map.copyOf(newBadges),
-                List.copyOf(newRecentResults),
-                createdAt,
-                now
-        );
-
-        apply(
-                new ProfileEvent.GameResultRecordedEvent(
-                        profileId,
-                        command.gameResult(),
-                        profile,
-                        now
-                )
-        );
+                newTopicXp,
+                newTopicWins,
+                newTopicLosses,
+                newTopicDraws,
+                newTopicWinStreak,
+                newBadges,
+                leveledUp,
+                Instant.now()
+        ));
     }
 
     @EventSourcingHandler
     public void on(ProfileEvent.ProfileCreatedEvent event) {
-        applyProfile(event.profile());
+        this.profileId = event.profileId();
+        this.winStreak = 0;
+        this.lossStreak = 0;
+        this.drawStreak = 0;
+        this.totalExperience = 0;
+        this.wins = 0;
+        this.losses = 0;
+        this.draws = 0;
+        this.badges = new EnumMap<>(BadgeType.class);
+        this.topicStatistics = new HashMap<>();
+        this.processedGameIds = new HashSet<>();
+        this.createdAt = event.createdAt();
     }
 
     @EventSourcingHandler
     public void on(ProfileEvent.GameResultRecordedEvent event) {
-        applyProfile(event.profile());
+        this.totalExperience = event.newGlobalTotalExperience();
+        this.wins = event.newGlobalWins();
+        this.losses = event.newGlobalLosses();
+        this.draws = event.newGlobalDraws();
+        this.winStreak = event.newWinStreak();
+        this.lossStreak = event.newLossStreak();
+        this.drawStreak = event.newDrawStreak();
+
+        TopicStatistics updatedTopic = new TopicStatistics(
+                event.topicId(),
+                event.newTopicTotalExperience(),
+                event.newTopicWins(),
+                event.newTopicLosses(),
+                event.newTopicDraws(),
+                event.newTopicWinStreak()
+        );
+        this.topicStatistics.put(event.topicId(), updatedTopic);
+
+        event.newBadges().forEach(badgeType -> this.badges.putIfAbsent(badgeType, new Badge(badgeType, event.recordedAt())));
+        this.processedGameIds.add(event.gameId());
     }
 
-    private void applyProfile(Profile profile) {
-        this.profileId = profile.profileId();
-        this.winStreak = profile.winStreak();
-        this.lossStreak = profile.lossStreak();
-        this.drawStreak = profile.drawStreak();
-        this.globalStatistics = profile.globalStatistics();
-        this.topicStatistics = new HashMap<>(profile.topicStatistics());
-        this.badges = new EnumMap<>(BadgeType.class);
-        this.badges.putAll(profile.badges());
-        this.recentGameResults = new ArrayDeque<>(profile.recentGameResults());
-        this.createdAt = profile.createdAt();
-        this.updatedAt = profile.updatedAt();
-    }
+    private Set<BadgeType> computeNewBadges(ProfileCommand.AddGameResultCommand command,
+                                            int newTotalGames,
+                                            int newWinStreak,
+                                            int newTopicWinStreak,
+                                            int newTopicLevel) {
+        Set<BadgeType> awarded = new HashSet<>();
 
-    private void unlockNewBadges(Map<BadgeType, Badge> unlockedBadges,
-                                 GameResult gameResult,
-                                 GlobalStatistics globalStats,
-                                 TopicStatistics topicStats,
-                                 int currentWinStreak) {
-        Instant unlockedAt = gameResult.playedAt() != null ? gameResult.playedAt() : Instant.now();
-
-        if (gameResult.result() == GameResultType.WIN) {
-            unlock(unlockedBadges, BadgeType.FIRST_WIN, unlockedAt);
+        if (command.result() == GameResultType.WIN && wins == 0 && !badges.containsKey(BadgeType.FIRST_WIN)) {
+            awarded.add(BadgeType.FIRST_WIN);
         }
-        if (gameResult.playerScore() >= PERFECT_GAME_SCORE) {
-            unlock(unlockedBadges, BadgeType.PERFECT_SCORE, unlockedAt);
+        if (command.playerScore() >= PERFECT_GAME_SCORE && !badges.containsKey(BadgeType.PERFECT_SCORE)) {
+            awarded.add(BadgeType.PERFECT_SCORE);
         }
-        if (currentWinStreak >= FIRE_STREAK_5_THRESHOLD) {
-            unlock(unlockedBadges, BadgeType.FIRE_STREAK_5, unlockedAt);
+        if (newWinStreak >= FIRE_STREAK_5_THRESHOLD && !badges.containsKey(BadgeType.FIRE_STREAK_5)) {
+            awarded.add(BadgeType.FIRE_STREAK_5);
         }
-        if (currentWinStreak >= FIRE_STREAK_10_THRESHOLD) {
-            unlock(unlockedBadges, BadgeType.FIRE_STREAK_10, unlockedAt);
+        if (newWinStreak >= FIRE_STREAK_10_THRESHOLD && !badges.containsKey(BadgeType.FIRE_STREAK_10)) {
+            awarded.add(BadgeType.FIRE_STREAK_10);
         }
-        if (globalStats.totalGames() >= VETERAN_100_THRESHOLD) {
-            unlock(unlockedBadges, BadgeType.VETERAN_100, unlockedAt);
+        if (newTotalGames >= VETERAN_100_THRESHOLD && !badges.containsKey(BadgeType.VETERAN_100)) {
+            awarded.add(BadgeType.VETERAN_100);
         }
-        if (topicStats.level() >= SPECIALIST_LEVEL_THRESHOLD) {
-            unlock(unlockedBadges, BadgeType.SPECIALIST, unlockedAt);
+        if (newTopicLevel >= SPECIALIST_LEVEL_THRESHOLD && !badges.containsKey(BadgeType.SPECIALIST)) {
+            awarded.add(BadgeType.SPECIALIST);
         }
-    }
-
-    private void unlock(Map<BadgeType, Badge> unlockedBadges, BadgeType badgeType, Instant unlockedAt) {
-        unlockedBadges.putIfAbsent(badgeType, new Badge(badgeType, unlockedAt));
-    }
-
-    public List<GameResult> getRecentGameResults() {
-        return List.copyOf(recentGameResults);
+        return awarded;
     }
 }
 
