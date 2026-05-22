@@ -1,8 +1,19 @@
 package io.github.quizup.profile.domain.model;
 
-public enum GameResult {
-    WIN,
-    LOSS,
-    DRAW
-}
+import lombok.Builder;
 
+import java.time.Instant;
+
+@Builder(toBuilder = true)
+public record GameResult(
+        String gameId,
+        String topicId,
+        String topicName,
+        String opponentId,
+        String opponentUsername,
+        int playerScore,
+        int opponentScore,
+        GameResultType result,
+        Instant playedAt
+) {
+}

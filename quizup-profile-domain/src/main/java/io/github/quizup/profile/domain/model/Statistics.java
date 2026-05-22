@@ -2,12 +2,44 @@ package io.github.quizup.profile.domain.model;
 
 public interface Statistics {
 
-    int level();
+    default int level() {
+        return ProfileRules.computeLevelFromXp(totalExperience());
+    }
 
-    int experience();
+    default int experience() {
+        return experienceInCurrentLevel();
+    }
 
-    default int experienceBeforeNextLevel() {
+    int totalExperience();
+
+    /**
+     * XP totale requise pour ENTRER dans le niveau actuel.
+     * Exemple : si level=5, retourne le seuil d'entrée du niveau 5.
+     */
+    default int experienceAtCurrentLevel() {
+        return ProfileRules.computeXpForLevel(level());
+    }
+
+    /**
+     * XP totale requise pour ENTRER dans le niveau suivant.
+     * Exemple : si level=5, retourne le seuil d'entrée du niveau 6.
+     */
+    default int experienceAtNextLevel() {
         return ProfileRules.computeXpForLevel(level() + 1);
+    }
+
+    /**
+     * XP gagnée dans le niveau actuel (pour la barre de progression UI).
+     */
+    default int experienceInCurrentLevel() {
+        return totalExperience() - experienceAtCurrentLevel();
+    }
+
+    /**
+     * XP totale nécessaire pour compléter le niveau actuel (dénominateur de la barre).
+     */
+    default int experienceRequiredToCompleteCurrentLevel() {
+        return experienceAtNextLevel() - experienceAtCurrentLevel();
     }
 
     int wins();

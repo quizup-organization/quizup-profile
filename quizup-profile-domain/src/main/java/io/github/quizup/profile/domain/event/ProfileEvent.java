@@ -7,7 +7,6 @@ public interface ProfileEvent {
 
     record ProfileCreatedEvent(
             String profileId,
-            String userId,
             Instant createdAt
     ) implements ProfileEvent {
     }
