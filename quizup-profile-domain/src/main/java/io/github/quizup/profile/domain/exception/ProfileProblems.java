@@ -6,33 +6,23 @@ import java.util.Map;
 
 public interface ProfileProblems {
 
-    class MissingUserIdProblem extends ProfileProblem {
-        public MissingUserIdProblem(String profileId) {
-            super(profileId, "urn:quizup:profile:missingUserId",
+    class MissingProfileIdProblem extends ProfileProblem {
+        public MissingProfileIdProblem(String profileId) {
+            super(profileId, "urn:quizup:profile:missingProfileId",
                     ProblemCategory.BUSINESS_INVALID_COMMAND,
-                    "User ID required",
-                    "A userId is required to create profile " + profileId,
+                    "Profile ID required",
+                    "A profileId is required to handle profile commands",
                     null);
         }
     }
 
-    class MissingPseudonymProblem extends ProfileProblem {
-        public MissingPseudonymProblem(String profileId) {
-            super(profileId, "urn:quizup:profile:missingPseudonym",
-                    ProblemCategory.BUSINESS_INVALID_COMMAND,
-                    "Pseudonym required",
-                    "A pseudonym is required to create profile " + profileId,
+    class ProfileNotFoundProblem extends ProfileProblem {
+        public ProfileNotFoundProblem(String profileId) {
+            super(profileId, "urn:quizup:profile:notFound",
+                    ProblemCategory.BUSINESS_RESOURCE_MISSING,
+                    "Profile not found",
+                    "The profile " + profileId + " was not found",
                     null);
-        }
-    }
-
-    class InvalidPseudonymProblem extends ProfileProblem {
-        public InvalidPseudonymProblem(String profileId, String pseudonym) {
-            super(profileId, "urn:quizup:profile:invalidPseudonym",
-                    ProblemCategory.BUSINESS_INVALID_COMMAND,
-                    "Invalid pseudonym",
-                    "Pseudonym must contain between 3 and 20 characters",
-                    Map.of("pseudonym", pseudonym == null ? "" : pseudonym));
         }
     }
 
@@ -46,13 +36,33 @@ public interface ProfileProblems {
         }
     }
 
-    class MissingMatchResultProblem extends ProfileProblem {
-        public MissingMatchResultProblem(String profileId) {
-            super(profileId, "urn:quizup:profile:missingMatchResult",
+    class MissingGameResultProblem extends ProfileProblem {
+        public MissingGameResultProblem(String profileId) {
+            super(profileId, "urn:quizup:profile:missingGameResult",
                     ProblemCategory.BUSINESS_INVALID_COMMAND,
-                    "Match result required",
-                    "A match result is required to update profile " + profileId,
+                    "Game result required",
+                    "A game result is required to update profile " + profileId,
                     null);
+        }
+    }
+
+    class MissingGameIdProblem extends ProfileProblem {
+        public MissingGameIdProblem(String profileId) {
+            super(profileId, "urn:quizup:profile:missingGameId",
+                    ProblemCategory.BUSINESS_INVALID_COMMAND,
+                    "Game ID required",
+                    "A gameId is required to record a match result on profile " + profileId,
+                    null);
+        }
+    }
+
+    class InvalidGameScoreProblem extends ProfileProblem {
+        public InvalidGameScoreProblem(String profileId, int score) {
+            super(profileId, "urn:quizup:profile:invalidGameScore",
+                    ProblemCategory.BUSINESS_INVALID_COMMAND,
+                    "Invalid game score",
+                    "The score must be greater than or equal to 0",
+                    Map.of("score", score));
         }
     }
 }

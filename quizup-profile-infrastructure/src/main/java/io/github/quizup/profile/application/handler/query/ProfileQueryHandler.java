@@ -1,0 +1,30 @@
+package io.github.quizup.profile.application.handler.query;
+
+import io.github.quizup.profile.domain.exception.ProfileProblems;
+import io.github.quizup.profile.domain.model.Profile;
+import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
+import io.github.quizup.profile.domain.query.ProfileQuery;
+import org.axonframework.queryhandling.QueryHandler;
+import org.springframework.stereotype.Component;
+
+@Component
+public class ProfileQueryHandler {
+
+    private final ProfileRepositoryPort profileRepositoryPort;
+
+    public ProfileQueryHandler(ProfileRepositoryPort profileRepositoryPort) {
+        this.profileRepositoryPort = profileRepositoryPort;
+    }
+
+    @QueryHandler
+    public Profile handle(ProfileQuery.GetProfileByIdQuery query) {
+        return profileRepositoryPort.findById(query.profileId())
+                .orElseThrow(() -> new ProfileProblems.ProfileNotFoundProblem(query.profileId()));
+    }
+
+    @QueryHandler
+    public boolean handle(ProfileQuery.ProfileExistsByIdQuery query) {
+        return profileRepositoryPort.existsById(query.profileId());
+    }
+}
+

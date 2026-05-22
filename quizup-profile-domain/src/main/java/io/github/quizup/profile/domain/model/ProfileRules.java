@@ -3,6 +3,13 @@ package io.github.quizup.profile.domain.model;
 public final class ProfileRules {
 
     public static final int MAX_RECENT_GAMES = 10;
+    public static final int PERFECT_GAME_SCORE = 160;
+
+    public static final int FIRE_STREAK_5_THRESHOLD = 5;
+    public static final int FIRE_STREAK_10_THRESHOLD = 10;
+    public static final int VETERAN_100_THRESHOLD = 100;
+    public static final int SPECIALIST_LEVEL_THRESHOLD = 10;
+
     public static final int GAME_BONUS = 40;
     public static final int VICTORY_BONUS = 50;
     private static final int LEVEL_FACTOR = 25;

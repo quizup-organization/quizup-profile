@@ -1,0 +1,32 @@
+package io.github.quizup.profile.application.service;
+
+import io.github.quizup.profile.domain.model.Profile;
+import io.github.quizup.profile.domain.port.in.CheckProfileUseCase;
+import io.github.quizup.profile.domain.port.in.GetProfileUseCase;
+import io.github.quizup.profile.domain.query.ProfileQuery;
+import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.queryhandling.QueryGateway;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
+
+@Service
+public class ProfileQueryService implements GetProfileUseCase, CheckProfileUseCase {
+
+    private final QueryGateway queryGateway;
+
+    public ProfileQueryService(QueryGateway queryGateway) {
+        this.queryGateway = queryGateway;
+    }
+
+    @Override
+    public CompletableFuture<Profile> getById(ProfileQuery.GetProfileByIdQuery query) {
+        return queryGateway.query(query, ResponseTypes.instanceOf(Profile.class));
+    }
+
+    @Override
+    public CompletableFuture<Boolean> existsById(ProfileQuery.ProfileExistsByIdQuery query) {
+        return queryGateway.query(query, ResponseTypes.instanceOf(Boolean.class));
+    }
+}
+

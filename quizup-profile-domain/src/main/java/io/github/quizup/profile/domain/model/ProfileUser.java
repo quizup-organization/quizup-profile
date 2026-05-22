@@ -2,11 +2,10 @@ package io.github.quizup.profile.domain.model;
 
 import lombok.Builder;
 
-import java.time.Instant;
-
 @Builder(toBuilder = true)
-public record Badge(
-        BadgeType type,
-        Instant unlockedAt
+public record ProfileUser(
+        String userId,
+        String name
 ) {
 }
+

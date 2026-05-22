@@ -21,6 +21,24 @@
         </dependency>
         <dependency>
             <groupId>io.github.quizup</groupId>
+            <artifactId>quizup-identity-domain</artifactId>
+            <version>1.0.2-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.quizup</groupId>
+            <artifactId>quizup-theme-domain</artifactId>
+            <version>1.0.3-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.quizup</groupId>
+            <artifactId>quizup-game-domain</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.quizup</groupId>
             <artifactId>quizup-starter</artifactId>
         </dependency>
     </dependencies>
