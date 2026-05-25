@@ -1,6 +1,6 @@
 package io.github.quizup.profile.infrastructure.in.api.response;
 
-import io.github.quizup.profile.domain.model.GameResultType;
+import io.github.quizup.profile.domain.model.GameResult;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -11,7 +11,7 @@ public record GameResultResponse(
         String opponentId,
         int playerScore,
         int opponentScore,
-        GameResultType result,
+        GameResult result,
         Instant playedAt
 ) implements Serializable {
 }

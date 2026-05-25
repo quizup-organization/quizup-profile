@@ -3,7 +3,7 @@ package io.github.quizup.profile.application.saga;
 import io.github.quizup.common.domain.constant.QuizUpConstants;
 import io.github.quizup.game.domain.event.GameEvent;
 import io.github.quizup.profile.domain.command.ProfileCommand;
-import io.github.quizup.profile.domain.model.GameResultType;
+import io.github.quizup.profile.domain.model.GameResult;
 import lombok.Getter;
 import lombok.Setter;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -64,11 +64,11 @@ public class GameEndedProfileSaga {
         SagaLifecycle.end();
     }
 
-    private GameResultType determineResult(String playerId, String winnerId) {
+    private GameResult determineResult(String playerId, String winnerId) {
         if (winnerId == null) {
-            return GameResultType.DRAW;
+            return GameResult.DRAW;
         }
-        return winnerId.equals(playerId) ? GameResultType.WIN : GameResultType.LOSS;
+        return winnerId.equals(playerId) ? GameResult.WIN : GameResult.LOSS;
     }
 }
 

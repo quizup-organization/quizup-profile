@@ -35,7 +35,7 @@ public class ProfileProjection {
 
     @EventHandler
     @Transactional
-    public void on(ProfileEvent.GameResultRecordedEvent event) {
+    public void on(ProfileEvent.GameResultAddedEvent event) {
         logger.debug("Projecting GameResultRecordedEvent: profileId={}, gameId={}", event.profileId(), event.gameId());
 
         profileRepositoryPort.findById(event.profileId()).ifPresent(existing -> {
@@ -53,7 +53,7 @@ public class ProfileProjection {
             updatedBadges.putAll(existing.badges());
             event.newBadges().forEach(badgeType -> updatedBadges.putIfAbsent(badgeType, new Badge(badgeType, event.recordedAt())));
 
-            List<GameResult> updatedRecent = buildUpdatedRecentGames(existing.recentGameResults(), event);
+            List<ProfileGame> updatedRecent = buildUpdatedRecentGames(existing.recentGameResults(), event);
 
             profileRepositoryPort.save(existing.toBuilder()
                     .globalStatistics(new GlobalStatistics(
@@ -73,8 +73,8 @@ public class ProfileProjection {
         });
     }
 
-    private List<GameResult> buildUpdatedRecentGames(List<GameResult> existing, ProfileEvent.GameResultRecordedEvent event) {
-        GameResult newEntry = GameResult.builder()
+    private List<ProfileGame> buildUpdatedRecentGames(List<ProfileGame> existing, ProfileEvent.GameResultAddedEvent event) {
+        ProfileGame newEntry = ProfileGame.builder()
                 .gameId(event.gameId())
                 .topicId(event.topicId())
                 .opponentId(event.opponentId())
@@ -84,7 +84,7 @@ public class ProfileProjection {
                 .playedAt(event.recordedAt())
                 .build();
 
-        List<GameResult> result = new ArrayList<>();
+        List<ProfileGame> result = new ArrayList<>();
         result.add(newEntry);
         result.addAll(existing);
         if (result.size() > ProfileRules.MAX_RECENT_GAMES) {

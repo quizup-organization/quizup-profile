@@ -31,7 +31,7 @@ public final class ProfileResponseMapper {
                         .map(ProfileResponseMapper::toResponse)
                         .toList(),
                 profile.recentGameResults().stream()
-                        .sorted(Comparator.comparing(GameResult::playedAt).reversed())
+                        .sorted(Comparator.comparing(ProfileGame::playedAt).reversed())
                         .map(ProfileResponseMapper::toResponse)
                         .toList(),
                 profile.createdAt(),
@@ -65,7 +65,7 @@ public final class ProfileResponseMapper {
         return new BadgeResponse(badge.type(), badge.unlockedAt());
     }
 
-    private static GameResultResponse toResponse(GameResult gameResult) {
+    private static GameResultResponse toResponse(ProfileGame gameResult) {
         return new GameResultResponse(
                 gameResult.gameId(),
                 gameResult.topicId(),

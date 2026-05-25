@@ -22,7 +22,7 @@ public final class ProfileEntityMapper {
         Map<BadgeType, Badge> badges = new EnumMap<>(BadgeType.class);
         entity.getBadges().forEach((badgeType, value) -> badges.put(badgeType, new Badge(badgeType, value.getUnlockedAt())));
 
-        List<GameResult> recentGameResults = entity.getRecentGameResults().stream()
+        List<ProfileGame> recentGameResults = entity.getRecentGameResults().stream()
                 .map(ProfileEntityMapper::toDomain)
                 .toList();
 
@@ -86,8 +86,8 @@ public final class ProfileEntityMapper {
         return entity;
     }
 
-    private static GameResult toDomain(GameResultEmbeddable embeddable) {
-        return new GameResult(
+    private static ProfileGame toDomain(GameResultEmbeddable embeddable) {
+        return new ProfileGame(
                 embeddable.getGameId(),
                 embeddable.getTopicId(),
                 embeddable.getOpponentId(),
@@ -98,7 +98,7 @@ public final class ProfileEntityMapper {
         );
     }
 
-    private static GameResultEmbeddable toEntity(GameResult gameResult) {
+    private static GameResultEmbeddable toEntity(ProfileGame gameResult) {
         GameResultEmbeddable embeddable = new GameResultEmbeddable();
         embeddable.setGameId(gameResult.gameId());
         embeddable.setTopicId(gameResult.topicId());

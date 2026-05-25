@@ -1,6 +1,6 @@
 package io.github.quizup.profile.infrastructure.out.persistence.entity;
 
-import io.github.quizup.profile.domain.model.GameResultType;
+import io.github.quizup.profile.domain.model.GameResult;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
@@ -33,7 +33,7 @@ public class GameResultEmbeddable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "result_type", nullable = false, length = 20)
-    private GameResultType result;
+    private GameResult result;
 
     @Column(name = "played_at", nullable = false)
     private Instant playedAt;

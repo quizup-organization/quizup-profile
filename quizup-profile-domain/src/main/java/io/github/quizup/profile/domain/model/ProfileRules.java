@@ -5,18 +5,12 @@ public final class ProfileRules {
     public static final int MAX_RECENT_GAMES = 10;
     public static final int PERFECT_GAME_SCORE = 160;
 
-    public static final int FIRE_STREAK_5_THRESHOLD = 5;
-    public static final int FIRE_STREAK_10_THRESHOLD = 10;
-    public static final int VETERAN_100_THRESHOLD = 100;
-    public static final int SPECIALIST_LEVEL_THRESHOLD = 10;
-
     public static final int GAME_BONUS = 40;
     public static final int VICTORY_BONUS = 50;
+
     private static final int LEVEL_FACTOR = 25;
 
     private ProfileRules() {}
-
-
 
     /**
      * XP totale nécessaire pour atteindre le début du niveau {@code level}.
@@ -35,10 +29,10 @@ public final class ProfileRules {
     }
 
     /**
-     * Calcule l'XP gagnée pour une partie.
+     * Calcule l'expérience gagnée pour une partie.
      * = score_partie + GAME_BONUS [+ VICTORY_BONUS si victoire]
      */
-    public static int computeXpEarned(int gameScore, GameResultType result) {
-        return gameScore + GAME_BONUS + (result == GameResultType.WIN ? VICTORY_BONUS : 0);
+    public static int computeXpEarned(int gameScore, GameResult result) {
+        return gameScore + GAME_BONUS + (result == GameResult.WIN ? VICTORY_BONUS : 0);
     }
 }
