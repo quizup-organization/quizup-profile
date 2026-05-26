@@ -24,6 +24,8 @@ public class GameResultEmbeddable {
     @Column(name = "opponent_id", nullable = false, length = 255)
     private String opponentId;
 
+    @Column(name = "opponent_name", length = 255)
+    private String opponentName;
 
     @Column(name = "player_score", nullable = false)
     private int playerScore;

@@ -1,9 +1,15 @@
 package io.github.quizup.profile.infrastructure.out.persistence.mapper;
 
-import io.github.quizup.profile.domain.model.*;
-import io.github.quizup.profile.infrastructure.out.persistence.entity.*;
+import io.github.quizup.profile.domain.model.Profile;
+import io.github.quizup.profile.domain.model.ProfileGame;
+import io.github.quizup.profile.domain.model.ProfileTopic;
+import io.github.quizup.profile.infrastructure.out.persistence.entity.GameResultEmbeddable;
+import io.github.quizup.profile.infrastructure.out.persistence.entity.ProfileEntity;
+import io.github.quizup.profile.infrastructure.out.persistence.entity.TopicStatisticsEmbeddable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class ProfileEntityMapper {
 
@@ -11,35 +17,29 @@ public final class ProfileEntityMapper {
     }
 
     public static Profile toDomain(ProfileEntity entity) {
-        Map<String, TopicStatistics> topicStatistics = new HashMap<>();
-        entity.getTopicStatistics().forEach((topicId, value) ->
-                topicStatistics.put(
+        Map<String, ProfileTopic> topics = new HashMap<>();
+        entity.getTopics().forEach((topicId, value) ->
+                topics.put(
                         topicId,
-                        new TopicStatistics(topicId, value.getTotalExperience(), value.getWins(), value.getLosses(), value.getDraws(), value.getWinStreak())
+                        new ProfileTopic(topicId, value.getTotalExperience(), value.getWins(), value.getLosses(), value.getDraws())
                 )
         );
 
-        Map<BadgeType, Badge> badges = new EnumMap<>(BadgeType.class);
-        entity.getBadges().forEach((badgeType, value) -> badges.put(badgeType, new Badge(badgeType, value.getUnlockedAt())));
-
-        List<ProfileGame> recentGameResults = entity.getRecentGameResults().stream()
+        List<ProfileGame> games = entity.getGames().stream()
                 .map(ProfileEntityMapper::toDomain)
                 .toList();
 
         return new Profile(
                 entity.getProfileId(),
+                entity.getTotalExperience(),
+                entity.getWins(),
+                entity.getLosses(),
+                entity.getDraws(),
                 entity.getWinStreak(),
                 entity.getLossStreak(),
                 entity.getDrawStreak(),
-                new GlobalStatistics(
-                        entity.getGlobalTotalExperience(),
-                        entity.getGlobalWins(),
-                        entity.getGlobalLosses(),
-                        entity.getGlobalDraws()
-                ),
-                topicStatistics,
-                badges,
-                recentGameResults,
+                topics,
+                games,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
@@ -48,38 +48,29 @@ public final class ProfileEntityMapper {
     public static ProfileEntity toEntity(Profile profile) {
         ProfileEntity entity = new ProfileEntity();
         entity.setProfileId(profile.profileId());
+        entity.setTotalExperience(profile.totalExperience());
+        entity.setWins(profile.wins());
+        entity.setLosses(profile.losses());
+        entity.setDraws(profile.draws());
         entity.setWinStreak(profile.winStreak());
         entity.setLossStreak(profile.lossStreak());
         entity.setDrawStreak(profile.drawStreak());
-        entity.setGlobalTotalExperience(profile.globalStatistics().totalExperience());
-        entity.setGlobalWins(profile.globalStatistics().wins());
-        entity.setGlobalLosses(profile.globalStatistics().losses());
-        entity.setGlobalDraws(profile.globalStatistics().draws());
 
-        Map<String, TopicStatisticsEmbeddable> topicStatistics = new HashMap<>();
-        profile.topicStatistics().forEach((topicId, stats) -> {
+        Map<String, TopicStatisticsEmbeddable> topics = new HashMap<>();
+        profile.topics().forEach((topicId, stats) -> {
             TopicStatisticsEmbeddable embeddable = new TopicStatisticsEmbeddable();
             embeddable.setTotalExperience(stats.totalExperience());
             embeddable.setWins(stats.wins());
             embeddable.setLosses(stats.losses());
             embeddable.setDraws(stats.draws());
-            embeddable.setWinStreak(stats.winStreak());
-            topicStatistics.put(topicId, embeddable);
+            topics.put(topicId, embeddable);
         });
-        entity.setTopicStatistics(topicStatistics);
+        entity.setTopics(topics);
 
-        Map<BadgeType, BadgeEmbeddable> badges = new EnumMap<>(BadgeType.class);
-        profile.badges().forEach((type, badge) -> {
-            BadgeEmbeddable embeddable = new BadgeEmbeddable();
-            embeddable.setUnlockedAt(badge.unlockedAt());
-            badges.put(type, embeddable);
-        });
-        entity.setBadges(badges);
-
-        List<GameResultEmbeddable> results = profile.recentGameResults().stream()
+        List<GameResultEmbeddable> games = profile.games().stream()
                 .map(ProfileEntityMapper::toEntity)
                 .toList();
-        entity.setRecentGameResults(results);
+        entity.setGames(games);
 
         entity.setCreatedAt(profile.createdAt());
         entity.setUpdatedAt(profile.updatedAt());
@@ -91,6 +82,7 @@ public final class ProfileEntityMapper {
                 embeddable.getGameId(),
                 embeddable.getTopicId(),
                 embeddable.getOpponentId(),
+                embeddable.getOpponentName(),
                 embeddable.getPlayerScore(),
                 embeddable.getOpponentScore(),
                 embeddable.getResult(),
@@ -103,6 +95,7 @@ public final class ProfileEntityMapper {
         embeddable.setGameId(gameResult.gameId());
         embeddable.setTopicId(gameResult.topicId());
         embeddable.setOpponentId(gameResult.opponentId());
+        embeddable.setOpponentName(gameResult.opponentName());
         embeddable.setPlayerScore(gameResult.playerScore());
         embeddable.setOpponentScore(gameResult.opponentScore());
         embeddable.setResult(gameResult.result());

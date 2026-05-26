@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Saga
-public class UserRegisteredProfileSaga {
+public class ProfileUserSaga {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserRegisteredProfileSaga.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProfileUserSaga.class);
 
     @Autowired
     private transient CommandGateway commandGateway;
@@ -38,7 +38,12 @@ public class UserRegisteredProfileSaga {
         }
 
         logger.info("Creating profile for new user: userId={}", event.userId());
-        commandGateway.send(new ProfileCommand.CreateProfileCommand(event.userId()));
+
+        commandGateway.send(
+                new ProfileCommand.CreateProfileCommand(
+                        event.userId()
+                )
+        );
     }
 }
 

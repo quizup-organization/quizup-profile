@@ -9,6 +9,7 @@ public record GameResultResponse(
         String gameId,
         String topicId,
         String opponentId,
+        String opponentName,
         int playerScore,
         int opponentScore,
         GameResult result,

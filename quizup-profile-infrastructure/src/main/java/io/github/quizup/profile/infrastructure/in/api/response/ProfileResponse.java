@@ -7,13 +7,24 @@ import java.util.Map;
 
 public record ProfileResponse(
         String profileId,
+        int totalExperience,
+        int level,
+        int experience,
+        int experienceAtCurrentLevel,
+        int experienceAtNextLevel,
+        int experienceRequiredToCompleteCurrentLevel,
+        int wins,
+        int losses,
+        int draws,
+        int totalGames,
+        int winPercentage,
+        int lossPercentage,
+        int drawPercentage,
         int winStreak,
         int lossStreak,
         int drawStreak,
-        ProfileStatisticsResponse globalStatistics,
-        Map<String, ProfileStatisticsResponse> topicStatistics,
-        List<BadgeResponse> badges,
-        List<GameResultResponse> recentGameResults,
+        Map<String, ProfileStatisticsResponse> topics,
+        List<GameResultResponse> games,
         Instant createdAt,
         Instant updatedAt
 ) implements Serializable {

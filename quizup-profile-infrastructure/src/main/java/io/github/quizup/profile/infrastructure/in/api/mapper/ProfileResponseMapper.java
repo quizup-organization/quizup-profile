@@ -3,8 +3,12 @@ package io.github.quizup.profile.infrastructure.in.api.mapper;
 import io.github.quizup.common.domain.model.search.PageResult;
 import io.github.quizup.common.infrastructure.in.api.response.PageResponse;
 import io.github.quizup.common.infrastructure.mapper.SearchResponseMapper;
-import io.github.quizup.profile.domain.model.*;
-import io.github.quizup.profile.infrastructure.in.api.response.*;
+import io.github.quizup.profile.domain.model.Profile;
+import io.github.quizup.profile.domain.model.ProfileGame;
+import io.github.quizup.profile.domain.model.Statistics;
+import io.github.quizup.profile.infrastructure.in.api.response.GameResultResponse;
+import io.github.quizup.profile.infrastructure.in.api.response.ProfileResponse;
+import io.github.quizup.profile.infrastructure.in.api.response.ProfileStatisticsResponse;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -17,20 +21,28 @@ public final class ProfileResponseMapper {
     public static ProfileResponse toResponse(Profile profile) {
         return new ProfileResponse(
                 profile.profileId(),
+                profile.totalExperience(),
+                profile.level(),
+                profile.experience(),
+                profile.experienceAtCurrentLevel(),
+                profile.experienceAtNextLevel(),
+                profile.experienceRequiredToCompleteCurrentLevel(),
+                profile.wins(),
+                profile.losses(),
+                profile.draws(),
+                profile.totalGames(),
+                profile.winPercentage(),
+                profile.lossPercentage(),
+                profile.drawPercentage(),
                 profile.winStreak(),
                 profile.lossStreak(),
                 profile.drawStreak(),
-                toStatisticsResponse(profile.globalStatistics()),
-                profile.topicStatistics().entrySet().stream()
+                profile.topics().entrySet().stream()
                         .collect(java.util.stream.Collectors.toMap(
                                 Map.Entry::getKey,
                                 entry -> toStatisticsResponse(entry.getValue())
                         )),
-                profile.badges().values().stream()
-                        .sorted(Comparator.comparing(Badge::unlockedAt).reversed())
-                        .map(ProfileResponseMapper::toResponse)
-                        .toList(),
-                profile.recentGameResults().stream()
+                profile.games().stream()
                         .sorted(Comparator.comparing(ProfileGame::playedAt).reversed())
                         .map(ProfileResponseMapper::toResponse)
                         .toList(),
@@ -61,15 +73,12 @@ public final class ProfileResponseMapper {
         );
     }
 
-    private static BadgeResponse toResponse(Badge badge) {
-        return new BadgeResponse(badge.type(), badge.unlockedAt());
-    }
-
     private static GameResultResponse toResponse(ProfileGame gameResult) {
         return new GameResultResponse(
                 gameResult.gameId(),
                 gameResult.topicId(),
                 gameResult.opponentId(),
+                gameResult.opponentName(),
                 gameResult.playerScore(),
                 gameResult.opponentScore(),
                 gameResult.result(),

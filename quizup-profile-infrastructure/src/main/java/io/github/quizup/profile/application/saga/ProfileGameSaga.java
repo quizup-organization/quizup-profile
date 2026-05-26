@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Saga
-public class GameEndedProfileSaga {
+public class ProfileGameSaga {
 
-    private static final Logger logger = LoggerFactory.getLogger(GameEndedProfileSaga.class);
+    private static final Logger logger = LoggerFactory.getLogger(ProfileGameSaga.class);
 
     @Autowired
     private transient CommandGateway commandGateway;
@@ -35,16 +35,19 @@ public class GameEndedProfileSaga {
         this.gameId = event.gameId();
         logger.info("GameEndedProfileSaga processing game results: gameId={}", event.gameId());
 
-        commandGateway.send(new ProfileCommand.AddGameResultCommand(
-                event.player1Id(),
-                event.gameId(),
-                event.topicId(),
-                event.player2Id(),
-                event.player2Name(),
-                event.player1FinalScore(),
-                event.player2FinalScore(),
-                determineResult(event.player1Id(), event.winnerId())
-        ));
+        commandGateway.send(
+                new ProfileCommand.AddGameResultCommand(
+                        event.player1Id(),
+                        event.gameId(),
+                        event.topicId(),
+                        event.player2Id(),
+                        event.player2Name(),
+                        event.player1FinalScore(),
+                        event.player2FinalScore(),
+                        determineResult(event.player1Id(), event.winnerId()),
+                        event.endedAt()
+                )
+        );
 
         if (!QuizUpConstants.BOT_USER_ID.equals(event.player2Id())) {
             commandGateway.send(
@@ -56,12 +59,11 @@ public class GameEndedProfileSaga {
                             event.player1Name(),
                             event.player2FinalScore(),
                             event.player1FinalScore(),
-                            determineResult(event.player2Id(), event.winnerId())
+                            determineResult(event.player2Id(), event.winnerId()),
+                            event.endedAt()
                     )
             );
         }
-
-        SagaLifecycle.end();
     }
 
     private GameResult determineResult(String playerId, String winnerId) {

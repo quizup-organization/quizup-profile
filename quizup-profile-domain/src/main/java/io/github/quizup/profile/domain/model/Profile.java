@@ -3,7 +3,6 @@ package io.github.quizup.profile.domain.model;
 import lombok.Builder;
 
 import java.time.Instant;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,7 @@ public record Profile(
         int winStreak,
         int lossStreak,
         int drawStreak,
-        Map<String, TopicStatistics> topics,
+        Map<String, ProfileTopic> topics,
         List<ProfileGame> games,
         Instant createdAt,
         Instant updatedAt

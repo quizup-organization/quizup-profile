@@ -13,12 +13,12 @@ Le code applicatif, lorsqu'il existe, reste organise sous `io.github.quizup.prof
 
 - Creation automatique du profil via `UserSaga` a partir de `UserRegisteredEvent` (`profileId = userId`).
 - Endpoint unique `GET /api/profiles/{profileId}` avec payload complet pour l'UI:
-  - streaks (win/loss/draw)
-  - statistiques globales et par theme (avec metriques derivees: niveau, pourcentages, progression XP)
-  - badges debloques
-  - 10 derniers resultats de parties (avec `opponentName` et `topicName`)
+  - statistiques globales simplifiees (xp, niveau derive, progression, ratio win/loss/draw)
+  - streaks (win/loss/draw) selon la semantique actuelle du module
+  - statistiques par theme
+  - 10 derniers resultats de parties (avec `opponentName`)
 - Projection des resultats de partie a partir de `GameEndedEvent`.
-- Persistence JPA/Flyway des projections profil.
+- Persistence JPA/Flyway des projections profil sur schema simplifie (sans badges).
 
 ## Build local
 

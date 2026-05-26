@@ -1,5 +1,7 @@
 package io.github.quizup.profile.domain.model;
 
+import java.util.Optional;
+
 public final class ProfileRules {
 
     public static final int MAX_RECENT_GAMES = 10;
@@ -10,7 +12,8 @@ public final class ProfileRules {
 
     private static final int LEVEL_FACTOR = 25;
 
-    private ProfileRules() {}
+    private ProfileRules() {
+    }
 
     /**
      * XP totale nécessaire pour atteindre le début du niveau {@code level}.
@@ -34,5 +37,30 @@ public final class ProfileRules {
      */
     public static int computeXpEarned(int gameScore, GameResult result) {
         return gameScore + GAME_BONUS + (result == GameResult.WIN ? VICTORY_BONUS : 0);
+    }
+
+
+    public static Streak computeStreak(Streak streak, ProfileGame currentGame, ProfileGame previousGame) {
+        GameResult previousResult = Optional.ofNullable(previousGame).map(ProfileGame::result).orElse(null);
+        return computeStreak(streak, currentGame.result(), previousResult);
+    }
+
+    public static Streak computeStreak(Streak streak, GameResult currentResult, GameResult previousResult) {
+        return switch (currentResult) {
+            case WIN -> new ProfileStreak(
+                    previousResult == GameResult.WIN ? streak.winStreak() + 1 : 1,
+                    0,
+                    0
+            );
+            case LOSS -> new ProfileStreak(
+                    0,
+                    previousResult == GameResult.LOSS ? streak.lossStreak() + 1 : 1,
+                    0
+            );
+            case DRAW -> new ProfileStreak(
+                    0,
+                    0,
+                    previousResult == GameResult.DRAW ? streak.drawStreak() + 1 : 1);
+        };
     }
 }

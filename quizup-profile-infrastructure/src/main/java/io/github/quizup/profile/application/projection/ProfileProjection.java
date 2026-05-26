@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,61 +35,68 @@ public class ProfileProjection {
     @EventHandler
     @Transactional
     public void on(ProfileEvent.GameResultAddedEvent event) {
-        logger.debug("Projecting GameResultRecordedEvent: profileId={}, gameId={}", event.profileId(), event.gameId());
+        logger.debug("Projecting GameResultAddedEvent: profileId={}, gameId={}", event.profileId(), event.game().gameId());
 
         profileRepositoryPort.findById(event.profileId()).ifPresent(existing -> {
-            Map<String, TopicStatistics> updatedTopics = new HashMap<>(existing.topicStatistics());
-            updatedTopics.put(event.topicId(), new TopicStatistics(
-                    event.topicId(),
-                    event.newTopicTotalExperience(),
-                    event.newTopicWins(),
-                    event.newTopicLosses(),
-                    event.newTopicDraws(),
-                    event.newTopicWinStreak()
-            ));
+            ProfileGame game = event.game();
 
-            Map<BadgeType, Badge> updatedBadges = new EnumMap<>(BadgeType.class);
-            updatedBadges.putAll(existing.badges());
-            event.newBadges().forEach(badgeType -> updatedBadges.putIfAbsent(badgeType, new Badge(badgeType, event.recordedAt())));
+            int xpEarned = ProfileRules.computeXpEarned(game.playerScore(), game.result());
 
-            List<ProfileGame> updatedRecent = buildUpdatedRecentGames(existing.recentGameResults(), event);
+            int updatedWins = existing.wins() + (game.result() == GameResult.WIN ? 1 : 0);
+            int updatedLosses = existing.losses() + (game.result() == GameResult.LOSS ? 1 : 0);
+            int updatedDraws = existing.draws() + (game.result() == GameResult.DRAW ? 1 : 0);
 
-            profileRepositoryPort.save(existing.toBuilder()
-                    .globalStatistics(new GlobalStatistics(
-                            event.newGlobalTotalExperience(),
-                            event.newGlobalWins(),
-                            event.newGlobalLosses(),
-                            event.newGlobalDraws()
-                    ))
-                    .winStreak(event.newWinStreak())
-                    .lossStreak(event.newLossStreak())
-                    .drawStreak(event.newDrawStreak())
-                    .topicStatistics(updatedTopics)
-                    .badges(updatedBadges)
-                    .recentGameResults(updatedRecent)
-                    .updatedAt(event.recordedAt())
-                    .build());
+            int winStreak = existing.winStreak();
+            int lossStreak = existing.lossStreak();
+            int drawStreak = existing.drawStreak();
+
+            ProfileGame previousGame = existing.games().isEmpty()
+                    ? null
+                    : existing.games().get(existing.games().size() - 1);
+
+            if (previousGame != null) {
+                switch (previousGame.result()) {
+                    case WIN -> winStreak = game.result() == GameResult.WIN ? winStreak + 1 : 0;
+                    case LOSS -> lossStreak = game.result() == GameResult.LOSS ? lossStreak + 1 : 0;
+                    case DRAW -> drawStreak = game.result() == GameResult.DRAW ? drawStreak + 1 : 0;
+                }
+            }
+
+            Map<String, ProfileTopic> updatedTopics = new HashMap<>(existing.topics());
+            ProfileTopic topicStatistics = updatedTopics.getOrDefault(game.topicId(), ProfileTopic.empty(game.topicId()));
+            updatedTopics.put(
+                    game.topicId(),
+                    new ProfileTopic(
+                            game.topicId(),
+                            topicStatistics.totalExperience() + xpEarned,
+                            topicStatistics.wins() + (game.result() == GameResult.WIN ? 1 : 0),
+                            topicStatistics.losses() + (game.result() == GameResult.LOSS ? 1 : 0),
+                            topicStatistics.draws() + (game.result() == GameResult.DRAW ? 1 : 0)
+                    )
+            );
+
+            List<ProfileGame> updatedGames = new ArrayList<>(existing.games());
+            updatedGames.add(game);
+
+            if (updatedGames.size() > ProfileRules.MAX_RECENT_GAMES) {
+                updatedGames.remove(0);
+            }
+
+            profileRepositoryPort.save(
+                    existing.toBuilder()
+                            .totalExperience(existing.totalExperience() + xpEarned)
+                            .wins(updatedWins)
+                            .losses(updatedLosses)
+                            .draws(updatedDraws)
+                            .winStreak(winStreak)
+                            .lossStreak(lossStreak)
+                            .drawStreak(drawStreak)
+                            .topics(updatedTopics)
+                            .games(updatedGames)
+                            .updatedAt(event.recordedAt())
+                            .build()
+            );
         });
-    }
-
-    private List<ProfileGame> buildUpdatedRecentGames(List<ProfileGame> existing, ProfileEvent.GameResultAddedEvent event) {
-        ProfileGame newEntry = ProfileGame.builder()
-                .gameId(event.gameId())
-                .topicId(event.topicId())
-                .opponentId(event.opponentId())
-                .playerScore(event.playerScore())
-                .opponentScore(event.opponentScore())
-                .result(event.result())
-                .playedAt(event.recordedAt())
-                .build();
-
-        List<ProfileGame> result = new ArrayList<>();
-        result.add(newEntry);
-        result.addAll(existing);
-        if (result.size() > ProfileRules.MAX_RECENT_GAMES) {
-            return result.subList(0, ProfileRules.MAX_RECENT_GAMES);
-        }
-        return result;
     }
 }
 

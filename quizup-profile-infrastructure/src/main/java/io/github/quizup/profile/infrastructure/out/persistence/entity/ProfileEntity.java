@@ -13,8 +13,8 @@ import java.util.*;
 @Getter
 @Entity
 @Table(name = "profile_entry", indexes = {
-        @Index(name = "idx_profile_total_xp", columnList = "global_total_experience"),
-        @Index(name = "idx_profile_wins", columnList = "global_wins")
+        @Index(name = "idx_profile_total_xp", columnList = "total_experience"),
+        @Index(name = "idx_profile_wins", columnList = "wins")
 })
 public class ProfileEntity {
 
@@ -23,48 +23,49 @@ public class ProfileEntity {
     @Column(name = "profile_id", nullable = false, length = 255)
     private String profileId;
 
+    @Searchable(type = FieldType.NUMBER)
+    @Column(name = "total_experience", nullable = false)
+    private int totalExperience;
+
+    @Searchable(type = FieldType.NUMBER)
+    @Column(name = "wins", nullable = false)
+    private int wins;
+
+    @Searchable(type = FieldType.NUMBER)
+    @Column(name = "losses", nullable = false)
+    private int losses;
+
+    @Searchable(type = FieldType.NUMBER)
+    @Column(name = "draws", nullable = false)
+    private int draws;
+
+    @Searchable(type = FieldType.NUMBER)
     @Column(name = "win_streak", nullable = false)
     private int winStreak;
 
+    @Searchable(type = FieldType.NUMBER)
     @Column(name = "loss_streak", nullable = false)
     private int lossStreak;
 
+    @Searchable(type = FieldType.NUMBER)
     @Column(name = "draw_streak", nullable = false)
     private int drawStreak;
-
-    @Searchable(type = FieldType.NUMBER)
-    @Column(name = "global_total_experience", nullable = false)
-    private int globalTotalExperience;
-
-    @Searchable(type = FieldType.NUMBER)
-    @Column(name = "global_wins", nullable = false)
-    private int globalWins;
-
-    @Column(name = "global_losses", nullable = false)
-    private int globalLosses;
-
-    @Column(name = "global_draws", nullable = false)
-    private int globalDraws;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "profile_topic_statistics_entry", joinColumns = @JoinColumn(name = "profile_id"))
     @MapKeyColumn(name = "topic_id")
-    private Map<String, TopicStatisticsEmbeddable> topicStatistics = new HashMap<>();
+    private Map<String, TopicStatisticsEmbeddable> topics = new HashMap<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "profile_badge_entry", joinColumns = @JoinColumn(name = "profile_id"))
-    @MapKeyEnumerated(EnumType.STRING)
-    @MapKeyColumn(name = "badge_type")
-    private Map<BadgeType, BadgeEmbeddable> badges = new EnumMap<>(BadgeType.class);
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "profile_game_result_entry", joinColumns = @JoinColumn(name = "profile_id"))
+    @CollectionTable(name = "profile_game_entry", joinColumns = @JoinColumn(name = "profile_id"))
     @OrderColumn(name = "position_idx")
-    private List<GameResultEmbeddable> recentGameResults = new ArrayList<>();
+    private List<GameResultEmbeddable> games = new ArrayList<>();
 
+    @Searchable(type = FieldType.DATE)
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Searchable(type = FieldType.DATE)
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 }

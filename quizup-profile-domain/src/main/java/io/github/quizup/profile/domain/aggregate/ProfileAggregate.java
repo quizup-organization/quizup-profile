@@ -3,9 +3,7 @@ package io.github.quizup.profile.domain.aggregate;
 import io.github.quizup.profile.domain.command.ProfileCommand;
 import io.github.quizup.profile.domain.event.ProfileEvent;
 import io.github.quizup.profile.domain.exception.ProfileProblems;
-import io.github.quizup.profile.domain.model.GameResult;
-import io.github.quizup.profile.domain.model.ProfileGame;
-import io.github.quizup.profile.domain.model.ProfileRules;
+import io.github.quizup.profile.domain.model.*;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.axonframework.commandhandling.CommandHandler;
@@ -14,10 +12,7 @@ import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.time.Instant;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static io.github.quizup.profile.domain.model.ProfileRules.MAX_RECENT_GAMES;
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
@@ -39,6 +34,7 @@ public class ProfileAggregate {
     private int lossStreak;
     private int drawStreak;
 
+    private Set<Badge> badges;
     private Deque<ProfileGame> games;
     private Map<String, ProfileTopicAggregate> topics;
 
@@ -76,6 +72,10 @@ public class ProfileAggregate {
             throw new ProfileProblems.InvalidGameScoreProblem(command.profileId(), command.playerScore());
         }
 
+        if (command.opponentScore() < 0) {
+            throw new ProfileProblems.InvalidGameScoreProblem(command.profileId(), command.opponentScore());
+        }
+
         ProfileGame game = ProfileGame
                 .builder()
                 .gameId(command.gameId())
@@ -106,6 +106,7 @@ public class ProfileAggregate {
         this.wins = 0;
         this.losses = 0;
         this.draws = 0;
+        this.badges = new HashSet<>();
         this.topics = new HashMap<>();
         this.games = new ArrayDeque<>(MAX_RECENT_GAMES);
         this.createdAt = event.createdAt();
@@ -114,42 +115,6 @@ public class ProfileAggregate {
     @EventSourcingHandler
     public void on(ProfileEvent.GameResultAddedEvent event) {
         ProfileGame currentGame = event.game();
-        ProfileGame previousGame = this.games.pollLast();
-
-        if (previousGame != null) {
-            GameResult currentGameResult = currentGame.result();
-            GameResult previousGameResult = previousGame.result();
-
-            switch (previousGameResult) {
-                case WIN -> {
-                    if (currentGameResult == GameResult.WIN) {
-                        winStreak++;
-                    } else {
-                        winStreak = 0;
-                    }
-                }
-                case LOSS -> {
-                    if (currentGameResult == GameResult.LOSS) {
-                        lossStreak++;
-                    } else {
-                        lossStreak = 0;
-                    }
-                }
-                case DRAW -> {
-                    if (currentGameResult == GameResult.DRAW) {
-                        drawStreak++;
-                    } else {
-                        drawStreak = 0;
-                    }
-                }
-            }
-        }
-
-        addGame(currentGame);
-
-        ProfileTopicAggregate topic = getTopic(currentGame.topicId());
-        topic.addGame(currentGame);
-        topics.put(event.game().topicId(), topic);
 
         experience += ProfileRules.computeXpEarned(currentGame.playerScore(), currentGame.result());
 
@@ -159,19 +124,29 @@ public class ProfileAggregate {
             case DRAW -> draws++;
         }
 
-        updatedAt = event.recordedAt();
-    }
+        ProfileGame previousGame = this.games.peekLast();
 
-    private void addGame(ProfileGame game) {
+        Streak streak = ProfileRules.computeStreak(
+                new ProfileStreak(winStreak, lossStreak, drawStreak),
+                currentGame,
+                previousGame
+        );
+
+        this.winStreak = streak.winStreak();
+        this.lossStreak = streak.lossStreak();
+        this.drawStreak = streak.drawStreak();
+
         if (this.games.size() >= MAX_RECENT_GAMES) {
             this.games.pollFirst(); // retire le plus ancien
         }
 
-        this.games.addLast(game);
-    }
+        this.games.addLast(currentGame);
 
-    private ProfileTopicAggregate getTopic(String topicId) {
-        return this.topics.getOrDefault(topicId, new ProfileTopicAggregate(topicId));
+        ProfileTopicAggregate topic = topics.getOrDefault(currentGame.topicId(), new ProfileTopicAggregate(currentGame.topicId()));
+        topic.addGame(currentGame, event.recordedAt());
+        topics.put(event.game().topicId(), topic);
+
+        updatedAt = event.recordedAt();
     }
 }
 

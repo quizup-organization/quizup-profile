@@ -1,6 +1,8 @@
 package io.github.quizup.profile.domain.model;
 
-public interface Statistics {
+import java.util.List;
+
+public interface Statistics extends Streak {
 
     default int level() {
         return ProfileRules.computeLevelFromXp(totalExperience());
@@ -47,6 +49,8 @@ public interface Statistics {
     int losses();
 
     int draws();
+
+    List<ProfileGame> games();
 
     default int totalGames() {
         return wins() + losses() + draws();
