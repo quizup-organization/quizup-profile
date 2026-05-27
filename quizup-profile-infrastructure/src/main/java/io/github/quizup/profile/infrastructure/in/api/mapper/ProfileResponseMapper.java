@@ -5,13 +5,14 @@ import io.github.quizup.common.infrastructure.in.api.response.PageResponse;
 import io.github.quizup.common.infrastructure.mapper.SearchResponseMapper;
 import io.github.quizup.profile.domain.model.Profile;
 import io.github.quizup.profile.domain.model.ProfileGame;
+import io.github.quizup.profile.domain.model.ProfileTopic;
 import io.github.quizup.profile.domain.model.Statistics;
 import io.github.quizup.profile.infrastructure.in.api.response.GameResultResponse;
 import io.github.quizup.profile.infrastructure.in.api.response.ProfileResponse;
 import io.github.quizup.profile.infrastructure.in.api.response.ProfileStatisticsResponse;
+import io.github.quizup.profile.infrastructure.in.api.response.ProfileTopicResponse;
 
 import java.util.Comparator;
-import java.util.Map;
 
 public final class ProfileResponseMapper {
 
@@ -37,11 +38,6 @@ public final class ProfileResponseMapper {
                 profile.winStreak(),
                 profile.lossStreak(),
                 profile.drawStreak(),
-                profile.topics().entrySet().stream()
-                        .collect(java.util.stream.Collectors.toMap(
-                                Map.Entry::getKey,
-                                entry -> toStatisticsResponse(entry.getValue())
-                        )),
                 profile.games().stream()
                         .sorted(Comparator.comparing(ProfileGame::playedAt).reversed())
                         .map(ProfileResponseMapper::toResponse)
@@ -53,6 +49,10 @@ public final class ProfileResponseMapper {
 
     public static PageResponse<ProfileResponse> toResponse(PageResult<Profile> pageResult) {
         return SearchResponseMapper.toSearchResponse(pageResult, ProfileResponseMapper::toResponse);
+    }
+
+    public static PageResponse<ProfileTopicResponse> toTopicResponse(PageResult<ProfileTopic> pageResult) {
+        return SearchResponseMapper.toSearchResponse(pageResult, ProfileResponseMapper::toTopicResponse);
     }
 
     private static ProfileStatisticsResponse toStatisticsResponse(Statistics statistics) {
@@ -83,6 +83,28 @@ public final class ProfileResponseMapper {
                 gameResult.opponentScore(),
                 gameResult.result(),
                 gameResult.playedAt()
+        );
+    }
+
+    private static ProfileTopicResponse toTopicResponse(ProfileTopic topic) {
+        return new ProfileTopicResponse(
+                topic.topicId(),
+                topic.totalExperience(),
+                topic.level(),
+                topic.experience(),
+                topic.experienceAtCurrentLevel(),
+                topic.experienceAtNextLevel(),
+                topic.experienceRequiredToCompleteCurrentLevel(),
+                topic.wins(),
+                topic.losses(),
+                topic.draws(),
+                topic.totalGames(),
+                topic.winPercentage(),
+                topic.lossPercentage(),
+                topic.drawPercentage(),
+                topic.winStreak(),
+                topic.lossStreak(),
+                topic.drawStreak()
         );
     }
 }

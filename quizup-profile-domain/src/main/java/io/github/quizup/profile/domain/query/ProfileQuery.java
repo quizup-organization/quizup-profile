@@ -21,5 +21,13 @@ public interface ProfileQuery {
 			PageCriteria page
 	) implements ProfileQuery, SearchQuery {
 	}
+
+	record SearchProfileTopicsQuery(
+			String profileId,
+			List<FilterCriteria> filters,
+			List<SortCriteria> sorts,
+			PageCriteria page
+	) implements ProfileQuery, SearchQuery {
+	}
 }
 

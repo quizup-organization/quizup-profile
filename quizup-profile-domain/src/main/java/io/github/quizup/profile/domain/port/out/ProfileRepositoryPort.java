@@ -3,6 +3,7 @@ package io.github.quizup.profile.domain.port.out;
 import io.github.quizup.common.domain.model.search.PageResult;
 import io.github.quizup.common.domain.model.search.SearchCriteria;
 import io.github.quizup.profile.domain.model.Profile;
+import io.github.quizup.profile.domain.model.ProfileTopic;
 
 import java.util.Optional;
 
@@ -15,5 +16,7 @@ public interface ProfileRepositoryPort {
     boolean existsById(String profileId);
 
     PageResult<Profile> findAll(SearchCriteria searchCriteria);
+
+    PageResult<ProfileTopic> findTopicsByProfileId(String profileId, SearchCriteria searchCriteria);
 }
 

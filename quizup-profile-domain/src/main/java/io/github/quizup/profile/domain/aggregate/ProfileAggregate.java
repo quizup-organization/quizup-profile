@@ -127,7 +127,7 @@ public class ProfileAggregate {
         ProfileGame previousGame = this.games.peekLast();
 
         Streak streak = ProfileRules.computeStreak(
-                new ProfileStreak(winStreak, lossStreak, drawStreak),
+                ProfileStreak.of(winStreak, lossStreak, drawStreak),
                 currentGame,
                 previousGame
         );
@@ -137,7 +137,7 @@ public class ProfileAggregate {
         this.drawStreak = streak.drawStreak();
 
         if (this.games.size() >= MAX_RECENT_GAMES) {
-            this.games.pollFirst(); // retire le plus ancien
+            this.games.pollFirst();
         }
 
         this.games.addLast(currentGame);

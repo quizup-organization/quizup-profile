@@ -8,6 +8,7 @@ import io.github.quizup.profile.infrastructure.out.persistence.entity.ProfileEnt
 import io.github.quizup.profile.infrastructure.out.persistence.entity.TopicStatisticsEmbeddable;
 
 import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,17 @@ public final class ProfileEntityMapper {
         entity.getTopics().forEach((topicId, value) ->
                 topics.put(
                         topicId,
-                        new ProfileTopic(topicId, value.getTotalExperience(), value.getWins(), value.getLosses(), value.getDraws())
+                        new ProfileTopic(
+                                topicId,
+                                value.getTotalExperience(),
+                                value.getWins(),
+                                value.getLosses(),
+                                value.getDraws(),
+                                Collections.emptyList(),
+                                value.getWinStreak(),
+                                value.getDrawStreak(),
+                                value.getLossStreak()
+                        )
                 )
         );
 
@@ -63,6 +74,9 @@ public final class ProfileEntityMapper {
             embeddable.setWins(stats.wins());
             embeddable.setLosses(stats.losses());
             embeddable.setDraws(stats.draws());
+            embeddable.setWinStreak(stats.winStreak());
+            embeddable.setLossStreak(stats.lossStreak());
+            embeddable.setDrawStreak(stats.drawStreak());
             topics.put(topicId, embeddable);
         });
         entity.setTopics(topics);

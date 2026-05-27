@@ -1,4 +1,4 @@
--- V1: Création des tables de projection simplifiée du module profile
+-- V1: create clean projection schema for profile module
 
 create table if not exists profile_entry (
 	profile_id varchar(255) primary key,
@@ -23,10 +23,19 @@ create table if not exists profile_topic_statistics_entry (
 	wins integer not null,
 	losses integer not null,
 	draws integer not null,
+	win_streak integer not null,
+	loss_streak integer not null,
+	draw_streak integer not null,
 	primary key (profile_id, topic_id),
 	constraint fk_profile_topic_stats_profile
 		foreign key (profile_id) references profile_entry(profile_id)
 );
+
+create index if not exists idx_profile_topic_stats_profile
+	on profile_topic_statistics_entry(profile_id);
+
+create index if not exists idx_profile_topic_stats_total_xp
+	on profile_topic_statistics_entry(total_experience);
 
 create table if not exists profile_game_entry (
 	profile_id varchar(255) not null,

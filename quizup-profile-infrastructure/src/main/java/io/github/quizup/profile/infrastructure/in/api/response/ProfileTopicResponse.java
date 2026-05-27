@@ -1,11 +1,9 @@
 package io.github.quizup.profile.infrastructure.in.api.response;
 
 import java.io.Serializable;
-import java.time.Instant;
-import java.util.List;
 
-public record ProfileResponse(
-        String profileId,
+public record ProfileTopicResponse(
+        String topicId,
         int totalExperience,
         int level,
         int experience,
@@ -21,10 +19,7 @@ public record ProfileResponse(
         int drawPercentage,
         int winStreak,
         int lossStreak,
-        int drawStreak,
-        List<GameResultResponse> games,
-        Instant createdAt,
-        Instant updatedAt
+        int drawStreak
 ) implements Serializable {
 }
 

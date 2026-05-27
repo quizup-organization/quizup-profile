@@ -9,10 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class ProfileProjection {
@@ -46,40 +43,25 @@ public class ProfileProjection {
             int updatedLosses = existing.losses() + (game.result() == GameResult.LOSS ? 1 : 0);
             int updatedDraws = existing.draws() + (game.result() == GameResult.DRAW ? 1 : 0);
 
-            int winStreak = existing.winStreak();
-            int lossStreak = existing.lossStreak();
-            int drawStreak = existing.drawStreak();
-
             ProfileGame previousGame = existing.games().isEmpty()
                     ? null
-                    : existing.games().get(existing.games().size() - 1);
+                    : existing.games().getLast();
 
-            if (previousGame != null) {
-                switch (previousGame.result()) {
-                    case WIN -> winStreak = game.result() == GameResult.WIN ? winStreak + 1 : 0;
-                    case LOSS -> lossStreak = game.result() == GameResult.LOSS ? lossStreak + 1 : 0;
-                    case DRAW -> drawStreak = game.result() == GameResult.DRAW ? drawStreak + 1 : 0;
-                }
-            }
+            Streak profileStreak = ProfileRules.computeStreak(
+                    ProfileStreak.of(existing.winStreak(), existing.lossStreak(), existing.drawStreak()),
+                    game,
+                    previousGame
+            );
 
             Map<String, ProfileTopic> updatedTopics = new HashMap<>(existing.topics());
-            ProfileTopic topicStatistics = updatedTopics.getOrDefault(game.topicId(), ProfileTopic.empty(game.topicId()));
-            updatedTopics.put(
-                    game.topicId(),
-                    new ProfileTopic(
-                            game.topicId(),
-                            topicStatistics.totalExperience() + xpEarned,
-                            topicStatistics.wins() + (game.result() == GameResult.WIN ? 1 : 0),
-                            topicStatistics.losses() + (game.result() == GameResult.LOSS ? 1 : 0),
-                            topicStatistics.draws() + (game.result() == GameResult.DRAW ? 1 : 0)
-                    )
-            );
+            ProfileTopic existingTopic = updatedTopics.getOrDefault(game.topicId(), ProfileTopic.empty(game.topicId()));
+            updatedTopics.put(game.topicId(), updateTopic(existingTopic, game, xpEarned));
 
             List<ProfileGame> updatedGames = new ArrayList<>(existing.games());
             updatedGames.add(game);
 
             if (updatedGames.size() > ProfileRules.MAX_RECENT_GAMES) {
-                updatedGames.remove(0);
+                updatedGames.removeFirst();
             }
 
             profileRepositoryPort.save(
@@ -88,15 +70,36 @@ public class ProfileProjection {
                             .wins(updatedWins)
                             .losses(updatedLosses)
                             .draws(updatedDraws)
-                            .winStreak(winStreak)
-                            .lossStreak(lossStreak)
-                            .drawStreak(drawStreak)
+                            .winStreak(profileStreak.winStreak())
+                            .lossStreak(profileStreak.lossStreak())
+                            .drawStreak(profileStreak.drawStreak())
                             .topics(updatedTopics)
                             .games(updatedGames)
                             .updatedAt(event.recordedAt())
                             .build()
             );
         });
+    }
+
+    private ProfileTopic updateTopic(ProfileTopic topic, ProfileGame game, int xpEarned) {
+        // Mirror du comportement de ProfileTopicAggregate: streak basé uniquement sur le résultat courant.
+        Streak topicStreak = ProfileRules.computeStreak(
+                ProfileStreak.of(topic.winStreak(), topic.lossStreak(), topic.drawStreak()),
+                game.result(),
+                game.result()
+        );
+
+        return new ProfileTopic(
+                topic.topicId(),
+                topic.totalExperience() + xpEarned,
+                topic.wins() + (game.result() == GameResult.WIN ? 1 : 0),
+                topic.losses() + (game.result() == GameResult.LOSS ? 1 : 0),
+                topic.draws() + (game.result() == GameResult.DRAW ? 1 : 0),
+                Collections.emptyList(),
+                topicStreak.winStreak(),
+                topicStreak.drawStreak(),
+                topicStreak.lossStreak()
+        );
     }
 }
 
