@@ -8,6 +8,13 @@ public interface ProfileTopicEvent extends ProfileEvent {
 
     String topicId();
 
+    record ProfileTopicCreatedEvent(
+            String profileId,
+            String topicId,
+            Instant createdAt
+    ) implements ProfileTopicEvent {
+    }
+
     record TopicExperienceIncreasedEvent(
             String profileId,
             String topicId,
