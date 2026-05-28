@@ -24,6 +24,7 @@ public class ProfileAggregate {
     @AggregateIdentifier
     private String profileId;
 
+    private int level;
     private int experience;
 
     private int wins;

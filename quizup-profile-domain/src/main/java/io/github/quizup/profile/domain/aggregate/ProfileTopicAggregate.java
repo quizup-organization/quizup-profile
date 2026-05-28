@@ -18,6 +18,7 @@ public class ProfileTopicAggregate {
     private final String topicId;
 
     private int experience;
+    private int level;
 
     private int wins;
     private int losses;
@@ -35,6 +36,7 @@ public class ProfileTopicAggregate {
     public ProfileTopicAggregate(String topicId) {
         this.topicId = topicId;
         this.experience = 0;
+        this.level = 0;
         this.wins = 0;
         this.losses = 0;
         this.draws = 0;

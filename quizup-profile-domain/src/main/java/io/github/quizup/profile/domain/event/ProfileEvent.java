@@ -14,56 +14,88 @@ public interface ProfileEvent {
     ) implements ProfileEvent {
     }
 
-    record GameResultAddedEvent(
-            String profileId,
-            ProfileGame game,
-            Instant recordedAt
-    ) implements ProfileEvent {
-    }
-
-    record ProfileExperienceIncreasedEvent(
+    record ExperienceIncreasedEvent(
             String profileId,
             int experienceEarned,
             Instant earnedAt
     ) implements ProfileEvent {
     }
 
-    record ProfileGamePlayedEvent(
+    record LevelIncreasedEvent(
             String profileId,
-            ProfileGame game,
-            Instant playedAt
+            int level,
+            Instant increasedAt
     ) implements ProfileEvent {
     }
 
-    record ProfileWinsIncreasedEvent(
+    record WinsIncreasedEvent(
             String profileId,
             int wins,
             Instant increasedAt
     ) implements ProfileEvent {
     }
 
-    record ProfileWinStreakIncreasedEvent(
+    record LossesIncreasedEvent(
+            String profileId,
+            int losses,
+            Instant increasedAt
+    ) implements ProfileEvent {
+    }
+
+    record DrawsIncreasedEvent(
+            String profileId,
+            int draws,
+            Instant increasedAt
+    ) implements ProfileEvent {
+    }
+
+    record WinStreakIncreasedEvent(
             String profileId,
             int winStreak,
             Instant increasedAt
     ) implements ProfileEvent {
     }
 
-    record ProfileWinStreakEndedEvent(
+    record WinStreakEndedEvent(
             String profileId,
             Instant endedAt
     ) implements ProfileEvent {
     }
 
-    record ProfileTopicWinStreakIncreasedEvent(
+    record LossStreakIncreasedEvent(
             String profileId,
-            String topicId,
-            int winStreak,
+            int lossStreak,
             Instant increasedAt
     ) implements ProfileEvent {
     }
 
-    record ProfileBadgeUnlockedEvent(
+    record LossStreakEndedEvent(
+            String profileId,
+            Instant endedAt
+    ) implements ProfileEvent {
+    }
+
+    record DrawStreakIncreasedEvent(
+            String profileId,
+            int drawStreak,
+            Instant increasedAt
+    ) implements ProfileEvent {
+    }
+
+    record DrawStreakEndedEvent(
+            String profileId,
+            Instant endedAt
+    ) implements ProfileEvent {
+    }
+
+    record GamePlayedEvent(
+            String profileId,
+            ProfileGame game,
+            Instant playedAt
+    ) implements ProfileEvent {
+    }
+
+    record BadgeUnlockedEvent(
             String profileId,
             Badge badge,
             Instant unlockedAt
