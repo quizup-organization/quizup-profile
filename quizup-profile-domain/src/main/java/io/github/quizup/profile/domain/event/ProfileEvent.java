@@ -95,6 +95,8 @@ public interface ProfileEvent {
     ) implements ProfileEvent {
     }
 
+    // GameResultAddedEvent supprimé — remplacé par des événements granulaires (event sourcing pur)
+
     record BadgeUnlockedEvent(
             String profileId,
             Badge badge,

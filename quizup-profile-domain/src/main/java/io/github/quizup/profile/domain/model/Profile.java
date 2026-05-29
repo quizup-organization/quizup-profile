@@ -10,6 +10,7 @@ import java.util.Map;
 public record Profile(
         String profileId,
         int totalExperience,
+        int level,
         int wins,
         int losses,
         int draws,
@@ -22,9 +23,15 @@ public record Profile(
         Instant updatedAt
 ) implements Statistics {
 
+    @Override
+    public int level() {
+        return level;
+    }
+
     public static Profile empty(String profileId, Instant now) {
         return new Profile(
                 profileId,
+                0,
                 0,
                 0,
                 0,
@@ -39,4 +46,3 @@ public record Profile(
         );
     }
 }
-

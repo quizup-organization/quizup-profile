@@ -14,6 +14,7 @@ import java.util.*;
 @Entity
 @Table(name = "profile_entry", indexes = {
         @Index(name = "idx_profile_total_xp", columnList = "total_experience"),
+        @Index(name = "idx_profile_level", columnList = "level"),
         @Index(name = "idx_profile_wins", columnList = "wins")
 })
 public class ProfileEntity {
@@ -26,6 +27,10 @@ public class ProfileEntity {
     @Searchable(type = FieldType.NUMBER)
     @Column(name = "total_experience", nullable = false)
     private int totalExperience;
+
+    @Searchable(type = FieldType.NUMBER)
+    @Column(name = "level", nullable = false)
+    private int level;
 
     @Searchable(type = FieldType.NUMBER)
     @Column(name = "wins", nullable = false)

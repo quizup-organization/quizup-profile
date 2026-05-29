@@ -7,8 +7,8 @@ import io.github.quizup.profile.infrastructure.out.persistence.entity.GameResult
 import io.github.quizup.profile.infrastructure.out.persistence.entity.ProfileEntity;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.TopicStatisticsEmbeddable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -25,13 +25,16 @@ public final class ProfileEntityMapper {
                         new ProfileTopic(
                                 topicId,
                                 value.getTotalExperience(),
+                                value.getLevel(),
                                 value.getWins(),
                                 value.getLosses(),
                                 value.getDraws(),
-                                Collections.emptyList(),
+                                new ArrayList<>(),
                                 value.getWinStreak(),
                                 value.getDrawStreak(),
-                                value.getLossStreak()
+                                value.getLossStreak(),
+                                value.getCreatedAt(),
+                                value.getUpdatedAt()
                         )
                 )
         );
@@ -43,6 +46,7 @@ public final class ProfileEntityMapper {
         return new Profile(
                 entity.getProfileId(),
                 entity.getTotalExperience(),
+                entity.getLevel(),
                 entity.getWins(),
                 entity.getLosses(),
                 entity.getDraws(),
@@ -60,6 +64,7 @@ public final class ProfileEntityMapper {
         ProfileEntity entity = new ProfileEntity();
         entity.setProfileId(profile.profileId());
         entity.setTotalExperience(profile.totalExperience());
+        entity.setLevel(profile.level());
         entity.setWins(profile.wins());
         entity.setLosses(profile.losses());
         entity.setDraws(profile.draws());
@@ -71,12 +76,15 @@ public final class ProfileEntityMapper {
         profile.topics().forEach((topicId, stats) -> {
             TopicStatisticsEmbeddable embeddable = new TopicStatisticsEmbeddable();
             embeddable.setTotalExperience(stats.totalExperience());
+            embeddable.setLevel(stats.level());
             embeddable.setWins(stats.wins());
             embeddable.setLosses(stats.losses());
             embeddable.setDraws(stats.draws());
             embeddable.setWinStreak(stats.winStreak());
             embeddable.setLossStreak(stats.lossStreak());
             embeddable.setDrawStreak(stats.drawStreak());
+            embeddable.setCreatedAt(stats.createdAt());
+            embeddable.setUpdatedAt(stats.updatedAt());
             topics.put(topicId, embeddable);
         });
         entity.setTopics(topics);
@@ -117,4 +125,3 @@ public final class ProfileEntityMapper {
         return embeddable;
     }
 }
-
