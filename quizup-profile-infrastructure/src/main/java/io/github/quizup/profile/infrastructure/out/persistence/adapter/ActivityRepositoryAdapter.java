@@ -1,0 +1,65 @@
+package io.github.quizup.profile.infrastructure.out.persistence.adapter;
+
+import io.github.quizup.profile.domain.model.ActivityDay;
+import io.github.quizup.profile.domain.model.PlayerActivity;
+import io.github.quizup.profile.domain.port.out.ActivityRepositoryPort;
+import io.github.quizup.profile.infrastructure.out.persistence.entity.ActivityDayEntity;
+import io.github.quizup.profile.infrastructure.out.persistence.mapper.ActivityEntityMapper;
+import io.github.quizup.profile.infrastructure.out.persistence.repository.ActivityDayJpaRepository;
+import io.github.quizup.profile.infrastructure.out.persistence.repository.ActivityJpaRepository;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Component
+public class ActivityRepositoryAdapter implements ActivityRepositoryPort {
+
+    private final ActivityJpaRepository activityJpaRepository;
+    private final ActivityDayJpaRepository activityDayJpaRepository;
+
+    public ActivityRepositoryAdapter(ActivityJpaRepository activityJpaRepository,
+                                     ActivityDayJpaRepository activityDayJpaRepository) {
+        this.activityJpaRepository = activityJpaRepository;
+        this.activityDayJpaRepository = activityDayJpaRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<PlayerActivity> findActivity(String userId) {
+        return activityJpaRepository.findById(userId).map(ActivityEntityMapper::toDomain);
+    }
+
+    @Override
+    @Transactional
+    public void saveActivity(PlayerActivity activity) {
+        activityJpaRepository.save(ActivityEntityMapper.toEntity(activity));
+    }
+
+    @Override
+    @Transactional
+    public void incrementDay(String userId, LocalDate date) {
+        ActivityDayEntity.ActivityDayId id = new ActivityDayEntity.ActivityDayId(userId, date);
+        ActivityDayEntity day = activityDayJpaRepository.findById(id)
+                .orElseGet(() -> {
+                    ActivityDayEntity created = new ActivityDayEntity();
+                    created.setUserId(userId);
+                    created.setActivityDate(date);
+                    created.setGamesCount(0);
+                    return created;
+                });
+        day.setGamesCount(day.getGamesCount() + 1);
+        activityDayJpaRepository.save(day);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ActivityDay> findDays(String userId, LocalDate from, LocalDate to) {
+        return activityDayJpaRepository
+                .findByUserIdAndActivityDateBetweenOrderByActivityDateAsc(userId, from, to).stream()
+                .map(ActivityEntityMapper::toDomain)
+                .toList();
+    }
+}

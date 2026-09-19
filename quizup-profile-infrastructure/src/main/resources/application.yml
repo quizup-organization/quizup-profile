@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: quizup-profile
+  profiles:
+    default: local
+
+  flyway:
+    locations: classpath:db/migration/profile
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+microservice:
+  swagger:
+    description: QuizUp Profile Module - User profile management (display name, bio, country)
+  websocket:
+    # Présence joueur : notifications STOMP sur /topic/presence/{userId}
+    enabled: true
+
+app:
+  seed-data:
+    enabled: false
+  activity:
+    # Fuseau servant à découper les « jours » du graphe d'activité (streak journalière)
+    zone: Europe/Paris
+
+logging:
+  level:
+    io.github.quizup: ${QUIZUP_LOG_LEVEL:INFO}
