@@ -1,3 +1,9 @@
+## [1.4.2](https://github.com/quizup-organization/quizup-profile/compare/v1.4.1...v1.4.2) (2026-09-20)
+
+### Bug Fixes
+
+* **presence:** schedule offline deadline with NoScopeDescriptor ([71babc5](https://github.com/quizup-organization/quizup-profile/commit/71babc555064b196bee2ff145880da99e62cbc56))
+
 ## [1.4.1](https://github.com/quizup-organization/quizup-profile/compare/v1.4.0...v1.4.1) (2026-09-20)
 
 ### Bug Fixes
