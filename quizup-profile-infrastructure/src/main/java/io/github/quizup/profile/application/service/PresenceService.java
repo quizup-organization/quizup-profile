@@ -10,6 +10,7 @@ import io.github.quizup.profile.domain.port.out.PresenceNotifierPort;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import org.axonframework.deadline.DeadlineManager;
 import org.axonframework.eventhandling.gateway.EventGateway;
+import org.axonframework.messaging.NoScopeDescriptor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -80,10 +81,13 @@ public class PresenceService implements PresenceUseCase {
             presenceRepositoryPort.findById(userId).ifPresent(current ->
                     presenceRepositoryPort.save(current.toBuilder().lastSeenAt(now).build()));
 
+            // Appelé depuis un listener Spring (déconnexion WebSocket), hors scope Axon :
+            // on fournit explicitement un ScopeDescriptor (sinon Scope.getCurrentScope() échoue).
             deadlineManager.schedule(
                     PresenceRules.DISCONNECT_GRACE,
                     PresenceDeadline.OFFLINE,
-                    new PresenceDeadline.OfflineCheck(userId)
+                    new PresenceDeadline.OfflineCheck(userId),
+                    NoScopeDescriptor.INSTANCE
             );
         }
 
