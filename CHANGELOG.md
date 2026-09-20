@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/quizup-organization/quizup-profile/compare/v1.1.0...v1.2.0) (2026-09-20)
+
+### Features
+
+* **observability:** consume quizup-sdk 1.2.0 (structured logs + tracing) ([1c34d39](https://github.com/quizup-organization/quizup-profile/commit/1c34d390118c645ed1f00b403b6e2ea3033ad22e))
+
 ## [1.1.0](https://github.com/quizup-organization/quizup-profile/compare/v1.0.0...v1.1.0) (2026-09-20)
 
 ### Features
