@@ -1,3 +1,9 @@
+## [1.4.6](https://github.com/quizup-organization/quizup-profile/compare/v1.4.5...v1.4.6) (2026-09-20)
+
+### Bug Fixes
+
+* **config:** align prod service URLs with quizup-* names ([06cdea4](https://github.com/quizup-organization/quizup-profile/commit/06cdea4865a48b10b29ab489d5cafa0a25a06ea4))
+
 ## [1.4.5](https://github.com/quizup-organization/quizup-profile/compare/v1.4.4...v1.4.5) (2026-09-20)
 
 ### Bug Fixes
