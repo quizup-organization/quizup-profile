@@ -1,3 +1,9 @@
+## [1.4.4](https://github.com/quizup-organization/quizup-profile/compare/v1.4.3...v1.4.4) (2026-09-20)
+
+### Bug Fixes
+
+* **system:** use the unified system account ([3d4bdbc](https://github.com/quizup-organization/quizup-profile/commit/3d4bdbcbfeeb5bc795f10bbdfd2b773b778ae8a7))
+
 ## [1.4.3](https://github.com/quizup-organization/quizup-profile/compare/v1.4.2...v1.4.3) (2026-09-20)
 
 ### Bug Fixes
