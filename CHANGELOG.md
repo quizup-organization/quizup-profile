@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/quizup-organization/quizup-profile/compare/v1.2.0...v1.3.0) (2026-09-20)
+
+### Features
+
+* **observability:** progression KPIs (XP, levels, badges) + consume quizup-sdk 1.3.0 ([3d4dd13](https://github.com/quizup-organization/quizup-profile/commit/3d4dd1389262b298b7bcf2005399d413fcc0e1bd))
+
 ## [1.2.0](https://github.com/quizup-organization/quizup-profile/compare/v1.1.0...v1.2.0) (2026-09-20)
 
 ### Features
