@@ -1,3 +1,9 @@
+## [1.4.3](https://github.com/quizup-organization/quizup-profile/compare/v1.4.2...v1.4.3) (2026-09-20)
+
+### Bug Fixes
+
+* **observability:** remove WebSocket and business KPI metrics (consume quizup-sdk 1.4.3) ([c5118f9](https://github.com/quizup-organization/quizup-profile/commit/c5118f9a3388b826c56eafbadc1f21cdff9db042))
+
 ## [1.4.2](https://github.com/quizup-organization/quizup-profile/compare/v1.4.1...v1.4.2) (2026-09-20)
 
 ### Bug Fixes
