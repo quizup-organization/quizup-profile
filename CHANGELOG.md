@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/quizup-organization/quizup-profile/compare/v1.0.0...v1.1.0) (2026-09-20)
+
+### Features
+
+* **observability:** consume quizup-sdk 1.1.0 (Prometheus metrics) ([771381b](https://github.com/quizup-organization/quizup-profile/commit/771381b27ac9cdbb4833be75c4ada73355ad1877))
+
 ## 1.0.0 (2026-09-19)
 
 ### Features
