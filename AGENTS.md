@@ -128,7 +128,7 @@ social/matchmaking), `ProfileExistsByIdQuery` (consommée par social), `ProfileS
 **idempotente** (garde sur `ProfileRepositoryPort.findById` : pas de commande si le profil existe).
 
 **Seeding système** : `ProfileDataSeeder` (`CommandLineRunner`, `app.seed-data.enabled`) garantit
-les profils des utilisateurs système (`QuizUpConstants.ADMIN_USER_ID` / `BOT_USER_ID`),
+les profils des utilisateurs système (`QuizUpConstants.SYSTEM_USER_ID`),
 indépendamment de la saga : si `profile` n'était pas abonné au flux Kafka quand `identity` a publié
 `UserRegisteredEvent`, ces profils seraient sinon manquants. Il passe par les use cases
 `CheckProfileUseCase` + `CreateProfileUseCase` (pas de port direct) et est idempotent.
@@ -136,7 +136,7 @@ indépendamment de la saga : si `profile` n'était pas abonné au flux Kafka qua
 **Conso progression** : `quizup-game-domain` (artifact Maven) — la saga
 `AwardProgressSaga` (`@SagaEventHandler(associationProperty = "gameId")`) consomme
 `GameEvent.GameEndedEvent` et envoie un `ProgressionCommand.AwardXpCommand` par joueur humain
-(idempotence par `gameId` portée par l'agrégat). Le bot (`QuizUpConstants.BOT_USER_ID`) est ignoré.
+(idempotence par `gameId` portée par l'agrégat). Le compte système (`QuizUpConstants.SYSTEM_USER_ID`) est ignoré.
 
 **Aucun QueryGateway sortant** : identity n'est jamais interrogé à l'exécution.
 

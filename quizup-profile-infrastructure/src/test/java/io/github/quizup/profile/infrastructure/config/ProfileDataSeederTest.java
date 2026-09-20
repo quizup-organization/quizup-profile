@@ -33,7 +33,7 @@ class ProfileDataSeederTest {
     }
 
     @Test
-    void runSeedsAdminAndBotWhenEnabledAndAbsent() {
+    void runSeedsSystemProfileWhenEnabledAndAbsent() {
         ReflectionTestUtils.setField(seeder, "seedDataEnabled", true);
         when(checkProfileUseCase.existsById(anyString()))
                 .thenReturn(CompletableFuture.completedFuture(false));
@@ -43,13 +43,9 @@ class ProfileDataSeederTest {
         seeder.run();
 
         verify(createProfileUseCase).create(
-                eq(QuizUpConstants.ADMIN_USER_ID),
-                eq(QuizUpConstants.ADMIN_USER_EMAIL),
-                eq(QuizUpConstants.ADMIN_USER_NAME));
-        verify(createProfileUseCase).create(
-                eq(QuizUpConstants.BOT_USER_ID),
-                eq(QuizUpConstants.BOT_USER_EMAIL),
-                eq(QuizUpConstants.BOT_USER_NAME));
+                eq(QuizUpConstants.SYSTEM_USER_ID),
+                eq(QuizUpConstants.SYSTEM_USER_EMAIL),
+                eq(QuizUpConstants.SYSTEM_USER_NAME));
     }
 
     @Test
@@ -63,49 +59,49 @@ class ProfileDataSeederTest {
 
     @Test
     void seedProfileSkipsWhenProjectionKnowsProfile() {
-        when(checkProfileUseCase.existsById(QuizUpConstants.ADMIN_USER_ID))
+        when(checkProfileUseCase.existsById(QuizUpConstants.SYSTEM_USER_ID))
                 .thenReturn(CompletableFuture.completedFuture(true));
 
         seeder.seedProfile(
-                QuizUpConstants.ADMIN_USER_ID,
-                QuizUpConstants.ADMIN_USER_EMAIL,
-                QuizUpConstants.ADMIN_USER_NAME,
-                "Admin");
+                QuizUpConstants.SYSTEM_USER_ID,
+                QuizUpConstants.SYSTEM_USER_EMAIL,
+                QuizUpConstants.SYSTEM_USER_NAME,
+                "System");
 
         verify(createProfileUseCase, never()).create(anyString(), anyString(), anyString());
     }
 
     @Test
     void seedProfileIgnoresExistingAggregateWhenProjectionLagging() {
-        when(checkProfileUseCase.existsById(QuizUpConstants.ADMIN_USER_ID))
+        when(checkProfileUseCase.existsById(QuizUpConstants.SYSTEM_USER_ID))
                 .thenReturn(CompletableFuture.completedFuture(false));
         when(createProfileUseCase.create(anyString(), anyString(), anyString()))
                 .thenReturn(CompletableFuture.failedFuture(
-                        new AggregateStreamCreationException(QuizUpConstants.ADMIN_USER_ID)));
+                        new AggregateStreamCreationException(QuizUpConstants.SYSTEM_USER_ID)));
 
         assertThatCode(() -> seeder.seedProfile(
-                QuizUpConstants.ADMIN_USER_ID,
-                QuizUpConstants.ADMIN_USER_EMAIL,
-                QuizUpConstants.ADMIN_USER_NAME,
-                "Admin")).doesNotThrowAnyException();
+                QuizUpConstants.SYSTEM_USER_ID,
+                QuizUpConstants.SYSTEM_USER_EMAIL,
+                QuizUpConstants.SYSTEM_USER_NAME,
+                "System")).doesNotThrowAnyException();
     }
 
     @Test
     void seedProfileCreatesWhenAbsent() {
-        when(checkProfileUseCase.existsById(QuizUpConstants.BOT_USER_ID))
+        when(checkProfileUseCase.existsById(QuizUpConstants.SYSTEM_USER_ID))
                 .thenReturn(CompletableFuture.completedFuture(false));
         when(createProfileUseCase.create(anyString(), anyString(), anyString()))
                 .thenReturn(CompletableFuture.completedFuture("created"));
 
         seeder.seedProfile(
-                QuizUpConstants.BOT_USER_ID,
-                QuizUpConstants.BOT_USER_EMAIL,
-                QuizUpConstants.BOT_USER_NAME,
-                "Bot");
+                QuizUpConstants.SYSTEM_USER_ID,
+                QuizUpConstants.SYSTEM_USER_EMAIL,
+                QuizUpConstants.SYSTEM_USER_NAME,
+                "System");
 
         verify(createProfileUseCase).create(
-                eq(QuizUpConstants.BOT_USER_ID),
-                eq(QuizUpConstants.BOT_USER_EMAIL),
-                eq(QuizUpConstants.BOT_USER_NAME));
+                eq(QuizUpConstants.SYSTEM_USER_ID),
+                eq(QuizUpConstants.SYSTEM_USER_EMAIL),
+                eq(QuizUpConstants.SYSTEM_USER_NAME));
     }
 }

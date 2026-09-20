@@ -49,10 +49,8 @@ public class ProfileDataSeeder implements CommandLineRunner {
 
         logger.info("=== Starting Profile Data Seeding ===");
 
-        seedProfile(QuizUpConstants.ADMIN_USER_ID, QuizUpConstants.ADMIN_USER_EMAIL,
-                QuizUpConstants.ADMIN_USER_NAME, "Admin");
-        seedProfile(QuizUpConstants.BOT_USER_ID, QuizUpConstants.BOT_USER_EMAIL,
-                QuizUpConstants.BOT_USER_NAME, "Bot");
+        seedProfile(QuizUpConstants.SYSTEM_USER_ID, QuizUpConstants.SYSTEM_USER_EMAIL,
+                QuizUpConstants.SYSTEM_USER_NAME, "System");
 
         logger.info("=== Profile Data Seeding Completed ===");
     }

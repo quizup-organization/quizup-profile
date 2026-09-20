@@ -45,7 +45,7 @@ public class AwardProgressSaga {
 
     private void award(String playerId, GameEvent.GameEndedEvent event, boolean won,
                        int correctAnswers, int fastAnswers) {
-        if (playerId == null || QuizUpConstants.BOT_USER_ID.equals(playerId)) {
+        if (playerId == null || QuizUpConstants.SYSTEM_USER_ID.equals(playerId)) {
             return;
         }
 

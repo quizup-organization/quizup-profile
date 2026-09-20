@@ -46,7 +46,7 @@ public class ActivityProjection {
     }
 
     private void record(String userId, LocalDate activeDate) {
-        if (userId == null || QuizUpConstants.BOT_USER_ID.equals(userId)) {
+        if (userId == null || QuizUpConstants.SYSTEM_USER_ID.equals(userId)) {
             return;
         }
 
