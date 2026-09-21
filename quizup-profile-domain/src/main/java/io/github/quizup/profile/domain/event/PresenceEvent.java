@@ -11,8 +11,8 @@ public interface PresenceEvent {
     String userId();
 
     /**
-     * Un joueur vient de passer hors ligne (battement de cœur trop ancien). Consommé par
-     * {@code quizup-game} pour clore par forfait un duel synchrone en cours.
+     * Un joueur vient de passer hors ligne (déconnexion confirmée après le délai de grâce).
+     * Consommé par {@code quizup-game} pour clore par forfait un duel synchrone en cours.
      */
     record PlayerWentOfflineEvent(
             String userId,

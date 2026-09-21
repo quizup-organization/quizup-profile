@@ -16,7 +16,7 @@ frontend = claims du JWT). Ce service est **créé par événement** (saga sur
 
 Il est aussi la **source unique d'existence et de nom d'affichage** des utilisateurs pour les
 autres services : social et matchmaking n'interrogent plus identity mais **profile** (queries
-`ProfileQuery.ProfileExistsByIdQuery` / `ProfileQuery.FindProfileQuery` sur le bus partagé).
+`ProfileQuery.ProfileExistsByIdQuery` / `ProfileQuery.GetProfileQuery` sur le bus partagé).
 Le `NameGenerator` (nom d'affichage déterministe généré à la création) vit dans ce domaine.
 
 Il porte enfin la **progression du joueur** (RPG) : XP totale + XP **par thème**, niveau, titre
@@ -110,9 +110,9 @@ où `days[]` = `ActivityDayResponse(date, games)`. Fenêtre par défaut : 365 de
 - `SearchProfileUseCase` — recherche paginée (pattern SDK `SearchRequest` → `PageResponse`)
 - `GetProgressionUseCase` — progression globale et par thème
 
-**Queries** (`domain/query/ProfileQuery.java`) : `GetProfileQuery`, `FindProfileQuery`
-(lecture légère, retourne `Optional<Profile>` — c'est elle que consomment
-social/matchmaking), `ProfileExistsByIdQuery` (consommée par social), `ProfileSearchQuery`.
+**Queries** (`domain/query/ProfileQuery.java`) : `GetProfileQuery` (consommée par
+social/matchmaking pour le nom d'affichage), `ProfileExistsByIdQuery` (consommée par social),
+`ProfileSearchQuery`.
 **Queries progression** (`ProgressionQuery.java`) : `GetProgressionQuery`, `GetTopicProgressionQuery`.
 
 **Ports sortants locaux** : `ProfileRepositoryPort` (persistance de la projection, dont
@@ -140,7 +140,7 @@ indépendamment de la saga : si `profile` n'était pas abonné au flux Kafka qua
 
 **Aucun QueryGateway sortant** : identity n'est jamais interrogé à l'exécution.
 
-**Fourniture (sortant)** : les queries `ProfileQuery.FindProfileQuery` /
+**Fourniture (sortant)** : les queries `ProfileQuery.GetProfileQuery` /
 `ProfileExistsByIdQuery` sont consommées par `quizup-social` et `quizup-matchmaking` (bus
 partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
 

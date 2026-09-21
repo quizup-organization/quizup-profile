@@ -11,6 +11,7 @@ import io.github.quizup.profile.domain.port.out.PresenceNotifierPort;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import org.axonframework.deadline.DeadlineManager;
 import org.axonframework.eventhandling.gateway.EventGateway;
+import org.axonframework.messaging.NoScopeDescriptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -73,7 +74,8 @@ class PresenceServiceTest {
         verify(deadlineManager).schedule(
                 eq(PresenceRules.DISCONNECT_GRACE),
                 eq(PresenceDeadline.OFFLINE),
-                any(PresenceDeadline.OfflineCheck.class));
+                any(PresenceDeadline.OfflineCheck.class),
+                eq(NoScopeDescriptor.INSTANCE));
     }
 
     @Test
@@ -83,7 +85,7 @@ class PresenceServiceTest {
 
         service.sessionDisconnected("s1", "u1");
 
-        verify(deadlineManager, never()).schedule(any(Duration.class), anyString(), any());
+        verify(deadlineManager, never()).schedule(any(Duration.class), anyString(), any(), any());
     }
 
     @Test
@@ -149,11 +151,6 @@ class PresenceServiceTest {
         @Override
         public long countSessions(String userId) {
             return sessionOwners.values().stream().filter(userId::equals).count();
-        }
-
-        @Override
-        public void deleteAllSessions() {
-            sessionOwners.clear();
         }
     }
 }

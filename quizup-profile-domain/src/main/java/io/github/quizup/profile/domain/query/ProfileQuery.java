@@ -12,9 +12,6 @@ public interface ProfileQuery {
     record GetProfileQuery(String userId) implements ProfileQuery {
     }
 
-    record FindProfileQuery(String userId) implements ProfileQuery {
-    }
-
     record ProfileExistsByIdQuery(String userId) implements ProfileQuery {
     }
 

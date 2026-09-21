@@ -27,7 +27,4 @@ public interface PresenceRepositoryPort {
 
     /** Nombre de sessions temps réel encore ouvertes pour un joueur. */
     long countSessions(String userId);
-
-    /** Purge toutes les sessions (au démarrage : elles meurent avec l'instance). */
-    void deleteAllSessions();
 }

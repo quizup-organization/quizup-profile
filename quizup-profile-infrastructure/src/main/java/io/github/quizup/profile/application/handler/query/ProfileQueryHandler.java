@@ -8,8 +8,6 @@ import io.github.quizup.profile.domain.query.ProfileQuery;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 /**
  * Handler Axon — Point d'entrée des queries sur le bus Axon.
  * Délègue aux ports sortants. Ne contient aucune logique propre.
@@ -28,11 +26,6 @@ public class ProfileQueryHandler {
     public Profile handle(ProfileQuery.GetProfileQuery query) {
         return profileRepositoryPort.findById(query.userId())
                 .orElseThrow(() -> new ProfileProblems.ProfileNotFoundProblem(query.userId()));
-    }
-
-    @QueryHandler
-    public Optional<Profile> handle(ProfileQuery.FindProfileQuery query) {
-        return profileRepositoryPort.findById(query.userId());
     }
 
     @QueryHandler

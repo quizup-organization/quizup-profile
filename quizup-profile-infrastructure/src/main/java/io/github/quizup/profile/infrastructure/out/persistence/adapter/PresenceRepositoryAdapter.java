@@ -80,12 +80,6 @@ public class PresenceRepositoryAdapter implements PresenceRepositoryPort {
         return presenceSessionJpaRepository.countByUserId(userId);
     }
 
-    @Override
-    @Transactional
-    public void deleteAllSessions() {
-        presenceSessionJpaRepository.deleteAll();
-    }
-
     /**
      * Les sessions STOMP vivent dans l'instance : au redémarrage, toutes sont mortes. On purge
      * donc les sessions et on repasse toutes les présences {@code OFFLINE} pour éviter les
