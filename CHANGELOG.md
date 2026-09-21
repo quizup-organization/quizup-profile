@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/quizup-organization/quizup-profile/compare/v1.5.0...v1.5.1) (2026-09-21)
+
+### Bug Fixes
+
+* **config:** honor QUIZUP_SEED_DATA_ENABLED in prod (seed system profile/topics) ([648ed3a](https://github.com/quizup-organization/quizup-profile/commit/648ed3a7d129cd6a8260baca881fc20a5d29e793))
+
 ## [1.5.0](https://github.com/quizup-organization/quizup-profile/compare/v1.4.7...v1.5.0) (2026-09-21)
 
 ### Features
