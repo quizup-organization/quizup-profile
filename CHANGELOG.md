@@ -1,3 +1,13 @@
+## [1.5.0](https://github.com/quizup-organization/quizup-profile/compare/v1.4.7...v1.5.0) (2026-09-21)
+
+### Features
+
+* **progression:** idempotent XP and activity, enforce profile ownership ([e8ade9d](https://github.com/quizup-organization/quizup-profile/commit/e8ade9d9b854f8491781b9e503616c9ad5f491e9))
+
+### Bug Fixes
+
+* **observability:** keep readable console logs in local ([df098a0](https://github.com/quizup-organization/quizup-profile/commit/df098a0594e5be7a4ddd90e0fcc7d6ab4c030db9))
+
 ## [1.4.7](https://github.com/quizup-organization/quizup-profile/compare/v1.4.6...v1.4.7) (2026-09-20)
 
 ### Bug Fixes
