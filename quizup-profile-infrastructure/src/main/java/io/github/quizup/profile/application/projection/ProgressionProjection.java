@@ -38,13 +38,18 @@ public class ProgressionProjection {
     @EventHandler
     @Transactional
     public void on(ProgressionEvent.XpAwardedEvent event) {
+        PlayerProgress existing = progressionRepositoryPort.findById(event.userId()).orElse(null);
+        PlayerProgress current = existing != null ? existing : PlayerProgress.empty(event.userId());
+
+        // La ligne `progression_entry` doit exister avant d'écrire le journal d'attribution.
+        if (existing == null) {
+            progressionRepositoryPort.save(current);
+        }
+
         // Idempotence par clé métier (userId, gameId) : un rejeu ne recompte pas l'XP.
         if (!awardedGameRepositoryPort.record(event.userId(), event.gameId())) {
             return;
         }
-
-        PlayerProgress current = progressionRepositoryPort.findById(event.userId())
-                .orElseGet(() -> PlayerProgress.empty(event.userId()));
 
         Map<String, Integer> xpByTopic = new HashMap<>(current.xpByTopic());
         xpByTopic.merge(event.topicId(), event.xp(), Integer::sum);

@@ -99,9 +99,7 @@ CREATE TABLE IF NOT EXISTS progression_activity_day (
 CREATE TABLE IF NOT EXISTS progression_awarded_game (
     user_id VARCHAR(255) NOT NULL,
     game_id VARCHAR(255) NOT NULL,
-    PRIMARY KEY (user_id, game_id),
-    CONSTRAINT fk_progression_awarded_game_user
-        FOREIGN KEY (user_id) REFERENCES progression_entry(user_id) ON DELETE CASCADE
+    PRIMARY KEY (user_id, game_id)
 );
 
 -- Journal des parties comptées par jour (idempotence du compteur d'activité au rejeu).
