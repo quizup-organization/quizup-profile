@@ -3,10 +3,10 @@ package io.github.quizup.profile.infrastructure.config;
 import io.github.quizup.microservice.core.domain.constant.QuizUpConstants;
 import io.github.quizup.profile.domain.port.in.CheckProfileUseCase;
 import io.github.quizup.profile.domain.port.in.CreateProfileUseCase;
+import io.github.quizup.profile.infrastructure.properties.AppProperties;
 import org.axonframework.modelling.command.AggregateStreamCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -30,14 +30,14 @@ public class ProfileDataSeeder implements CommandLineRunner {
 
     private final CheckProfileUseCase checkProfileUseCase;
     private final CreateProfileUseCase createProfileUseCase;
-
-    @Value("${app.seed-data.enabled:false}")
-    private boolean seedDataEnabled;
+    private final boolean seedDataEnabled;
 
     public ProfileDataSeeder(CheckProfileUseCase checkProfileUseCase,
-                             CreateProfileUseCase createProfileUseCase) {
+                             CreateProfileUseCase createProfileUseCase,
+                             AppProperties properties) {
         this.checkProfileUseCase = checkProfileUseCase;
         this.createProfileUseCase = createProfileUseCase;
+        this.seedDataEnabled = properties.seedData().enabled();
     }
 
     @Override

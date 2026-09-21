@@ -3,10 +3,10 @@ package io.github.quizup.profile.infrastructure.config;
 import io.github.quizup.microservice.core.domain.constant.QuizUpConstants;
 import io.github.quizup.profile.domain.port.in.CheckProfileUseCase;
 import io.github.quizup.profile.domain.port.in.CreateProfileUseCase;
+import io.github.quizup.profile.infrastructure.properties.AppProperties;
 import org.axonframework.modelling.command.AggregateStreamCreationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -23,18 +23,23 @@ class ProfileDataSeederTest {
 
     private CheckProfileUseCase checkProfileUseCase;
     private CreateProfileUseCase createProfileUseCase;
-    private ProfileDataSeeder seeder;
 
     @BeforeEach
     void setUp() {
         checkProfileUseCase = mock(CheckProfileUseCase.class);
         createProfileUseCase = mock(CreateProfileUseCase.class);
-        seeder = new ProfileDataSeeder(checkProfileUseCase, createProfileUseCase);
+    }
+
+    private ProfileDataSeeder seeder(boolean seedDataEnabled) {
+        AppProperties properties = new AppProperties(
+                new AppProperties.SeedData(seedDataEnabled),
+                new AppProperties.Activity("Europe/Paris"));
+        return new ProfileDataSeeder(checkProfileUseCase, createProfileUseCase, properties);
     }
 
     @Test
     void runSeedsSystemProfileWhenEnabledAndAbsent() {
-        ReflectionTestUtils.setField(seeder, "seedDataEnabled", true);
+        ProfileDataSeeder seeder = seeder(true);
         when(checkProfileUseCase.existsById(anyString()))
                 .thenReturn(CompletableFuture.completedFuture(false));
         when(createProfileUseCase.create(anyString(), anyString(), anyString()))
@@ -50,7 +55,7 @@ class ProfileDataSeederTest {
 
     @Test
     void runDoesNothingWhenDisabled() {
-        ReflectionTestUtils.setField(seeder, "seedDataEnabled", false);
+        ProfileDataSeeder seeder = seeder(false);
 
         seeder.run();
 
@@ -59,6 +64,7 @@ class ProfileDataSeederTest {
 
     @Test
     void seedProfileSkipsWhenProjectionKnowsProfile() {
+        ProfileDataSeeder seeder = seeder(true);
         when(checkProfileUseCase.existsById(QuizUpConstants.SYSTEM_USER_ID))
                 .thenReturn(CompletableFuture.completedFuture(true));
 
@@ -73,6 +79,7 @@ class ProfileDataSeederTest {
 
     @Test
     void seedProfileIgnoresExistingAggregateWhenProjectionLagging() {
+        ProfileDataSeeder seeder = seeder(true);
         when(checkProfileUseCase.existsById(QuizUpConstants.SYSTEM_USER_ID))
                 .thenReturn(CompletableFuture.completedFuture(false));
         when(createProfileUseCase.create(anyString(), anyString(), anyString()))
@@ -88,6 +95,7 @@ class ProfileDataSeederTest {
 
     @Test
     void seedProfileCreatesWhenAbsent() {
+        ProfileDataSeeder seeder = seeder(true);
         when(checkProfileUseCase.existsById(QuizUpConstants.SYSTEM_USER_ID))
                 .thenReturn(CompletableFuture.completedFuture(false));
         when(createProfileUseCase.create(anyString(), anyString(), anyString()))

@@ -5,10 +5,10 @@ import io.github.quizup.microservice.core.domain.constant.QuizUpConstants;
 import io.github.quizup.profile.domain.model.ActivityRules;
 import io.github.quizup.profile.domain.model.PlayerActivity;
 import io.github.quizup.profile.domain.port.out.ActivityRepositoryPort;
+import io.github.quizup.profile.infrastructure.properties.AppProperties;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +32,9 @@ public class ActivityProjection {
     private final ZoneId activityZone;
 
     public ActivityProjection(ActivityRepositoryPort activityRepositoryPort,
-                              @Value("${app.activity.zone:Europe/Paris}") String activityZone) {
+                              AppProperties properties) {
         this.activityRepositoryPort = activityRepositoryPort;
-        this.activityZone = ZoneId.of(activityZone);
+        this.activityZone = ZoneId.of(properties.activity().zone());
     }
 
     @EventHandler
