@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:classpath:quizup-defaults.yml
   application:
     name: quizup-profile
   profiles:
@@ -26,6 +28,4 @@ app:
     # Fuseau servant à découper les « jours » du graphe d'activité (streak journalière)
     zone: Europe/Paris
 
-logging:
-  level:
-    io.github.quizup: ${QUIZUP_LOG_LEVEL:INFO}
+
