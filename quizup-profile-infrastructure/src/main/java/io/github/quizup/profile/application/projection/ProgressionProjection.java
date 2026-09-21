@@ -4,6 +4,7 @@ import io.github.quizup.profile.domain.event.ProgressionEvent;
 import io.github.quizup.profile.domain.model.Badge;
 import io.github.quizup.profile.domain.model.PlayerProgress;
 import io.github.quizup.profile.domain.model.ProgressionRules;
+import io.github.quizup.profile.domain.port.out.ProgressionAwardedGameRepositoryPort;
 import io.github.quizup.profile.domain.port.out.ProgressionRepositoryPort;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
@@ -26,14 +27,22 @@ public class ProgressionProjection {
     private static final Logger logger = LoggerFactory.getLogger(ProgressionProjection.class);
 
     private final ProgressionRepositoryPort progressionRepositoryPort;
+    private final ProgressionAwardedGameRepositoryPort awardedGameRepositoryPort;
 
-    public ProgressionProjection(ProgressionRepositoryPort progressionRepositoryPort) {
+    public ProgressionProjection(ProgressionRepositoryPort progressionRepositoryPort,
+                                 ProgressionAwardedGameRepositoryPort awardedGameRepositoryPort) {
         this.progressionRepositoryPort = progressionRepositoryPort;
+        this.awardedGameRepositoryPort = awardedGameRepositoryPort;
     }
 
     @EventHandler
     @Transactional
     public void on(ProgressionEvent.XpAwardedEvent event) {
+        // Idempotence par clé métier (userId, gameId) : un rejeu ne recompte pas l'XP.
+        if (!awardedGameRepositoryPort.record(event.userId(), event.gameId())) {
+            return;
+        }
+
         PlayerProgress current = progressionRepositoryPort.findById(event.userId())
                 .orElseGet(() -> PlayerProgress.empty(event.userId()));
 

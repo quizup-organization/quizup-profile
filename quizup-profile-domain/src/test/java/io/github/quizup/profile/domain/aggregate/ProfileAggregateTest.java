@@ -71,6 +71,20 @@ class ProfileAggregateTest {
 
 
     @Test
+    void updateByNonOwner_isRejected() {
+        fixture
+                .given(new ProfileEvent.ProfileCreatedEvent("user-1", "user@quizup.dev", "Alice", Instant.now()))
+                .when(new ProfileCommand.UpdateProfileCommand(
+                        "user-1",
+                        "user-2",
+                        "Alicia",
+                        null,
+                        null))
+                .expectException(ProfileProblems.ProfileNotOwnerProblem.class);
+    }
+
+
+    @Test
     void updateWithBlankDisplayName_throwsValidationProblem() {
         fixture
                 .given(new ProfileEvent.ProfileCreatedEvent("user-1", "user@quizup.dev", "Alice", Instant.now()))

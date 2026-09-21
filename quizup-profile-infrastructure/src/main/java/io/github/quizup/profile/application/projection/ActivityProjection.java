@@ -41,19 +41,23 @@ public class ActivityProjection {
     @Transactional
     public void on(GameEvent.GameEndedEvent event) {
         LocalDate activeDate = event.endedAt().atZone(activityZone).toLocalDate();
-        record(event.player1Id(), activeDate);
-        record(event.player2Id(), activeDate);
+        record(event.player1Id(), activeDate, event.gameId());
+        record(event.player2Id(), activeDate, event.gameId());
     }
 
-    private void record(String userId, LocalDate activeDate) {
+    private void record(String userId, LocalDate activeDate, String gameId) {
         if (userId == null || QuizUpConstants.SYSTEM_USER_ID.equals(userId)) {
+            return;
+        }
+
+        // Idempotent par (userId, date, gameId) : un rejeu de la même fin de partie ne recompte rien.
+        if (!activityRepositoryPort.incrementDay(userId, activeDate, gameId)) {
             return;
         }
 
         PlayerActivity current = activityRepositoryPort.findActivity(userId)
                 .orElseGet(() -> PlayerActivity.empty(userId));
         activityRepositoryPort.saveActivity(ActivityRules.advance(current, activeDate));
-        activityRepositoryPort.incrementDay(userId, activeDate);
 
         logger.debug("Activité projetée: userId={}, date={}", userId, activeDate);
     }

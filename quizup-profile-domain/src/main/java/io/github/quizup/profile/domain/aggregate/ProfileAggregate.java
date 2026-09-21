@@ -48,6 +48,9 @@ public class ProfileAggregate {
 
     @CommandHandler
     public void update(ProfileCommand.UpdateProfileCommand command) {
+        if (!userId.equals(command.requestedBy())) {
+            throw new ProfileProblems.ProfileNotOwnerProblem(userId, command.requestedBy());
+        }
         validateDisplayName(command.userId(), command.displayName());
         validateBio(command.userId(), command.bio());
         validateCountry(command.userId(), command.country());

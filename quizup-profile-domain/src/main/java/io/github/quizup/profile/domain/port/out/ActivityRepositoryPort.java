@@ -16,8 +16,12 @@ public interface ActivityRepositoryPort {
 
     void saveActivity(PlayerActivity activity);
 
-    /** Incrémente le compteur de parties d'un jour (création à 1 s'il n'existe pas). */
-    void incrementDay(String userId, LocalDate date);
+    /**
+     * Compte une partie pour un jour, de façon idempotente par {@code gameId}.
+     *
+     * @return {@code true} si la partie est nouvelle (compteur recalculé), {@code false} si déjà comptée.
+     */
+    boolean incrementDay(String userId, LocalDate date, String gameId);
 
     /** Points d'activité d'un joueur sur une fenêtre inclusive. */
     List<ActivityDay> findDays(String userId, LocalDate from, LocalDate to);

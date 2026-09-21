@@ -4,7 +4,9 @@ import io.github.quizup.profile.domain.model.ActivityDay;
 import io.github.quizup.profile.domain.model.PlayerActivity;
 import io.github.quizup.profile.domain.port.out.ActivityRepositoryPort;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.ActivityDayEntity;
+import io.github.quizup.profile.infrastructure.out.persistence.entity.ActivityDayGameEntity;
 import io.github.quizup.profile.infrastructure.out.persistence.mapper.ActivityEntityMapper;
+import io.github.quizup.profile.infrastructure.out.persistence.repository.ActivityDayGameJpaRepository;
 import io.github.quizup.profile.infrastructure.out.persistence.repository.ActivityDayJpaRepository;
 import io.github.quizup.profile.infrastructure.out.persistence.repository.ActivityJpaRepository;
 import org.springframework.stereotype.Component;
@@ -19,11 +21,14 @@ public class ActivityRepositoryAdapter implements ActivityRepositoryPort {
 
     private final ActivityJpaRepository activityJpaRepository;
     private final ActivityDayJpaRepository activityDayJpaRepository;
+    private final ActivityDayGameJpaRepository activityDayGameJpaRepository;
 
     public ActivityRepositoryAdapter(ActivityJpaRepository activityJpaRepository,
-                                     ActivityDayJpaRepository activityDayJpaRepository) {
+                                     ActivityDayJpaRepository activityDayJpaRepository,
+                                     ActivityDayGameJpaRepository activityDayGameJpaRepository) {
         this.activityJpaRepository = activityJpaRepository;
         this.activityDayJpaRepository = activityDayJpaRepository;
+        this.activityDayGameJpaRepository = activityDayGameJpaRepository;
     }
 
     @Override
@@ -40,18 +45,26 @@ public class ActivityRepositoryAdapter implements ActivityRepositoryPort {
 
     @Override
     @Transactional
-    public void incrementDay(String userId, LocalDate date) {
+    public boolean incrementDay(String userId, LocalDate date, String gameId) {
+        ActivityDayGameEntity.ActivityDayGameId gameEntryId =
+                new ActivityDayGameEntity.ActivityDayGameId(userId, date, gameId);
+        if (activityDayGameJpaRepository.existsById(gameEntryId)) {
+            return false;
+        }
+        activityDayGameJpaRepository.save(new ActivityDayGameEntity(userId, date, gameId));
+
+        int gamesCount = (int) activityDayGameJpaRepository.countByUserIdAndActivityDate(userId, date);
         ActivityDayEntity.ActivityDayId id = new ActivityDayEntity.ActivityDayId(userId, date);
         ActivityDayEntity day = activityDayJpaRepository.findById(id)
                 .orElseGet(() -> {
                     ActivityDayEntity created = new ActivityDayEntity();
                     created.setUserId(userId);
                     created.setActivityDate(date);
-                    created.setGamesCount(0);
                     return created;
                 });
-        day.setGamesCount(day.getGamesCount() + 1);
+        day.setGamesCount(gamesCount);
         activityDayJpaRepository.save(day);
+        return true;
     }
 
     @Override
