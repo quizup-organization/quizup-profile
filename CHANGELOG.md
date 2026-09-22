@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/quizup-organization/quizup-profile/compare/v1.5.2...v1.6.0) (2026-09-22)
+
+### Features
+
+* **profile:** explicit Axon processing groups and default seeding ([f2b705e](https://github.com/quizup-organization/quizup-profile/commit/f2b705ed3dcb3e20cdc33fc5ba7df10bb3be3201))
+
 ## [1.5.2](https://github.com/quizup-organization/quizup-profile/compare/v1.5.1...v1.5.2) (2026-09-21)
 
 ### Bug Fixes
