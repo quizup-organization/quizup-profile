@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/quizup-organization/quizup-profile/compare/v1.6.0...v1.6.1) (2026-09-22)
+
+### Bug Fixes
+
+* **profile:** upgrade quizup-parent to 2.3.1 (registration address fix) ([31da1e2](https://github.com/quizup-organization/quizup-profile/commit/31da1e2d80c8ea5a3e435c78de09a795bbdfaa45))
+
 ## [1.6.0](https://github.com/quizup-organization/quizup-profile/compare/v1.5.2...v1.6.0) (2026-09-22)
 
 ### Features
