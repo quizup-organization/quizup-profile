@@ -1,3 +1,9 @@
+## [1.6.4](https://github.com/quizup-organization/quizup-profile/compare/v1.6.3...v1.6.4) (2026-09-22)
+
+### Bug Fixes
+
+* **quizup-profile:** upgrade quizup-parent to 2.3.4 ([62ede7c](https://github.com/quizup-organization/quizup-profile/commit/62ede7c864290fb5f9d80402a32f83ea9fdb0060))
+
 ## [1.6.3](https://github.com/quizup-organization/quizup-profile/compare/v1.6.2...v1.6.3) (2026-09-22)
 
 ### Bug Fixes
