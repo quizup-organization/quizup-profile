@@ -6,6 +6,7 @@ import io.github.quizup.profile.domain.model.ActivityRules;
 import io.github.quizup.profile.domain.model.PlayerActivity;
 import io.github.quizup.profile.domain.port.out.ActivityRepositoryPort;
 import io.github.quizup.profile.infrastructure.properties.AppProperties;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import java.time.ZoneId;
  * {@link ActivityRules} — rejouer le même jour n'incrémente rien.</p>
  */
 @Component
+@ProcessingGroup("activity-projection")
 public class ActivityProjection {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivityProjection.class);

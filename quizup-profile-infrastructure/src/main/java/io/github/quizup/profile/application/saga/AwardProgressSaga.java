@@ -5,6 +5,7 @@ import io.github.quizup.microservice.core.domain.constant.QuizUpConstants;
 import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.model.ProgressionRules;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * L'idempotence (un duel = une attribution) est portée par l'agrégat.</p>
  */
 @Saga
+@ProcessingGroup("award-progress-saga")
 public class AwardProgressSaga {
 
     private static final Logger logger = LoggerFactory.getLogger(AwardProgressSaga.class);

@@ -5,6 +5,7 @@ import io.github.quizup.profile.domain.command.ProfileCommand;
 import io.github.quizup.profile.domain.model.NameGenerator;
 import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * de création n'est pas renvoyée.</p>
  */
 @Saga
+@ProcessingGroup("create-profile-saga")
 public class CreateProfileSaga {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateProfileSaga.class);

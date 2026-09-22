@@ -6,6 +6,7 @@ import io.github.quizup.profile.domain.model.PlayerProgress;
 import io.github.quizup.profile.domain.model.ProgressionRules;
 import io.github.quizup.profile.domain.port.out.ProgressionAwardedGameRepositoryPort;
 import io.github.quizup.profile.domain.port.out.ProgressionRepositoryPort;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import java.util.Set;
  * (XP totale, XP par thème, niveau, titre, badges).
  */
 @Component
+@ProcessingGroup("progression-projection")
 public class ProgressionProjection {
 
     private static final Logger logger = LoggerFactory.getLogger(ProgressionProjection.class);

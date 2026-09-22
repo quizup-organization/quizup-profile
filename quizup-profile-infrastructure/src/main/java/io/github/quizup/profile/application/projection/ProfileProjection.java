@@ -3,6 +3,7 @@ package io.github.quizup.profile.application.projection;
 import io.github.quizup.profile.domain.event.ProfileEvent;
 import io.github.quizup.profile.domain.model.Profile;
 import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
+import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
  * des profils (lecture : GET par id, recherche paginée).
  */
 @Component
+@ProcessingGroup("profile-projection")
 public class ProfileProjection {
 
     private static final Logger logger = LoggerFactory.getLogger(ProfileProjection.class);

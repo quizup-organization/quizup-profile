@@ -23,7 +23,7 @@ microservice:
 
 app:
   seed-data:
-    enabled: false
+    enabled: true
   activity:
     # Fuseau servant à découper les « jours » du graphe d'activité (streak journalière)
     zone: Europe/Paris
