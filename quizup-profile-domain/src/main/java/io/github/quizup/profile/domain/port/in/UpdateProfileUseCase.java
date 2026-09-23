@@ -23,13 +23,15 @@ public interface UpdateProfileUseCase {
             String requestedBy,
             String displayName,
             String bio,
-            String country) {
+            String country,
+            String avatarOptions) {
         return update(new ProfileCommand.UpdateProfileCommand(
                 userId,
                 requestedBy,
                 displayName,
                 bio,
-                country
+                country,
+                avatarOptions
         ));
     }
 }

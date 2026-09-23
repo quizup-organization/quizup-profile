@@ -19,6 +19,7 @@ public final class ProfileEntityMapper {
                 .displayName(entity.getDisplayName())
                 .bio(entity.getBio())
                 .country(entity.getCountry())
+                .avatarOptions(entity.getAvatarOptions())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -34,6 +35,7 @@ public final class ProfileEntityMapper {
         entity.setDisplayName(profile.displayName());
         entity.setBio(profile.bio());
         entity.setCountry(profile.country());
+        entity.setAvatarOptions(profile.avatarOptions());
         entity.setCreatedAt(profile.createdAt());
         entity.setUpdatedAt(profile.updatedAt());
         return entity;

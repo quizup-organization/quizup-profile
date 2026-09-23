@@ -40,6 +40,9 @@ public class ProfileEntity {
     @Column(name = "country", length = 100)
     private String country;
 
+    @Column(name = "avatar_options", length = 2000)
+    private String avatarOptions;
+
     @Column(name = "created_at", nullable = false)
     @Searchable(type = FieldType.DATE)
     private Instant createdAt;

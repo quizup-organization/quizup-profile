@@ -26,6 +26,7 @@ public interface ProfileEvent {
             String displayName,
             String bio,
             String country,
+            String avatarOptions,
             Instant updatedAt
     ) implements ProfileEvent {
     }

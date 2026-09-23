@@ -57,6 +57,7 @@ public class ProfileProjection {
                                 .displayName(event.displayName())
                                 .bio(event.bio())
                                 .country(event.country())
+                                .avatarOptions(event.avatarOptions())
                                 .updatedAt(event.updatedAt())
                                 .build()
                 ));

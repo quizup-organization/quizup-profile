@@ -66,4 +66,14 @@ public interface ProfileProblems {
                     Map.of("country", country));
         }
     }
+
+    class AvatarOptionsTooLongProblem extends ProfileProblem {
+        public AvatarOptionsTooLongProblem(String userId) {
+            super(userId, "urn:quizup:profile:avatarOptionsTooLong",
+                    ProblemCategory.VALIDATION,
+                    "Avatar options too long",
+                    "The avatar options must not exceed " + ProfileRules.MAX_AVATAR_OPTIONS_LENGTH + " characters",
+                    null);
+        }
+    }
 }

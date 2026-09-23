@@ -58,7 +58,8 @@ public class ProfileController {
                         SecurityHelper.getUserId(),
                         request.displayName(),
                         request.bio(),
-                        request.country())
+                        request.country(),
+                        request.avatarOptions())
                 .thenApply(updatedId -> ResponseEntity.ok().build());
     }
 

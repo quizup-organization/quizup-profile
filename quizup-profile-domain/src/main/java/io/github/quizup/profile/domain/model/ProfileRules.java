@@ -11,6 +11,9 @@ public final class ProfileRules {
 
     public static final int MAX_COUNTRY_LENGTH = 100;
 
+    /** Sérialisation JSON des options d'avatar DiceBear (style micah). */
+    public static final int MAX_AVATAR_OPTIONS_LENGTH = 2000;
+
     private ProfileRules() {
     }
 }

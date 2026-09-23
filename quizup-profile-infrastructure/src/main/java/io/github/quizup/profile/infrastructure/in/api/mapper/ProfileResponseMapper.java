@@ -15,6 +15,7 @@ public final class ProfileResponseMapper {
                 profile.displayName(),
                 profile.bio(),
                 profile.country(),
+                profile.avatarOptions(),
                 profile.createdAt(),
                 profile.updatedAt()
         );

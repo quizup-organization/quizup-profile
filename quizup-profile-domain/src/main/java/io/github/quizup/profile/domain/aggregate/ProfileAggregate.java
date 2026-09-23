@@ -27,6 +27,7 @@ public class ProfileAggregate {
     private String displayName;
     private String bio;
     private String country;
+    private String avatarOptions;
 
     // Constructeur par défaut requis par Axon
     protected ProfileAggregate() {
@@ -54,6 +55,7 @@ public class ProfileAggregate {
         validateDisplayName(command.userId(), command.displayName());
         validateBio(command.userId(), command.bio());
         validateCountry(command.userId(), command.country());
+        validateAvatarOptions(command.userId(), command.avatarOptions());
 
         AggregateLifecycle.apply(
                 new ProfileEvent.ProfileUpdatedEvent(
@@ -62,6 +64,7 @@ public class ProfileAggregate {
                         command.displayName(),
                         command.bio(),
                         command.country(),
+                        command.avatarOptions(),
                         Instant.now()
                 )
         );
@@ -79,6 +82,7 @@ public class ProfileAggregate {
         this.displayName = event.displayName();
         this.bio = event.bio();
         this.country = event.country();
+        this.avatarOptions = event.avatarOptions();
     }
 
     private static void validateDisplayName(String userId, String displayName) {
@@ -99,6 +103,12 @@ public class ProfileAggregate {
     private static void validateCountry(String userId, String country) {
         if (country != null && country.length() > ProfileRules.MAX_COUNTRY_LENGTH) {
             throw new ProfileProblems.CountryTooLongProblem(userId, country);
+        }
+    }
+
+    private static void validateAvatarOptions(String userId, String avatarOptions) {
+        if (avatarOptions != null && avatarOptions.length() > ProfileRules.MAX_AVATAR_OPTIONS_LENGTH) {
+            throw new ProfileProblems.AvatarOptionsTooLongProblem(userId);
         }
     }
 }

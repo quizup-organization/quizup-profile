@@ -18,7 +18,8 @@ public interface ProfileCommand {
             String requestedBy,
             String displayName,
             String bio,
-            String country
+            String country,
+            String avatarOptions
     ) implements ProfileCommand {
     }
 }

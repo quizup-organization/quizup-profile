@@ -12,6 +12,7 @@ public record ProfileResponse(
         String displayName,
         String bio,
         String country,
+        String avatarOptions,
         Instant createdAt,
         Instant updatedAt
 ) implements Serializable {

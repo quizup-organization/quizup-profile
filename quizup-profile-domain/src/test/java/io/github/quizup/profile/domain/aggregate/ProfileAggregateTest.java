@@ -59,14 +59,16 @@ class ProfileAggregateTest {
                         "user-1",
                         "Alicia",
                         "Full stack developer",
-                        "France"))
+                        "France",
+                        "{\"hairVariant\":[\"full\"]}"))
                 .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
                         ProfileEvent.ProfileUpdatedEvent.class,
                         e -> "user-1".equals(((ProfileEvent.ProfileUpdatedEvent) e).userId())
                                 && "user-1".equals(((ProfileEvent.ProfileUpdatedEvent) e).requestedBy())
                                 && "Alicia".equals(((ProfileEvent.ProfileUpdatedEvent) e).displayName())
                                 && "Full stack developer".equals(((ProfileEvent.ProfileUpdatedEvent) e).bio())
-                                && "France".equals(((ProfileEvent.ProfileUpdatedEvent) e).country())));
+                                && "France".equals(((ProfileEvent.ProfileUpdatedEvent) e).country())
+                                && "{\"hairVariant\":[\"full\"]}".equals(((ProfileEvent.ProfileUpdatedEvent) e).avatarOptions())));
     }
 
 
@@ -78,6 +80,7 @@ class ProfileAggregateTest {
                         "user-1",
                         "user-2",
                         "Alicia",
+                        null,
                         null,
                         null))
                 .expectException(ProfileProblems.ProfileNotOwnerProblem.class);
@@ -93,6 +96,7 @@ class ProfileAggregateTest {
                         "user-1",
                         "",
                         null,
+                        null,
                         null))
                 .expectException(ProfileProblems.DisplayNameBlankProblem.class);
     }
@@ -106,6 +110,7 @@ class ProfileAggregateTest {
                         "user-1",
                         "Alice",
                         "x".repeat(301),
+                        null,
                         null))
                 .expectException(ProfileProblems.BioTooLongProblem.class);
     }
@@ -119,7 +124,22 @@ class ProfileAggregateTest {
                         "user-1",
                         "Alice",
                         null,
-                        "x".repeat(101)))
+                        "x".repeat(101),
+                        null))
                 .expectException(ProfileProblems.CountryTooLongProblem.class);
+    }
+
+    @Test
+    void updateWithTooLongAvatarOptions_throwsValidationProblem() {
+        fixture
+                .given(new ProfileEvent.ProfileCreatedEvent("user-1", "user@quizup.dev", "Alice", Instant.now()))
+                .when(new ProfileCommand.UpdateProfileCommand(
+                        "user-1",
+                        "user-1",
+                        "Alice",
+                        null,
+                        null,
+                        "x".repeat(2001)))
+                .expectException(ProfileProblems.AvatarOptionsTooLongProblem.class);
     }
 }

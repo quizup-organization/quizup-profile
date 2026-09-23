@@ -30,7 +30,9 @@ de vie des **sessions temps réel STOMP** (connexion/déconnexion), utilisé pou
 
 **Package** : `io.github.quizup.profile`
 
-**Avatar** : hors périmètre (pas d'infrastructure de stockage d'images — à trancher en ADR).
+**Avatar** : le profil porte `avatarOptions` (JSON des options DiceBear, style `micah`) choisi par
+le propriétaire. **Aucun stockage d'image** : l'avatar est régénéré côté client de façon déterministe
+à partir de ces options (repli sur `userId` si `null`).
 
 ---
 
@@ -44,7 +46,7 @@ de vie des **sessions temps réel STOMP** (connexion/déconnexion), utilisé pou
 | PUT      | `/api/profiles/{userId}`  | `updateProfile(String, body)`    | `200 OK` (403 si non propriétaire) |
 | POST     | `/api/profiles/search`    | `search(SearchRequest)`          | `PageResponse<ProfileResponse>` |
 
-**DTO** : `ProfileResponse(userId, email, displayName, bio, country, Instant createdAt, Instant updatedAt)`
+**DTO** : `ProfileResponse(userId, email, displayName, bio, country, String avatarOptions, Instant createdAt, Instant updatedAt)`
 
 La recherche filtre sur les colonnes `@Searchable` de la projection (`displayName`, `email`).
 

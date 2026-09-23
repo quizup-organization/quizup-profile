@@ -6,6 +6,7 @@ package io.github.quizup.profile.infrastructure.in.api.request;
 public record UpdateProfileRequest(
         String displayName,
         String bio,
-        String country
+        String country,
+        String avatarOptions
 ) {
 }
