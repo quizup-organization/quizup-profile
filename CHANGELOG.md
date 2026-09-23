@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/quizup-organization/quizup-profile/compare/v1.6.4...v1.7.0) (2026-09-23)
+
+### Features
+
+* **profile:** add avatarOptions to profile (DiceBear micah) ([ff47985](https://github.com/quizup-organization/quizup-profile/commit/ff47985cf0c12214a65ad34ec2c41ea54ae50bbe))
+
 ## [1.6.4](https://github.com/quizup-organization/quizup-profile/compare/v1.6.3...v1.6.4) (2026-09-22)
 
 ### Bug Fixes
