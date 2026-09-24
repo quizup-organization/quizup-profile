@@ -1,3 +1,9 @@
+## [1.8.2](https://github.com/quizup-organization/quizup-profile/compare/v1.8.1...v1.8.2) (2026-09-24)
+
+### Bug Fixes
+
+* **deps:** bump quizup-parent to 2.4.3 (bus-only search criteria type info) ([e236316](https://github.com/quizup-organization/quizup-profile/commit/e236316e8fa3e8a6309b32e4015f987af77684a4))
+
 ## [1.8.1](https://github.com/quizup-organization/quizup-profile/compare/v1.8.0...v1.8.1) (2026-09-24)
 
 ### Bug Fixes
