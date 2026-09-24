@@ -1,3 +1,9 @@
+## [1.8.1](https://github.com/quizup-organization/quizup-profile/compare/v1.8.0...v1.8.1) (2026-09-24)
+
+### Bug Fixes
+
+* **deps:** bump quizup-parent to 2.4.2 (search criteria type info) ([2f88ac4](https://github.com/quizup-organization/quizup-profile/commit/2f88ac44cdc7f3b901175b9b4d37086254edf959))
+
 ## [1.8.0](https://github.com/quizup-organization/quizup-profile/compare/v1.7.0...v1.8.0) (2026-09-24)
 
 ### Features
