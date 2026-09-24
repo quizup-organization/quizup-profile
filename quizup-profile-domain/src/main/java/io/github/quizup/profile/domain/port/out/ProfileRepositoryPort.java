@@ -4,6 +4,7 @@ import io.github.quizup.microservice.core.domain.model.search.PageResult;
 import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
 import io.github.quizup.profile.domain.model.Profile;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,6 +26,14 @@ public interface ProfileRepositoryPort {
      * @return le profil trouvé, ou Optional.empty() s'il n'existe pas
      */
     Optional<Profile> findById(String userId);
+
+    /**
+     * Trouve plusieurs profils par leurs identifiants (résolution en lot).
+     *
+     * @param userIds les identifiants recherchés
+     * @return les profils existants (ordre non garanti)
+     */
+    List<Profile> findByIds(List<String> userIds);
 
     /**
      * Recherche paginée de profils selon des critères.

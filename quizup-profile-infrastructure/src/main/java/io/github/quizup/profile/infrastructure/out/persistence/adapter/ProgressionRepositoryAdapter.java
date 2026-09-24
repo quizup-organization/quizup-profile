@@ -6,6 +6,7 @@ import io.github.quizup.profile.infrastructure.out.persistence.mapper.ProgressEn
 import io.github.quizup.profile.infrastructure.out.persistence.repository.ProgressJpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -25,5 +26,15 @@ public class ProgressionRepositoryAdapter implements ProgressionRepositoryPort {
     @Override
     public Optional<PlayerProgress> findById(String userId) {
         return progressJpaRepository.findById(userId).map(ProgressEntityMapper::toDomain);
+    }
+
+    @Override
+    public List<PlayerProgress> findByIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        return progressJpaRepository.findAllById(userIds).stream()
+                .map(ProgressEntityMapper::toDomain)
+                .toList();
     }
 }

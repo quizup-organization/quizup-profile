@@ -11,6 +11,7 @@ import io.github.quizup.profile.infrastructure.out.persistence.mapper.ProfileEnt
 import io.github.quizup.profile.infrastructure.out.persistence.repository.ProfileJpaRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -32,6 +33,16 @@ public class ProfileRepositoryAdapter implements ProfileRepositoryPort {
     @Override
     public Optional<Profile> findById(String userId) {
         return profileJpaRepository.findById(userId).map(ProfileEntityMapper::toDomain);
+    }
+
+    @Override
+    public List<Profile> findByIds(List<String> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return List.of();
+        }
+        return profileJpaRepository.findAllById(userIds).stream()
+                .map(ProfileEntityMapper::toDomain)
+                .toList();
     }
 
     @Override

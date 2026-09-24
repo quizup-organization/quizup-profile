@@ -15,6 +15,12 @@ public interface ProfileQuery {
     record ProfileExistsByIdQuery(String userId) implements ProfileQuery {
     }
 
+    /**
+     * Résolution en lot : évite le fan-out N+1 côté consommateur (ex. liste de suiveurs).
+     */
+    record GetProfilesByIdsQuery(List<String> userIds) implements ProfileQuery {
+    }
+
     record ProfileSearchQuery(
             List<FilterCriteria> filters,
             List<SortCriteria> sorts,
