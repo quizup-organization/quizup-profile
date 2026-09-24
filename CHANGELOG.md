@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/quizup-organization/quizup-profile/compare/v1.7.0...v1.8.0) (2026-09-24)
+
+### Features
+
+* **profile:** batch queries for profiles and progressions by ids ([f333534](https://github.com/quizup-organization/quizup-profile/commit/f33353473fd6fce11e782392255f94c15de1f4bd))
+
 ## [1.7.0](https://github.com/quizup-organization/quizup-profile/compare/v1.6.4...v1.7.0) (2026-09-23)
 
 ### Features
