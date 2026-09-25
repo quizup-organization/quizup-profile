@@ -1,6 +1,6 @@
 package io.github.quizup.profile.application.handler.query;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.profile.domain.exception.ProfileProblems;
 import io.github.quizup.profile.domain.model.Profile;
 import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
@@ -41,7 +41,7 @@ public class ProfileQueryHandler {
     }
 
     @QueryHandler
-    public PageResult<Profile> handle(ProfileQuery.ProfileSearchQuery query) {
-        return profileRepositoryPort.findAll(query);
+    public SearchResponse<Profile> handle(ProfileQuery.ProfileSearchQuery query) {
+        return profileRepositoryPort.findAll(query.request());
     }
 }

@@ -1,7 +1,7 @@
 package io.github.quizup.profile.domain.port.out;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.profile.domain.model.PlayerPresence;
 
 import java.util.Optional;
@@ -17,7 +17,7 @@ public interface PresenceRepositoryPort {
     Optional<PlayerPresence> findById(String userId);
 
     /** Recherche paginée (filtres/sorts/pagination standards, ex. {@code userId IN [...]}). */
-    PageResult<PlayerPresence> findAll(SearchCriteria searchCriteria);
+    SearchResponse<PlayerPresence> findAll(SearchRequest request);
 
     /** Enregistre une session temps réel ouverte pour un joueur. */
     void addSession(String sessionId, String userId);

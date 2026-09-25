@@ -36,80 +36,19 @@ le propriétaire. **Aucun stockage d'image** : l'avatar est régénéré côté 
 
 ---
 
-## 2. Endpoints REST
+## 2. Surface (headless)
 
-### `ProfileController` — `/api/profiles` (`@CrossOrigin`)
-
-| Méthode  | Chemin                    | Handler                          | Response                     |
-|----------|---------------------------|----------------------------------|------------------------------|
-| GET      | `/api/profiles/{userId}`  | `getProfileById(String)`         | `ProfileResponse`            |
-| PUT      | `/api/profiles/{userId}`  | `updateProfile(String, body)`    | `200 OK` (403 si non propriétaire) |
-| POST     | `/api/profiles/search`    | `search(SearchRequest)`          | `PageResponse<ProfileResponse>` |
-
-**DTO** : `ProfileResponse(userId, email, displayName, bio, country, String avatarOptions, Instant createdAt, Instant updatedAt)`
-
-La recherche filtre sur les colonnes `@Searchable` de la projection (`displayName`, `email`).
-
-### `ProgressionController` — `/api/profiles`
-
-| Méthode | Chemin                                    | Handler                     | Response                    |
-|---------|-------------------------------------------|-----------------------------|-----------------------------|
-| GET     | `/api/profiles/{userId}/progress`         | `getProgress(String)`       | `ProgressionResponse`       |
-| GET     | `/api/profiles/{userId}/progress/{topicId}` | `getTopicProgress(...)`   | `TopicProgressResponse`     |
-
-**DTO** : `ProgressionResponse(userId, xpTotal, level, title, xpForNextLevel, badges[], topics[])`
-et `TopicProgressResponse(topicId, xp, level)`. Un joueur sans duel retourne un niveau 1 / 0 XP.
-
-### `PresenceController` — `/api/presence`
-
-Présence joueur : **read-model éphémère, non event-sourcé** (tables `presence_entry` +
-`presence_session`, pas d'agrégat Axon). La session STOMP est le signal : `SessionConnectedEvent`
-bascule le joueur `ONLINE` ; la fermeture de sa dernière session programme, après
-`PresenceRules.DISCONNECT_GRACE = 15 s`, une échéance Axon (`DeadlineManager`) qui le bascule
-`OFFLINE` et publie `PlayerWentOfflineEvent` (consommé par game pour le forfait). Toute reconnexion
-avant l'échéance annule le passage hors ligne. Les présences sont repassées `OFFLINE` et les
-sessions purgées au démarrage (elles meurent avec l'instance). Notification temps réel sur STOMP
-`/topic/presence/{userId}` (route gateway `profile-service-ws`). L'authentification de la trame
-STOMP `CONNECT` est portée par le SDK (`StompAuthChannelInterceptor`).
-
-| Méthode | Chemin                          | Handler                       | Response                          |
-|---------|---------------------------------|-------------------------------|-----------------------------------|
-| GET     | `/api/presence/{userId}`        | `get(String)`                 | `PresenceResponse`                |
-| POST    | `/api/presence/search`          | `search(SearchRequest)`       | `PageResponse<PresenceResponse>`  |
-
-**DTO** : `PresenceResponse(userId, PresenceStatus status, Instant lastSeenAt)`. La recherche est
-**paginée standard** (`SearchRequest` → `PageResponse`, cf. pattern commun) : `PresenceEntity`
-expose `@Searchable` sur `userId` (STRING) et `lastSeenAt` (DATE), chaîne
-`PresenceQueryService` (`QueryGateway`) → `PresenceQueryHandler` (`@QueryHandler`) →
-`PresenceRepositoryPort.findAll` (`JpaSearchAdapter`). Le batch se fait via un filtre
-`userId IN [...]`. Le client web maintient une connexion STOMP persistante vers `profile` (le
-`CONNECT` alimente la présence) ; il n'y a plus d'endpoint heartbeat.
-
-### `ActivityController` — `/api/profiles`
-
-Activité journalière (streak façon « contributions »), **read-model dérivé** des fins de partie
-(tables `progression_activity` + `progression_activity_day`, pas d'agrégat). `ActivityProjection`
-consomme `GameEvent.GameEndedEvent` (service `quizup-game`) : pour chaque joueur humain non-bot,
-avance la série via `ActivityRules` (idempotent par jour) et incrémente le compteur du jour.
-Le découpage du jour utilise `app.activity.zone` (défaut `Europe/Paris`). Les runs async « record »
-(`GameRunRecordedEvent`, sans XP) ne comptent pas ; le replay compte.
-
-| Méthode | Chemin                                | Handler                          | Response           |
-|---------|---------------------------------------|----------------------------------|--------------------|
-| GET     | `/api/profiles/{userId}/activity`     | `getActivity(userId, from, to)`  | `ActivityResponse` |
-
-**DTO** : `ActivityResponse(userId, currentStreak, longestStreak, lastActiveDate, totalActiveDays, days[])`
-où `days[]` = `ActivityDayResponse(date, games)`. Fenêtre par défaut : 365 derniers jours.
-
----
-
+Service **headless** : aucun contrôleur REST ni WebSocket. La surface applicative unique est le
+**`quizup-bff`** (`/api/**` + `/ws`) ; il interroge ce service via le **query bus** Axon et consomme
+ses événements. Les handlers de requête/commande, sagas et projections restent la seule surface
+exposée par le service.
 ## 3. Use cases (ports entrants — `domain/port/in/`)
 
 - `GetProfileUseCase` — récupération par userId (404 si inconnu)
 - `UpdateProfileUseCase` — mise à jour (propriétaire uniquement)
 - `CreateProfileUseCase` — création (utilisée par le seeding système ; en nominal par la saga)
 - `CheckProfileUseCase` — vérification d'existence (`existsById`)
-- `SearchProfileUseCase` — recherche paginée (pattern SDK `SearchRequest` → `PageResponse`)
+- `SearchProfileUseCase` — recherche paginée (pattern SDK `SearchRequest` → `SearchResponse`)
 - `GetProgressionUseCase` — progression globale et par thème
 
 **Queries** (`domain/query/ProfileQuery.java`) : `GetProfileQuery` (consommée par

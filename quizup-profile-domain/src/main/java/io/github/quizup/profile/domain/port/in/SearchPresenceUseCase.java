@@ -1,13 +1,10 @@
 package io.github.quizup.profile.domain.port.in;
 
-import io.github.quizup.microservice.core.domain.model.search.FilterCriteria;
-import io.github.quizup.microservice.core.domain.model.search.PageCriteria;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SortCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.profile.domain.model.PlayerPresence;
 import io.github.quizup.profile.domain.query.PresenceQuery;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -16,11 +13,9 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface SearchPresenceUseCase {
 
-    CompletableFuture<PageResult<PlayerPresence>> search(PresenceQuery.PresenceSearchQuery query);
+    CompletableFuture<SearchResponse<PlayerPresence>> search(PresenceQuery.PresenceSearchQuery query);
 
-    default CompletableFuture<PageResult<PlayerPresence>> search(List<FilterCriteria> filters,
-                                                                 List<SortCriteria> sorts,
-                                                                 PageCriteria page) {
-        return search(new PresenceQuery.PresenceSearchQuery(filters, sorts, page));
+    default CompletableFuture<SearchResponse<PlayerPresence>> search(SearchRequest request) {
+        return search(new PresenceQuery.PresenceSearchQuery(request));
     }
 }

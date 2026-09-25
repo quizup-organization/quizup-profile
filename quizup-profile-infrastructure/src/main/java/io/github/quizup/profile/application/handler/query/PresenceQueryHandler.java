@@ -1,6 +1,6 @@
 package io.github.quizup.profile.application.handler.query;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.profile.domain.model.PlayerPresence;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import io.github.quizup.profile.domain.query.PresenceQuery;
@@ -20,7 +20,7 @@ public class PresenceQueryHandler {
     }
 
     @QueryHandler
-    public PageResult<PlayerPresence> handle(PresenceQuery.PresenceSearchQuery query) {
-        return presenceRepositoryPort.findAll(query);
+    public SearchResponse<PlayerPresence> handle(PresenceQuery.PresenceSearchQuery query) {
+        return presenceRepositoryPort.findAll(query.request());
     }
 }

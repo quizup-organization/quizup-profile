@@ -1,13 +1,12 @@
 package io.github.quizup.profile.application.service;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.profile.domain.event.PresenceEvent;
 import io.github.quizup.profile.domain.model.PlayerPresence;
 import io.github.quizup.profile.domain.model.PresenceDeadline;
 import io.github.quizup.profile.domain.model.PresenceRules;
 import io.github.quizup.profile.domain.model.PresenceStatus;
-import io.github.quizup.profile.domain.port.out.PresenceNotifierPort;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import org.axonframework.deadline.DeadlineManager;
 import org.axonframework.eventhandling.gateway.EventGateway;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,7 +32,6 @@ import static org.mockito.Mockito.verify;
 class PresenceServiceTest {
 
     private InMemoryPresenceRepository repository;
-    private PresenceNotifierPort notifier;
     private EventGateway eventGateway;
     private DeadlineManager deadlineManager;
     private PresenceService service;
@@ -40,27 +39,26 @@ class PresenceServiceTest {
     @BeforeEach
     void setUp() {
         repository = new InMemoryPresenceRepository();
-        notifier = mock(PresenceNotifierPort.class);
         eventGateway = mock(EventGateway.class);
         deadlineManager = mock(DeadlineManager.class);
-        service = new PresenceService(repository, notifier, eventGateway, deadlineManager);
+        service = new PresenceService(repository, eventGateway, deadlineManager);
     }
 
     @Test
-    void firstSessionMarksPlayerOnlineAndNotifies() {
+    void firstSessionMarksPlayerOnlineAndPublishesOnlineEvent() {
         PlayerPresence presence = service.sessionConnected("s1", "u1");
 
         assertThat(presence.status()).isEqualTo(PresenceStatus.ONLINE);
         assertThat(presence.lastSeenAt()).isNotNull();
-        verify(notifier, times(1)).publish(any(PlayerPresence.class));
+        verify(eventGateway, times(1)).publish(any(PresenceEvent.PlayerWentOnlineEvent.class));
     }
 
     @Test
-    void additionalSessionDoesNotNotifyAgain() {
+    void additionalSessionDoesNotPublishOnlineEventAgain() {
         service.sessionConnected("s1", "u1");
         service.sessionConnected("s2", "u1");
 
-        verify(notifier, times(1)).publish(any(PlayerPresence.class));
+        verify(eventGateway, times(1)).publish(any(PresenceEvent.PlayerWentOnlineEvent.class));
     }
 
     @Test
@@ -96,7 +94,6 @@ class PresenceServiceTest {
         service.confirmOffline("u1");
 
         assertThat(service.get("u1").status()).isEqualTo(PresenceStatus.OFFLINE);
-        verify(notifier, times(2)).publish(any(PlayerPresence.class));
         verify(eventGateway).publish(any(PresenceEvent.PlayerWentOfflineEvent.class));
     }
 
@@ -134,8 +131,8 @@ class PresenceServiceTest {
         }
 
         @Override
-        public PageResult<PlayerPresence> findAll(SearchCriteria searchCriteria) {
-            return PageResult.unpaged();
+        public SearchResponse<PlayerPresence> findAll(SearchRequest request) {
+            return new SearchResponse<>(List.of(), 0, 0, 0, 0, List.of(), true, true, true);
         }
 
         @Override

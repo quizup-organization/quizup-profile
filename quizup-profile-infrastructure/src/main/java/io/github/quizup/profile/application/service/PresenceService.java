@@ -6,7 +6,6 @@ import io.github.quizup.profile.domain.model.PresenceDeadline;
 import io.github.quizup.profile.domain.model.PresenceRules;
 import io.github.quizup.profile.domain.model.PresenceStatus;
 import io.github.quizup.profile.domain.port.in.PresenceUseCase;
-import io.github.quizup.profile.domain.port.out.PresenceNotifierPort;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import org.axonframework.deadline.DeadlineManager;
 import org.axonframework.eventhandling.gateway.EventGateway;
@@ -17,28 +16,25 @@ import java.time.Instant;
 import java.util.Optional;
 
 /**
- * Présence joueur pilotée par le cycle de vie de la session temps réel STOMP.
+ * Présence joueur pilotée par le cycle de vie de la session temps réel STOMP **du BFF**.
  *
- * <p>Une session ouverte bascule le joueur {@code ONLINE} ; la fermeture de la dernière
- * session programme, après {@link PresenceRules#DISCONNECT_GRACE}, une échéance de
- * confirmation qui le bascule {@code OFFLINE} (une reconnexion entre-temps rend l'échéance
- * sans effet). Aucun battement de cœur ni polling : la seule source est la session, et la
- * notification temps réel n'est diffusée qu'au changement d'état.</p>
+ * <p>Le BFF (seule surface STOMP) signale les connexions/déconnexions via les commandes
+ * {@code PresenceCommand}. Une session ouverte bascule le joueur {@code ONLINE} ; la fermeture
+ * de la dernière session programme, après {@link PresenceRules#DISCONNECT_GRACE}, une échéance
+ * de confirmation qui le bascule {@code OFFLINE} (une reconnexion entre-temps rend l'échéance
+ * sans effet). Les transitions sont publiées comme événements ; le BFF en fait le fan-out STOMP.</p>
  */
 @Service
 public class PresenceService implements PresenceUseCase {
 
     private final PresenceRepositoryPort presenceRepositoryPort;
-    private final PresenceNotifierPort presenceNotifierPort;
     private final EventGateway eventGateway;
     private final DeadlineManager deadlineManager;
 
     public PresenceService(PresenceRepositoryPort presenceRepositoryPort,
-                           PresenceNotifierPort presenceNotifierPort,
                            EventGateway eventGateway,
                            DeadlineManager deadlineManager) {
         this.presenceRepositoryPort = presenceRepositoryPort;
-        this.presenceNotifierPort = presenceNotifierPort;
         this.eventGateway = eventGateway;
         this.deadlineManager = deadlineManager;
     }
@@ -65,7 +61,7 @@ public class PresenceService implements PresenceUseCase {
         PlayerPresence saved = presenceRepositoryPort.save(presence);
 
         if (!wasOnline) {
-            presenceNotifierPort.publish(saved);
+            eventGateway.publish(new PresenceEvent.PlayerWentOnlineEvent(userId, now));
         }
         return saved;
     }
@@ -81,8 +77,6 @@ public class PresenceService implements PresenceUseCase {
             presenceRepositoryPort.findById(userId).ifPresent(current ->
                     presenceRepositoryPort.save(current.toBuilder().lastSeenAt(now).build()));
 
-            // Appelé depuis un listener Spring (déconnexion WebSocket), hors scope Axon :
-            // on fournit explicitement un ScopeDescriptor (sinon Scope.getCurrentScope() échoue).
             deadlineManager.schedule(
                     PresenceRules.DISCONNECT_GRACE,
                     PresenceDeadline.OFFLINE,
@@ -106,7 +100,6 @@ public class PresenceService implements PresenceUseCase {
                             .status(PresenceStatus.OFFLINE)
                             .build();
                     presenceRepositoryPort.save(offline);
-                    presenceNotifierPort.publish(offline);
                     eventGateway.publish(new PresenceEvent.PlayerWentOfflineEvent(
                             offline.userId(),
                             offline.lastSeenAt()

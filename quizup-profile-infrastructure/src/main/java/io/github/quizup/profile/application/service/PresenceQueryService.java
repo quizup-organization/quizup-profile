@@ -1,7 +1,7 @@
 package io.github.quizup.profile.application.service;
 
 import io.github.quizup.microservice.core.infrastructure.axon.QueryResponseTypes;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.profile.domain.model.PlayerPresence;
 import io.github.quizup.profile.domain.port.in.SearchPresenceUseCase;
 import io.github.quizup.profile.domain.query.PresenceQuery;
@@ -23,7 +23,7 @@ public class PresenceQueryService implements SearchPresenceUseCase {
     }
 
     @Override
-    public CompletableFuture<PageResult<PlayerPresence>> search(PresenceQuery.PresenceSearchQuery query) {
-        return queryGateway.query(query, QueryResponseTypes.pageResultOf(PlayerPresence.class));
+    public CompletableFuture<SearchResponse<PlayerPresence>> search(PresenceQuery.PresenceSearchQuery query) {
+        return queryGateway.query(query, QueryResponseTypes.searchResponseOf(PlayerPresence.class));
     }
 }

@@ -1,7 +1,7 @@
 package io.github.quizup.profile.infrastructure.out.persistence.adapter;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.microservice.core.infrastructure.adapter.AnnotationSearchableEntity;
 import io.github.quizup.microservice.core.infrastructure.adapter.JpaSearchAdapter;
 import io.github.quizup.profile.domain.model.PlayerPresence;
@@ -54,8 +54,8 @@ public class PresenceRepositoryAdapter implements PresenceRepositoryPort {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResult<PlayerPresence> findAll(SearchCriteria searchCriteria) {
-        return presenceJpaSearchAdapter.findAll(searchCriteria, PresenceEntityMapper::toDomain);
+    public SearchResponse<PlayerPresence> findAll(SearchRequest request) {
+        return presenceJpaSearchAdapter.findAll(request).map(PresenceEntityMapper::toDomain);
     }
 
     @Override

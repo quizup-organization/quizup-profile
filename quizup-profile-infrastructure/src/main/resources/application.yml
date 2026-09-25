@@ -18,8 +18,8 @@ microservice:
   swagger:
     description: QuizUp Profile Module - User profile management (display name, bio, country)
   websocket:
-    # Présence joueur : notifications STOMP sur /topic/presence/{userId}
-    enabled: true
+    # La présence est pilotée par les sessions STOMP du BFF (seule surface temps réel).
+    enabled: false
 
 app:
   seed-data:

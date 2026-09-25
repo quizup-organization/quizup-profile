@@ -1,9 +1,6 @@
 package io.github.quizup.profile.domain.query;
 
-import io.github.quizup.microservice.core.domain.model.search.FilterCriteria;
-import io.github.quizup.microservice.core.domain.model.search.PageCriteria;
-import io.github.quizup.microservice.core.domain.model.search.SortCriteria;
-import io.github.quizup.microservice.core.domain.query.SearchQuery;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 
 import java.util.List;
 
@@ -21,10 +18,6 @@ public interface ProfileQuery {
     record GetProfilesByIdsQuery(List<String> userIds) implements ProfileQuery {
     }
 
-    record ProfileSearchQuery(
-            List<FilterCriteria> filters,
-            List<SortCriteria> sorts,
-            PageCriteria page
-    ) implements ProfileQuery, SearchQuery {
+    record ProfileSearchQuery(SearchRequest request) implements ProfileQuery {
     }
 }

@@ -1,7 +1,7 @@
 package io.github.quizup.profile.domain.port.out;
 
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
-import io.github.quizup.microservice.core.domain.model.search.SearchCriteria;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
+import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.profile.domain.model.Profile;
 
 import java.util.List;
@@ -41,7 +41,7 @@ public interface ProfileRepositoryPort {
      * @param searchCriteria les critères de recherche
      * @return la page de profils correspondante
      */
-    PageResult<Profile> findAll(SearchCriteria searchCriteria);
+    SearchResponse<Profile> findAll(SearchRequest request);
 
     /**
      * Vérifie si un profil existe pour cet utilisateur.

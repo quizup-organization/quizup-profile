@@ -1,7 +1,7 @@
 package io.github.quizup.profile.application.service;
 
 import io.github.quizup.microservice.core.infrastructure.axon.QueryResponseTypes;
-import io.github.quizup.microservice.core.domain.model.search.PageResult;
+import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.profile.domain.exception.ProfileProblems;
 import io.github.quizup.profile.domain.model.Profile;
 import io.github.quizup.profile.domain.port.in.CheckProfileUseCase;
@@ -32,8 +32,8 @@ public class ProfileQueryService implements GetProfileUseCase, SearchProfileUseC
     }
 
     @Override
-    public CompletableFuture<PageResult<Profile>> search(ProfileQuery.ProfileSearchQuery query) {
-        return queryGateway.query(query, QueryResponseTypes.pageResultOf(Profile.class));
+    public CompletableFuture<SearchResponse<Profile>> search(ProfileQuery.ProfileSearchQuery query) {
+        return queryGateway.query(query, QueryResponseTypes.searchResponseOf(Profile.class));
     }
 
     @Override
