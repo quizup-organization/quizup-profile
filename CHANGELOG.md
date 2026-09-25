@@ -1,3 +1,15 @@
+## [2.0.0](https://github.com/quizup-organization/quizup-profile/compare/v1.8.3...v2.0.0) (2026-09-25)
+
+### ⚠ BREAKING CHANGES
+
+* **profile:** the service no longer exposes its REST/WS; presence is now
+driven by the BFF (STOMP sessions -> commands). Search/query contracts use the
+SDK SearchRequest/SearchResponse DTOs.
+
+### Features
+
+* **profile:** headless service, BFF-owned presence + SDK search contracts ([368142e](https://github.com/quizup-organization/quizup-profile/commit/368142e9ecd0ac4b8b322c944a0b2e4d78ec17d4))
+
 ## [1.8.3](https://github.com/quizup-organization/quizup-profile/compare/v1.8.2...v1.8.3) (2026-09-24)
 
 ### Bug Fixes
