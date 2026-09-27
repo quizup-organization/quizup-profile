@@ -15,4 +15,10 @@ public interface ProgressionQuery {
 
     record GetTopicProgressionQuery(String userId, String topicId) implements ProgressionQuery {
     }
+
+    /**
+     * XP attribuée pour une liste de parties (écran de résultat / historique).
+     */
+    record GetGamesXpQuery(String userId, List<String> gameIds) implements ProgressionQuery {
+    }
 }

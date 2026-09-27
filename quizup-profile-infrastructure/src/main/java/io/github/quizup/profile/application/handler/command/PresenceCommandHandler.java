@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * Expose les transitions de session temps réel sur le bus de commandes distribué : le BFF
  * (seule surface STOMP) dispatche {@link PresenceCommand.ConnectPlayerCommand} /
- * {@link PresenceCommand.DisconnectPlayerCommand}.
+ * {@link PresenceCommand.DisconnectPlayerCommand} / {@link PresenceCommand.ResetInstanceSessionsCommand}.
  */
 @Component
 public class PresenceCommandHandler {
@@ -21,11 +21,16 @@ public class PresenceCommandHandler {
 
     @CommandHandler
     public void handle(PresenceCommand.ConnectPlayerCommand command) {
-        presenceUseCase.sessionConnected(command.sessionId(), command.userId());
+        presenceUseCase.sessionConnected(command.sessionId(), command.userId(), command.instanceId());
     }
 
     @CommandHandler
     public void handle(PresenceCommand.DisconnectPlayerCommand command) {
         presenceUseCase.sessionDisconnected(command.sessionId(), command.userId());
+    }
+
+    @CommandHandler
+    public void handle(PresenceCommand.ResetInstanceSessionsCommand command) {
+        presenceUseCase.resetInstanceSessions(command.instanceId(), command.startedAt());
     }
 }

@@ -46,6 +46,9 @@ public class ProgressEntity {
     @Column(name = "losses", nullable = false)
     private int losses;
 
+    @Column(name = "draws", nullable = false)
+    private int draws;
+
     @Column(name = "best_score", nullable = false)
     private int bestScore;
 

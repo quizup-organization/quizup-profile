@@ -13,6 +13,7 @@ public final class PresenceEntityMapper {
                 .userId(entity.getUserId())
                 .status(entity.getStatus())
                 .lastSeenAt(entity.getLastSeenAt())
+                .offlineDeadlineAt(entity.getOfflineDeadlineAt())
                 .build();
     }
 
@@ -21,6 +22,7 @@ public final class PresenceEntityMapper {
         entity.setUserId(presence.userId());
         entity.setStatus(presence.status());
         entity.setLastSeenAt(presence.lastSeenAt());
+        entity.setOfflineDeadlineAt(presence.offlineDeadlineAt());
         return entity;
     }
 }

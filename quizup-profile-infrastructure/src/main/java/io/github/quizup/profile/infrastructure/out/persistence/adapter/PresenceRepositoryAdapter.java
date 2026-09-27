@@ -5,27 +5,21 @@ import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRe
 import io.github.quizup.microservice.core.infrastructure.adapter.AnnotationSearchableEntity;
 import io.github.quizup.microservice.core.infrastructure.adapter.JpaSearchAdapter;
 import io.github.quizup.profile.domain.model.PlayerPresence;
-import io.github.quizup.profile.domain.model.PresenceStatus;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.PresenceEntity;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.PresenceSessionEntity;
 import io.github.quizup.profile.infrastructure.out.persistence.mapper.PresenceEntityMapper;
 import io.github.quizup.profile.infrastructure.out.persistence.repository.PresenceJpaRepository;
 import io.github.quizup.profile.infrastructure.out.persistence.repository.PresenceSessionJpaRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Component
 public class PresenceRepositoryAdapter implements PresenceRepositoryPort {
-
-    private static final Logger logger = LoggerFactory.getLogger(PresenceRepositoryAdapter.class);
 
     private final PresenceJpaRepository presenceJpaRepository;
     private final PresenceSessionJpaRepository presenceSessionJpaRepository;
@@ -59,11 +53,23 @@ public class PresenceRepositoryAdapter implements PresenceRepositoryPort {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<PlayerPresence> findByIds(List<String> userIds) {
+        if (userIds.isEmpty()) {
+            return List.of();
+        }
+        return presenceJpaRepository.findAllById(userIds).stream()
+                .map(PresenceEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     @Transactional
-    public void addSession(String sessionId, String userId) {
+    public void addSession(String sessionId, String userId, String instanceId) {
         PresenceSessionEntity session = new PresenceSessionEntity();
         session.setSessionId(sessionId);
         session.setUserId(userId);
+        session.setInstanceId(instanceId);
         session.setConnectedAt(Instant.now());
         presenceSessionJpaRepository.save(session);
     }
@@ -80,18 +86,29 @@ public class PresenceRepositoryAdapter implements PresenceRepositoryPort {
         return presenceSessionJpaRepository.countByUserId(userId);
     }
 
-    /**
-     * Les sessions STOMP vivent dans l'instance : au redémarrage, toutes sont mortes. On purge
-     * donc les sessions et on repasse toutes les présences {@code OFFLINE} pour éviter les
-     * faux « en ligne » après un crash.
-     */
-    @EventListener(ApplicationReadyEvent.class)
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> userIdsByInstanceBefore(String instanceId, Instant before) {
+        return presenceSessionJpaRepository.findUserIdsByInstanceBefore(instanceId, before);
+    }
+
+    @Override
     @Transactional
-    public void resetSessionsOnStartup() {
-        long sessions = presenceSessionJpaRepository.count();
-        presenceSessionJpaRepository.deleteAll();
-        int presences = presenceJpaRepository.updateStatusForAll(PresenceStatus.OFFLINE);
-        logger.info("Presence sessions purged on startup: {} session(s), {} presence(s) reset offline",
-                sessions, presences);
+    public void deleteSessionsByInstanceBefore(String instanceId, Instant before) {
+        presenceSessionJpaRepository.deleteByInstanceIdAndConnectedAtBefore(instanceId, before);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlayerPresence> findDueOffline(Instant now) {
+        return presenceJpaRepository.findDueOffline(now).stream()
+                .map(PresenceEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public boolean markOffline(String userId, Instant now) {
+        return presenceJpaRepository.markOffline(userId, now) == 1;
     }
 }

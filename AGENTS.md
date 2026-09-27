@@ -28,6 +28,14 @@ Il expose aussi la **présence joueur** (`/api/presence`) : read-model éphémè
 de vie des **sessions temps réel STOMP** (connexion/déconnexion), utilisé pour les pastilles
 « en ligne » et le forfait des duels. Plus de battement de cœur ni de polling.
 
+**Passage hors ligne — TTL en base + balayeur** (pas de deadline Axon) : la fermeture de la
+dernière session arme `presence_entry.offline_deadline_at` (+15 s de grâce) ; un balayeur
+périodique (`PresenceOfflineSweeper`, 5 s) confirme la transition par un `UPDATE` conditionnel
+(idempotent, multi-instances) et publie `PlayerWentOfflineEvent`. Les sessions portent
+`instance_id` : au démarrage, le BFF purge ses propres sessions antérieures à son boot
+(`ResetInstanceSessionsCommand`), sans toucher aux autres instances ni aux connexions récentes.
+Les commandes de présence du BFF sont retentées tant que le routage distribué n'est pas prêt.
+
 **Package** : `io.github.quizup.profile`
 
 **Avatar** : le profil porte `avatarOptions` (JSON des options DiceBear, style `micah`) choisi par
@@ -87,12 +95,25 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
 
 ### Enrichissements progression
 
-- `ProgressionResponse` porte `duelStats` (joués, victoires, défaites, winrate, meilleur score,
-  meilleure série) et `TopicProgressResponse` porte `title` (titre par thème).
-- Badges implémentés : `FIRST_WIN`, `PERFECT`, `LIGHTNING` (« Éclair », 5 bonnes réponses < 3 s),
-  `STREAK_MASTER` (« Série de feu », 10 victoires consécutives dans un thème).
-- `AwardXpCommand` / `XpAwardedEvent` portent `correctAnswers` + `fastAnswers` (issus de
-  `GameEndedEvent`). Compteurs `duelStats` maintenus en projection.
+- `ProgressionResponse` porte `duelStats` (joués, victoires, défaites, égalités, winrate, meilleur
+  score, meilleure série) et `TopicProgressResponse` porte `title` (titre par thème).
+- Badges implémentés : `FIRST_WIN`, `PERFECT`, `LIGHTNING` (« Éclair », 5 bonnes réponses < 3 s
+  **dans un même duel**), `STREAK_MASTER` (« Série de feu », 10 victoires consécutives dans un thème).
+- `AwardXpCommand` / `XpAwardedEvent` portent `correctAnswers`, `fastAnswers`, `draw` et
+  `botGame` (issus de `GameEndedEvent`). **Règle produit** : les duels contre bot comptent pour
+  l'XP, le niveau et les badges, mais sont exclus des stats V/N/D (colonne `draws`, migr. V5) ;
+  les égalités sont comptées comme telles (jamais en défaite). Compteurs `duelStats` maintenus en
+  projection, les événements antérieurs (`botGame=false`, `draw=false`) restent comptés.
 - **Activité journalière** : `ActivityProjection` alimente `progression_activity` (série
   courante/record, dernier jour actif) et `progression_activity_day` (parties par jour) depuis
   `GameEndedEvent` ; exposée par `GET /api/profiles/{userId}/activity`.
+
+### Vues BFF (queries dédiées)
+
+- `PresenceQuery.GetPresencesByIdsQuery(userIds)` → `List<PlayerPresence>` : présences en lot
+  (les joueurs sans ligne sont absents ; `404` REST = jamais connecté).
+- `ProgressionQuery.GetGamesXpQuery(userId, gameIds)` → `List<GameXp>` : XP réellement attribuée
+  par partie, lue depuis le journal `progression_awarded_game` (colonne `xp`, migr. V3).
+- `ProfileQuery.GetProfileSuggestionsQuery(nameQuery, limit)` : suggestions ⌘K par nom.
+- `GetProgressionsByIdsQuery` est désormais consommée par le BFF (niveaux des listes de personnes) ;
+  `SearchProfileUseCase` / `SearchChallengeUseCase` restent pour les futures surfaces d'administration.

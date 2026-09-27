@@ -1,7 +1,9 @@
 package io.github.quizup.profile.application.handler.query;
 
+import io.github.quizup.profile.domain.model.GameXp;
 import io.github.quizup.profile.domain.model.PlayerProgress;
 import io.github.quizup.profile.domain.model.TopicProgress;
+import io.github.quizup.profile.domain.port.out.ProgressionAwardedGameRepositoryPort;
 import io.github.quizup.profile.domain.port.out.ProgressionRepositoryPort;
 import io.github.quizup.profile.domain.query.ProgressionQuery;
 import org.axonframework.queryhandling.QueryHandler;
@@ -20,9 +22,12 @@ import java.util.stream.Collectors;
 public class ProgressionQueryHandler {
 
     private final ProgressionRepositoryPort progressionRepositoryPort;
+    private final ProgressionAwardedGameRepositoryPort awardedGameRepositoryPort;
 
-    public ProgressionQueryHandler(ProgressionRepositoryPort progressionRepositoryPort) {
+    public ProgressionQueryHandler(ProgressionRepositoryPort progressionRepositoryPort,
+                                   ProgressionAwardedGameRepositoryPort awardedGameRepositoryPort) {
         this.progressionRepositoryPort = progressionRepositoryPort;
+        this.awardedGameRepositoryPort = awardedGameRepositoryPort;
     }
 
     @QueryHandler
@@ -47,5 +52,10 @@ public class ProgressionQueryHandler {
                 .orElse(0);
 
         return TopicProgress.of(query.topicId(), xp);
+    }
+
+    @QueryHandler
+    public List<GameXp> handle(ProgressionQuery.GetGamesXpQuery query) {
+        return awardedGameRepositoryPort.findGameXp(query.userId(), query.gameIds());
     }
 }

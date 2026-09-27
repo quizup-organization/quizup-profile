@@ -10,6 +10,9 @@ public interface ProgressionEvent {
 
     /**
      * XP attribuée pour un duel (un événement par joueur et par duel).
+     * {@code draw} distingue l'égalité de la défaite ; {@code botGame} signale un duel contre un
+     * bot (XP/badges conservés, stats V/N/D et classement exclus). Les événements antérieurs à ces
+     * champs sont rejoués avec {@code false} (stats legacy).
      */
     record XpAwardedEvent(
             String userId,
@@ -18,6 +21,8 @@ public interface ProgressionEvent {
             int xp,
             int gameScore,
             boolean won,
+            boolean draw,
+            boolean botGame,
             int correctAnswers,
             int fastAnswers,
             Instant awardedAt

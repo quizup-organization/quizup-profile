@@ -11,6 +11,10 @@ public interface ProgressionCommand {
      * <p>{@code progressId} est l'identifiant de l'agrégat de progression
      * (namespacé, cf. {@code ProgressionRules.progressIdFor}), distinct du
      * {@code userId} qui identifie le {@code ProfileAggregate}.</p>
+     *
+     * <p>{@code draw} distingue l'égalité de la défaite ; {@code botGame} permet aux
+     * consommateurs (stats V/N/D, classement) d'exclure les duels contre bot — l'XP, le niveau
+     * et les badges restent attribués.</p>
      */
     record AwardXpCommand(
             @TargetAggregateIdentifier String progressId,
@@ -19,6 +23,8 @@ public interface ProgressionCommand {
             String topicId,
             int gameScore,
             boolean won,
+            boolean draw,
+            boolean botGame,
             int correctAnswers,
             int fastAnswers
     ) implements ProgressionCommand {

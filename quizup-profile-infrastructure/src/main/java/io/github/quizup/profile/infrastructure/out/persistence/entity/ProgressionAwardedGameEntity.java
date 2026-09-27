@@ -31,9 +31,13 @@ public class ProgressionAwardedGameEntity {
     @Column(name = "game_id", length = 255, nullable = false)
     private String gameId;
 
-    public ProgressionAwardedGameEntity(String userId, String gameId) {
+    @Column(name = "xp")
+    private Integer xp;
+
+    public ProgressionAwardedGameEntity(String userId, String gameId, Integer xp) {
         this.userId = userId;
         this.gameId = gameId;
+        this.xp = xp;
     }
 
     /** Clé composite {@code (user_id, game_id)}. */

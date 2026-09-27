@@ -7,6 +7,8 @@ import io.github.quizup.profile.domain.query.PresenceQuery;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Handler Axon — recherche paginée de présences. Délègue au port sortant.
  */
@@ -22,5 +24,10 @@ public class PresenceQueryHandler {
     @QueryHandler
     public SearchResponse<PlayerPresence> handle(PresenceQuery.PresenceSearchQuery query) {
         return presenceRepositoryPort.findAll(query.request());
+    }
+
+    @QueryHandler
+    public List<PlayerPresence> handle(PresenceQuery.GetPresencesByIdsQuery query) {
+        return presenceRepositoryPort.findByIds(query.userIds());
     }
 }

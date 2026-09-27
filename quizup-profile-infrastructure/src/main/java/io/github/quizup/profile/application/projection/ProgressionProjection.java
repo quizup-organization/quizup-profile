@@ -49,7 +49,7 @@ public class ProgressionProjection {
         }
 
         // Idempotence par clé métier (userId, gameId) : un rejeu ne recompte pas l'XP.
-        if (!awardedGameRepositoryPort.record(event.userId(), event.gameId())) {
+        if (!awardedGameRepositoryPort.record(event.userId(), event.gameId(), event.xp())) {
             return;
         }
 
@@ -59,7 +59,10 @@ public class ProgressionProjection {
         int xpTotal = current.xpTotal() + event.xp();
         int level = ProgressionRules.levelFor(xpTotal);
 
-        int currentWinStreak = event.won() ? current.currentWinStreak() + 1 : 0;
+        boolean humanDuel = !event.botGame();
+        int currentWinStreak = humanDuel
+                ? (event.won() ? current.currentWinStreak() + 1 : 0)
+                : current.currentWinStreak();
         int bestWinStreak = Math.max(current.bestWinStreak(), currentWinStreak);
 
         progressionRepositoryPort.save(current.toBuilder()
@@ -67,10 +70,11 @@ public class ProgressionProjection {
                 .level(level)
                 .title(ProgressionRules.titleFor(level))
                 .xpByTopic(xpByTopic)
-                .gamesPlayed(current.gamesPlayed() + 1)
-                .wins(current.wins() + (event.won() ? 1 : 0))
-                .losses(current.losses() + (event.won() ? 0 : 1))
-                .bestScore(Math.max(current.bestScore(), event.gameScore()))
+                .gamesPlayed(current.gamesPlayed() + (humanDuel ? 1 : 0))
+                .wins(current.wins() + (humanDuel && event.won() ? 1 : 0))
+                .losses(current.losses() + (humanDuel && !event.won() && !event.draw() ? 1 : 0))
+                .draws(current.draws() + (humanDuel && event.draw() ? 1 : 0))
+                .bestScore(humanDuel ? Math.max(current.bestScore(), event.gameScore()) : current.bestScore())
                 .currentWinStreak(currentWinStreak)
                 .bestWinStreak(bestWinStreak)
                 .updatedAt(event.awardedAt())

@@ -7,6 +7,7 @@ import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.modelling.saga.SagaEventHandler;
+import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
 import org.slf4j.Logger;
@@ -37,17 +38,20 @@ public class CreateProfileSaga {
     public void on(UserEvent.UserRegisteredEvent event) {
         if (profileRepositoryPort.findById(event.userId()).isPresent()) {
             logger.debug("Profile already exists, skipping creation: userId={}", event.userId());
+            SagaLifecycle.end();
             return;
         }
 
         logger.info("User registered, creating profile: userId={}", event.userId());
 
-        commandGateway.send(
+        commandGateway.sendAndWait(
                 new ProfileCommand.CreateProfileCommand(
                         event.userId(),
                         event.email(),
                         NameGenerator.generate()
                 )
         );
+
+        SagaLifecycle.end();
     }
 }

@@ -50,4 +50,12 @@ public interface ProfileRepositoryPort {
      * @return true si un profil existe
      */
     boolean existsById(String userId);
+
+    /**
+     * Suggestions de profils par nom (insensible à la casse), ordre alphabétique.
+     *
+     * @param nameQuery texte recherché (non vide)
+     * @param limit     nombre maximum de suggestions
+     */
+    List<Profile> findSuggestions(String nameQuery, int limit);
 }

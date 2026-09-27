@@ -25,6 +25,7 @@ public final class ProgressEntityMapper {
                 .gamesPlayed(entity.getGamesPlayed())
                 .wins(entity.getWins())
                 .losses(entity.getLosses())
+                .draws(entity.getDraws())
                 .bestScore(entity.getBestScore())
                 .currentWinStreak(entity.getCurrentWinStreak())
                 .bestWinStreak(entity.getBestWinStreak())
@@ -43,6 +44,7 @@ public final class ProgressEntityMapper {
         entity.setGamesPlayed(progress.gamesPlayed());
         entity.setWins(progress.wins());
         entity.setLosses(progress.losses());
+        entity.setDraws(progress.draws());
         entity.setBestScore(progress.bestScore());
         entity.setCurrentWinStreak(progress.currentWinStreak());
         entity.setBestWinStreak(progress.bestWinStreak());

@@ -9,6 +9,7 @@ import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.ProfileEntity;
 import io.github.quizup.profile.infrastructure.out.persistence.mapper.ProfileEntityMapper;
 import io.github.quizup.profile.infrastructure.out.persistence.repository.ProfileJpaRepository;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -53,5 +54,13 @@ public class ProfileRepositoryAdapter implements ProfileRepositoryPort {
     @Override
     public boolean existsById(String userId) {
         return profileJpaRepository.existsById(userId);
+    }
+
+    @Override
+    public List<Profile> findSuggestions(String nameQuery, int limit) {
+        return profileJpaRepository
+                .findByDisplayNameContainingIgnoreCaseOrderByDisplayNameAsc(nameQuery, Limit.of(limit)).stream()
+                .map(ProfileEntityMapper::toDomain)
+                .toList();
     }
 }

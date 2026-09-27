@@ -44,4 +44,9 @@ public class ProfileQueryHandler {
     public SearchResponse<Profile> handle(ProfileQuery.ProfileSearchQuery query) {
         return profileRepositoryPort.findAll(query.request());
     }
+
+    @QueryHandler
+    public List<Profile> handle(ProfileQuery.GetProfileSuggestionsQuery query) {
+        return profileRepositoryPort.findSuggestions(query.nameQuery(), query.limit());
+    }
 }

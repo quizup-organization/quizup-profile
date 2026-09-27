@@ -21,6 +21,7 @@ public record PlayerProgress(
         int gamesPlayed,
         int wins,
         int losses,
+        int draws,
         int bestScore,
         int currentWinStreak,
         int bestWinStreak,
@@ -41,6 +42,7 @@ public record PlayerProgress(
                 .gamesPlayed(0)
                 .wins(0)
                 .losses(0)
+                .draws(0)
                 .bestScore(0)
                 .currentWinStreak(0)
                 .bestWinStreak(0)

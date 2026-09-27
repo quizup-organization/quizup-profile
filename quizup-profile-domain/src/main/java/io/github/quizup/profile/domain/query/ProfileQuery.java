@@ -20,4 +20,10 @@ public interface ProfileQuery {
 
     record ProfileSearchQuery(SearchRequest request) implements ProfileQuery {
     }
+
+    /**
+     * Suggestions de joueurs par nom (palette ⌘K), ordre alphabétique.
+     */
+    record GetProfileSuggestionsQuery(String nameQuery, int limit) implements ProfileQuery {
+    }
 }

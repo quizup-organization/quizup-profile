@@ -35,9 +35,14 @@ public class AwardProgressSaga {
     public void on(GameEvent.GameEndedEvent event) {
         boolean player1Won = event.winnerId() != null && event.winnerId().equals(event.player1Id());
         boolean player2Won = event.winnerId() != null && event.winnerId().equals(event.player2Id());
+        boolean draw = event.winnerId() == null;
 
-        award(event.player1Id(), event, player1Won, event.player1CorrectAnswers(), event.player1FastAnswers());
-        award(event.player2Id(), event, player2Won, event.player2CorrectAnswers(), event.player2FastAnswers());
+        award(event.player1Id(), event, player1Won, draw,
+                QuizUpConstants.SYSTEM_USER_ID.equals(event.player2Id()),
+                event.player1CorrectAnswers(), event.player1FastAnswers());
+        award(event.player2Id(), event, player2Won, draw,
+                QuizUpConstants.SYSTEM_USER_ID.equals(event.player1Id()),
+                event.player2CorrectAnswers(), event.player2FastAnswers());
 
         logger.info("Progression attribuée: gameId={}, topicId={}, winner={}",
                 event.gameId(), event.topicId(), event.winnerId());
@@ -45,8 +50,8 @@ public class AwardProgressSaga {
         SagaLifecycle.end();
     }
 
-    private void award(String playerId, GameEvent.GameEndedEvent event, boolean won,
-                       int correctAnswers, int fastAnswers) {
+    private void award(String playerId, GameEvent.GameEndedEvent event, boolean won, boolean draw,
+                       boolean botGame, int correctAnswers, int fastAnswers) {
         if (playerId == null || QuizUpConstants.SYSTEM_USER_ID.equals(playerId)) {
             return;
         }
@@ -55,13 +60,15 @@ public class AwardProgressSaga {
                 ? event.player1FinalScore()
                 : event.player2FinalScore();
 
-        commandGateway.send(new ProgressionCommand.AwardXpCommand(
+        commandGateway.sendAndWait(new ProgressionCommand.AwardXpCommand(
                 ProgressionRules.progressIdFor(playerId),
                 playerId,
                 event.gameId(),
                 event.topicId(),
                 score,
                 won,
+                draw,
+                botGame,
                 correctAnswers,
                 fastAnswers
         ));

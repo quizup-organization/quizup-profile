@@ -43,7 +43,6 @@ public class PlayerProgressAggregate {
     private final Map<String, Integer> winStreakByTopic = new HashMap<>();
 
     private int xpTotal;
-    private int fastAnswersTotal;
     private int level = 1;
     private String title = ProgressionRules.titleFor(1);
 
@@ -76,6 +75,8 @@ public class PlayerProgressAggregate {
                 xp,
                 command.gameScore(),
                 command.won(),
+                command.draw(),
+                command.botGame(),
                 command.correctAnswers(),
                 command.fastAnswers(),
                 now
@@ -108,7 +109,7 @@ public class PlayerProgressAggregate {
             ));
         }
 
-        if (fastAnswersTotal >= LIGHTNING_FAST_ANSWERS && !badges.contains(Badge.LIGHTNING)) {
+        if (command.fastAnswers() >= LIGHTNING_FAST_ANSWERS && !badges.contains(Badge.LIGHTNING)) {
             AggregateLifecycle.apply(new ProgressionEvent.BadgeEarnedEvent(
                     command.userId(),
                     Badge.LIGHTNING,
@@ -133,7 +134,6 @@ public class PlayerProgressAggregate {
         this.xpByTopic.merge(event.topicId(), event.xp(), Integer::sum);
         this.awardedGameIds.add(event.gameId());
         this.xpTotal += event.xp();
-        this.fastAnswersTotal += event.fastAnswers();
         this.level = ProgressionRules.levelFor(this.xpTotal);
         this.title = ProgressionRules.titleFor(this.level);
 
