@@ -1,3 +1,9 @@
+## [2.1.0](https://github.com/quizup-organization/quizup-profile/compare/v2.0.0...v2.1.0) (2026-09-27)
+
+### Features
+
+* **profile:** presence read model, per-game XP journal and honest duel stats ([647760c](https://github.com/quizup-organization/quizup-profile/commit/647760c0f7de783d1c79e27e4154cc1e21d31cbc))
+
 ## [2.0.0](https://github.com/quizup-organization/quizup-profile/compare/v1.8.3...v2.0.0) (2026-09-25)
 
 ### ⚠ BREAKING CHANGES
