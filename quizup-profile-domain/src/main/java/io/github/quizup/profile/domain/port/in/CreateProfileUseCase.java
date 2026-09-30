@@ -12,7 +12,7 @@ public interface CreateProfileUseCase {
 
     CompletableFuture<String> create(ProfileCommand.CreateProfileCommand command);
 
-    default CompletableFuture<String> create(String userId, String email, String displayName) {
-        return create(new ProfileCommand.CreateProfileCommand(userId, email, displayName));
+    default CompletableFuture<String> create(String userId, String email, String initialPseudonym) {
+        return create(new ProfileCommand.CreateProfileCommand(userId, email, initialPseudonym));
     }
 }

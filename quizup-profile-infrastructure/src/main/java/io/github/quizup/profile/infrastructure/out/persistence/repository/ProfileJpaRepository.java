@@ -14,5 +14,5 @@ import java.util.List;
 @Repository
 public interface ProfileJpaRepository extends JpaRepository<ProfileEntity, String>, JpaSpecificationExecutor<ProfileEntity> {
 
-    List<ProfileEntity> findByDisplayNameContainingIgnoreCaseOrderByDisplayNameAsc(String nameQuery, Limit limit);
+    List<ProfileEntity> findByPseudonymContainingIgnoreCaseOrderByPseudonymAsc(String nameQuery, Limit limit);
 }

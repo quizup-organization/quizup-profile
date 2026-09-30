@@ -9,15 +9,17 @@
 
 ## 1. Rôle
 
-Propriétaire des **données modifiables** du profil utilisateur (`displayName`, `bio`, `country`).
+Propriétaire des **données modifiables** du profil utilisateur (`pseudonym`, `bio`, `country`,
+`avatarOptions`, `language`).
 Identity (`quizup-identity`) reste le IdP : identité immuable + JWT (lecture du profil côté
 frontend = claims du JWT). Ce service est **créé par événement** (saga sur
-`UserRegisteredEvent` d'identity) et mis à jour **uniquement par le propriétaire**.
+`UserRegisteredEvent` d'identity) et mis à jour **uniquement par le propriétaire**, **champ par
+champ** (une commande/événement/endpoint par champ ; no-op si la valeur est inchangée).
 
-Il est aussi la **source unique d'existence et de nom d'affichage** des utilisateurs pour les
+Il est aussi la **source unique d'existence et de pseudonyme** des utilisateurs pour les
 autres services : social et matchmaking n'interrogent plus identity mais **profile** (queries
 `ProfileQuery.ProfileExistsByIdQuery` / `ProfileQuery.GetProfileQuery` sur le bus partagé).
-Le `NameGenerator` (nom d'affichage déterministe généré à la création) vit dans ce domaine.
+Le `PseudonymGenerator` (pseudonyme déterministe généré à la création) vit dans ce domaine.
 
 Il porte enfin la **progression du joueur** (RPG) : XP totale + XP **par thème**, niveau, titre
 honorifique et badges, attribués de façon idempotente à la fin de chaque duel (saga sur
@@ -53,14 +55,15 @@ exposée par le service.
 ## 3. Use cases (ports entrants — `domain/port/in/`)
 
 - `GetProfileUseCase` — récupération par userId (404 si inconnu)
-- `UpdateProfileUseCase` — mise à jour (propriétaire uniquement)
+- `UpdateProfileUseCase` — mise à jour par champ (pseudonyme, bio, pays, avatar, langue) ;
+  propriétaire uniquement, no-op si la valeur est inchangée
 - `CreateProfileUseCase` — création (utilisée par le seeding système ; en nominal par la saga)
 - `CheckProfileUseCase` — vérification d'existence (`existsById`)
 - `SearchProfileUseCase` — recherche paginée (pattern SDK `SearchRequest` → `SearchResponse`)
 - `GetProgressionUseCase` — progression globale et par thème
 
 **Queries** (`domain/query/ProfileQuery.java`) : `GetProfileQuery` (consommée par
-social/matchmaking pour le nom d'affichage), `ProfileExistsByIdQuery` (consommée par social),
+social/matchmaking pour le pseudonyme), `ProfileExistsByIdQuery` (consommée par social),
 `ProfileSearchQuery`.
 **Queries progression** (`ProgressionQuery.java`) : `GetProgressionQuery`, `GetTopicProgressionQuery`.
 

@@ -1,8 +1,14 @@
 package io.github.quizup.profile.domain.event;
 
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
+
 import java.time.Instant;
 
+/**
+ * Événements du profil : un événement par champ modifié.
+ */
 public interface ProfileEvent {
+
     String userId();
 
     /**
@@ -12,21 +18,47 @@ public interface ProfileEvent {
     record ProfileCreatedEvent(
             String userId,
             String email,
-            String displayName,
+            String pseudonym,
             Instant createdAt
     ) implements ProfileEvent {
     }
 
-    /**
-     * Événement émis lors d'une mise à jour du profil par son propriétaire.
-     */
-    record ProfileUpdatedEvent(
+    record ProfilePseudonymUpdatedEvent(
             String userId,
             String requestedBy,
-            String displayName,
+            String pseudonym,
+            Instant updatedAt
+    ) implements ProfileEvent {
+    }
+
+    record ProfileBioUpdatedEvent(
+            String userId,
+            String requestedBy,
             String bio,
+            Instant updatedAt
+    ) implements ProfileEvent {
+    }
+
+    record ProfileCountryUpdatedEvent(
+            String userId,
+            String requestedBy,
             String country,
+            Instant updatedAt
+    ) implements ProfileEvent {
+    }
+
+    record ProfileAvatarUpdatedEvent(
+            String userId,
+            String requestedBy,
             String avatarOptions,
+            Instant updatedAt
+    ) implements ProfileEvent {
+    }
+
+    record ProfileLanguageUpdatedEvent(
+            String userId,
+            String requestedBy,
+            Language language,
             Instant updatedAt
     ) implements ProfileEvent {
     }

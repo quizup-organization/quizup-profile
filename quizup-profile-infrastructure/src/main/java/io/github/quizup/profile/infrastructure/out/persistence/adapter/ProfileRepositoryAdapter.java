@@ -59,7 +59,7 @@ public class ProfileRepositoryAdapter implements ProfileRepositoryPort {
     @Override
     public List<Profile> findSuggestions(String nameQuery, int limit) {
         return profileJpaRepository
-                .findByDisplayNameContainingIgnoreCaseOrderByDisplayNameAsc(nameQuery, Limit.of(limit)).stream()
+                .findByPseudonymContainingIgnoreCaseOrderByPseudonymAsc(nameQuery, Limit.of(limit)).stream()
                 .map(ProfileEntityMapper::toDomain)
                 .toList();
     }

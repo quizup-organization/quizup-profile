@@ -1,5 +1,6 @@
 package io.github.quizup.profile.domain.model;
 
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -13,10 +14,11 @@ import java.time.Instant;
 public record Profile(
         String userId,
         String email,
-        String displayName,
+        String pseudonym,
         String bio,
         String country,
         String avatarOptions,
+        Language language,
         Instant createdAt,
         Instant updatedAt
 ) {

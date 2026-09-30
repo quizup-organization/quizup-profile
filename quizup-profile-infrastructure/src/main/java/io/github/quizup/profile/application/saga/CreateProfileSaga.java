@@ -2,7 +2,7 @@ package io.github.quizup.profile.application.saga;
 
 import io.github.quizup.identity.domain.event.UserEvent;
 import io.github.quizup.profile.domain.command.ProfileCommand;
-import io.github.quizup.profile.domain.model.NameGenerator;
+import io.github.quizup.profile.domain.model.PseudonymGenerator;
 import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.ProcessingGroup;
@@ -48,7 +48,7 @@ public class CreateProfileSaga {
                 new ProfileCommand.CreateProfileCommand(
                         event.userId(),
                         event.email(),
-                        NameGenerator.generate()
+                        PseudonymGenerator.generate()
                 )
         );
 

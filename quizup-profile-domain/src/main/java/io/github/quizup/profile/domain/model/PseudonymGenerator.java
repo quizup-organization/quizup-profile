@@ -2,7 +2,10 @@ package io.github.quizup.profile.domain.model;
 
 import java.util.Random;
 
-public final class NameGenerator {
+/**
+ * Génère le pseudonyme initial d'un joueur (ex. {@code SwiftFox42}).
+ */
+public final class PseudonymGenerator {
 
     private static final String[] ADJECTIVES = {
             "Swift", "Brave", "Calm", "Bold", "Bright",
@@ -22,12 +25,12 @@ public final class NameGenerator {
 
     private static final Random random = new Random();
 
-    private NameGenerator() {
+    private PseudonymGenerator() {
         //
     }
 
     /**
-     * Génère un nom d'affichage du type "SwiftFox42".
+     * Génère un pseudonyme du type "SwiftFox42".
      */
     public static String generate() {
         String adj    = ADJECTIVES[random.nextInt(ADJECTIVES.length)];

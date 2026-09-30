@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Port entrant - Cas d'utilisation : recherche paginée de profils
- * (par displayName ou email, cf. @Searchable sur la projection).
+ * (par pseudonyme ou email, cf. @Searchable sur la projection).
  */
 public interface SearchProfileUseCase {
 

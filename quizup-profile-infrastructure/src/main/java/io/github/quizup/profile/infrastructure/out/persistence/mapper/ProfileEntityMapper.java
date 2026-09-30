@@ -1,6 +1,8 @@
 package io.github.quizup.profile.infrastructure.out.persistence.mapper;
 
+import io.github.quizup.microservice.core.domain.model.i18n.Language;
 import io.github.quizup.profile.domain.model.Profile;
+import io.github.quizup.profile.domain.model.ProfileRules;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.ProfileEntity;
 
 /**
@@ -16,10 +18,11 @@ public final class ProfileEntityMapper {
         return Profile.builder()
                 .userId(entity.getUserId())
                 .email(entity.getEmail())
-                .displayName(entity.getDisplayName())
+                .pseudonym(entity.getPseudonym())
                 .bio(entity.getBio())
                 .country(entity.getCountry())
                 .avatarOptions(entity.getAvatarOptions())
+                .language(toLanguage(entity.getLanguage()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
@@ -32,12 +35,22 @@ public final class ProfileEntityMapper {
         ProfileEntity entity = new ProfileEntity();
         entity.setUserId(profile.userId());
         entity.setEmail(profile.email());
-        entity.setDisplayName(profile.displayName());
+        entity.setPseudonym(profile.pseudonym());
         entity.setBio(profile.bio());
         entity.setCountry(profile.country());
         entity.setAvatarOptions(profile.avatarOptions());
+        entity.setLanguage(profile.language() == null
+                ? ProfileRules.DEFAULT_LANGUAGE.code()
+                : profile.language().code());
         entity.setCreatedAt(profile.createdAt());
         entity.setUpdatedAt(profile.updatedAt());
         return entity;
+    }
+
+    private static Language toLanguage(String code) {
+        if (code == null) {
+            return ProfileRules.DEFAULT_LANGUAGE;
+        }
+        return Language.fromCode(code);
     }
 }

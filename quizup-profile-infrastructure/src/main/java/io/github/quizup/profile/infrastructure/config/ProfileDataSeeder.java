@@ -59,14 +59,14 @@ public class ProfileDataSeeder implements CommandLineRunner {
      * Crée un profil s'il n'existe pas déjà dans l'event store (la commande constructeur échoue
      * si l'agrégat existe). Package-private pour les tests.
      */
-    void seedProfile(String userId, String email, String displayName, String label) {
+    void seedProfile(String userId, String email, String pseudonym, String label) {
         if (Boolean.TRUE.equals(checkProfileUseCase.existsById(userId).join())) {
             logger.info("{} profile already exists, skipping creation", label);
             return;
         }
 
         try {
-            createProfileUseCase.create(userId, email, displayName).join();
+            createProfileUseCase.create(userId, email, pseudonym).join();
             logger.info("✓ {} profile created: {}", label, userId);
         } catch (CompletionException exception) {
             if (isAggregateAlreadyExists(exception)) {

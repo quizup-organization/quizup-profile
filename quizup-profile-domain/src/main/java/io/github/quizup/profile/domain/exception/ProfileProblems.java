@@ -27,23 +27,23 @@ public interface ProfileProblems {
         }
     }
 
-    class DisplayNameBlankProblem extends ProfileProblem {
-        public DisplayNameBlankProblem(String userId, String displayName) {
-            super(userId, "urn:quizup:profile:blankDisplayName",
+    class PseudonymBlankProblem extends ProfileProblem {
+        public PseudonymBlankProblem(String userId, String pseudonym) {
+            super(userId, "urn:quizup:profile:blankPseudonym",
                     ProblemCategory.VALIDATION,
-                    "Display name is required",
-                    "The display name must not be blank",
-                    Map.of("displayName", displayName));
+                    "Pseudonym is required",
+                    "The pseudonym must not be blank",
+                    Map.of("pseudonym", pseudonym));
         }
     }
 
-    class DisplayNameTooLongProblem extends ProfileProblem {
-        public DisplayNameTooLongProblem(String userId, String displayName) {
-            super(userId, "urn:quizup:profile:displayNameTooLong",
+    class PseudonymTooLongProblem extends ProfileProblem {
+        public PseudonymTooLongProblem(String userId, String pseudonym) {
+            super(userId, "urn:quizup:profile:pseudonymTooLong",
                     ProblemCategory.VALIDATION,
-                    "Display name too long",
-                    "The display name must not exceed " + ProfileRules.MAX_DISPLAY_NAME_LENGTH + " characters",
-                    Map.of("displayName", displayName));
+                    "Pseudonym too long",
+                    "The pseudonym must not exceed " + ProfileRules.MAX_PSEUDONYM_LENGTH + " characters",
+                    Map.of("pseudonym", pseudonym));
         }
     }
 
@@ -73,6 +73,16 @@ public interface ProfileProblems {
                     ProblemCategory.VALIDATION,
                     "Avatar options too long",
                     "The avatar options must not exceed " + ProfileRules.MAX_AVATAR_OPTIONS_LENGTH + " characters",
+                    null);
+        }
+    }
+
+    class LanguageMissingProblem extends ProfileProblem {
+        public LanguageMissingProblem(String userId) {
+            super(userId, "urn:quizup:profile:languageMissing",
+                    ProblemCategory.VALIDATION,
+                    "Language is required",
+                    "The language must be one of the supported languages",
                     null);
         }
     }

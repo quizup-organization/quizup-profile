@@ -17,7 +17,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "profile_entry", indexes = {
     @Index(name = "idx_profile_entry_email", columnList = "email"),
-    @Index(name = "idx_profile_entry_display_name", columnList = "display_name")
+    @Index(name = "idx_profile_entry_pseudonym", columnList = "pseudonym")
 })
 public class ProfileEntity {
 
@@ -30,9 +30,9 @@ public class ProfileEntity {
     @Searchable(type = FieldType.STRING)
     private String email;
 
-    @Column(name = "display_name", length = 100, nullable = false)
+    @Column(name = "pseudonym", length = 100, nullable = false)
     @Searchable(type = FieldType.STRING)
-    private String displayName;
+    private String pseudonym;
 
     @Column(name = "bio", length = 300)
     private String bio;
@@ -42,6 +42,10 @@ public class ProfileEntity {
 
     @Column(name = "avatar_options", length = 2000)
     private String avatarOptions;
+
+    /** Code ISO 639-1 de la langue préférée du joueur (fr, en). */
+    @Column(name = "language", length = 5, nullable = false)
+    private String language;
 
     @Column(name = "created_at", nullable = false)
     @Searchable(type = FieldType.DATE)

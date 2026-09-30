@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Service applicatif - Implémente UpdateProfileUseCase et CreateProfileUseCase.
+ * Service applicatif - Implémente CreateProfileUseCase et UpdateProfileUseCase (une méthode par champ).
  */
 @Service
 public class ProfileCommandService implements UpdateProfileUseCase, CreateProfileUseCase {
@@ -26,7 +26,27 @@ public class ProfileCommandService implements UpdateProfileUseCase, CreateProfil
     }
 
     @Override
-    public CompletableFuture<String> update(ProfileCommand.UpdateProfileCommand command) {
+    public CompletableFuture<String> updatePseudonym(ProfileCommand.UpdateProfilePseudonymCommand command) {
+        return commandGateway.send(command);
+    }
+
+    @Override
+    public CompletableFuture<String> updateBio(ProfileCommand.UpdateProfileBioCommand command) {
+        return commandGateway.send(command);
+    }
+
+    @Override
+    public CompletableFuture<String> updateCountry(ProfileCommand.UpdateProfileCountryCommand command) {
+        return commandGateway.send(command);
+    }
+
+    @Override
+    public CompletableFuture<String> updateAvatar(ProfileCommand.UpdateProfileAvatarCommand command) {
+        return commandGateway.send(command);
+    }
+
+    @Override
+    public CompletableFuture<String> updateLanguage(ProfileCommand.UpdateProfileLanguageCommand command) {
         return commandGateway.send(command);
     }
 }

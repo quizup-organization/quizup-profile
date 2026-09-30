@@ -6,9 +6,10 @@
 CREATE TABLE IF NOT EXISTS profile_entry (
     user_id VARCHAR(255) PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    display_name VARCHAR(100) NOT NULL,
+    pseudonym VARCHAR(100) NOT NULL,
     bio VARCHAR(300),
     country VARCHAR(100),
+    language VARCHAR(5) NOT NULL DEFAULT 'fr',
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
@@ -16,16 +17,17 @@ CREATE TABLE IF NOT EXISTS profile_entry (
 -- Index pour recherche par email
 CREATE INDEX idx_profile_entry_email ON profile_entry(email);
 
--- Index pour recherche par nom de joueur
-CREATE INDEX idx_profile_entry_display_name ON profile_entry(display_name);
+-- Index pour recherche par pseudonyme
+CREATE INDEX idx_profile_entry_pseudonym ON profile_entry(pseudonym);
 
 -- Commentaires pour documentation
 COMMENT ON TABLE profile_entry IS 'Table des profils utilisateur - projection read-only mise a jour via Event Handlers';
 COMMENT ON COLUMN profile_entry.user_id IS 'Identifiant unique de l''utilisateur (UUID)';
 COMMENT ON COLUMN profile_entry.email IS 'Email de l''utilisateur (denormalise depuis identity pour la recherche)';
-COMMENT ON COLUMN profile_entry.display_name IS 'Nom public du joueur (modifiable par le proprietaire)';
+COMMENT ON COLUMN profile_entry.pseudonym IS 'Pseudonyme public du joueur (modifiable par le proprietaire)';
 COMMENT ON COLUMN profile_entry.bio IS 'Bio libre de l''utilisateur (max 300 caracteres)';
 COMMENT ON COLUMN profile_entry.country IS 'Pays de l''utilisateur (max 100 caracteres)';
+COMMENT ON COLUMN profile_entry.language IS 'Langue preferee du joueur (code ISO 639-1, defaut fr)';
 COMMENT ON COLUMN profile_entry.created_at IS 'Date de creation du profil';
 COMMENT ON COLUMN profile_entry.updated_at IS 'Date de derniere mise a jour du profil';
 
