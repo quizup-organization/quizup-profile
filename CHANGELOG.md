@@ -1,3 +1,13 @@
+## [3.0.0](https://github.com/quizup-organization/quizup-profile/compare/v2.1.0...v3.0.0) (2026-09-30)
+
+### ⚠ BREAKING CHANGES
+
+* **profile:** UpdateProfileCommand/ProfileUpdatedEvent removed; one command/event per field (pseudonym, bio, country, avatarOptions, language); Profile.displayName renamed to pseudonym; V1 migration edited (DB reset required).
+
+### Features
+
+* **profile:** per-field profile updates with pseudonym and language ([45859a3](https://github.com/quizup-organization/quizup-profile/commit/45859a3f09042366daabdeb92dee67fe5970340a))
+
 ## [2.1.0](https://github.com/quizup-organization/quizup-profile/compare/v2.0.0...v2.1.0) (2026-09-27)
 
 ### Features
