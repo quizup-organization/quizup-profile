@@ -13,7 +13,7 @@ public final class ProfileRules {
 
     public static final int MAX_COUNTRY_LENGTH = 100;
 
-    /** Sérialisation JSON des options d'avatar DiceBear (style micah). */
+    /** Sérialisation JSON des options d'avatar DiceBear (styles micah, lorelei, notionists). */
     public static final int MAX_AVATAR_OPTIONS_LENGTH = 2000;
 
     /** Langue par défaut d'un profil (appliquée à la création). */

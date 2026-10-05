@@ -40,7 +40,8 @@ Les commandes de présence du BFF sont retentées tant que le routage distribué
 
 **Package** : `io.github.quizup.profile`
 
-**Avatar** : le profil porte `avatarOptions` (JSON des options DiceBear, style `micah`) choisi par
+**Avatar** : le profil porte `avatarOptions` (JSON des options DiceBear, styles `micah`, `lorelei` ou
+`notionists`, cf. `web-applications/quizup-web/src/shared/avatar/styles/`) choisi par
 le propriétaire. **Aucun stockage d'image** : l'avatar est régénéré côté client de façon déterministe
 à partir de ces options (repli sur `userId` si `null`).
 
