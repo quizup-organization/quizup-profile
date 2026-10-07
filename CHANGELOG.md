@@ -1,3 +1,9 @@
+## [3.1.1](https://github.com/quizup-organization/quizup-profile/compare/v3.1.0...v3.1.1) (2026-10-07)
+
+### Bug Fixes
+
+* **deps:** pin quizup-game-domain 5.2.0 (version publiée) ([a7c86ce](https://github.com/quizup-organization/quizup-profile/commit/a7c86ceaeffcd86ece3de788bd88875c77c84f96))
+
 ## [3.1.0](https://github.com/quizup-organization/quizup-profile/compare/v3.0.0...v3.1.0) (2026-10-07)
 
 ### Features
