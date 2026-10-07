@@ -2,82 +2,79 @@ package io.github.quizup.profile.application.service;
 
 import io.github.quizup.profile.domain.event.PresenceEvent;
 import io.github.quizup.profile.domain.model.PlayerPresence;
-import io.github.quizup.profile.domain.model.PresenceRules;
 import io.github.quizup.profile.domain.model.PresenceStatus;
 import io.github.quizup.profile.domain.port.in.PresenceUseCase;
+import io.github.quizup.profile.domain.port.out.PresenceLeasePort;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import org.axonframework.eventhandling.gateway.EventGateway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Présence joueur pilotée par le cycle de vie de la session temps réel STOMP **du BFF**.
+ * Présence joueur adossée à des <b>leases de session</b> dans le store chaud (Redis, source de
+ * vérité) et à une projection durable en base.
  *
- * <p>Le BFF (seule surface STOMP) signale les connexions/déconnexions via les commandes
- * {@code PresenceCommand}. Une session ouverte bascule le joueur {@code ONLINE} ; la fermeture
- * de la dernière session arme une échéance de grâce en base ({@code offline_deadline_at}),
- * confirmée par le balayeur périodique : plus de deadline Axon (le délai est un simple TTL,
- * rejouable et multi-instances).</p>
+ * <p>Le BFF (seule surface STOMP) signale les connexions/déconnexions et renouvelle les leases
+ * de ses sessions locales (heartbeat batch). La fermeture de la dernière session arme la grâce
+ * de déconnexion ; un lease non renouvelé expire (crash, coupure half-open). Le balayeur
+ * périodique réclame les échéances dépassées sans session vivante et publie
+ * {@code PlayerWentOfflineEvent} — idempotent et sûr entre instances.</p>
  */
 @Service
 public class PresenceService implements PresenceUseCase {
 
+    private static final Logger logger = LoggerFactory.getLogger(PresenceService.class);
+
     private final PresenceRepositoryPort presenceRepositoryPort;
+    private final PresenceLeasePort presenceLeasePort;
     private final EventGateway eventGateway;
 
     public PresenceService(PresenceRepositoryPort presenceRepositoryPort,
+                           PresenceLeasePort presenceLeasePort,
                            EventGateway eventGateway) {
         this.presenceRepositoryPort = presenceRepositoryPort;
+        this.presenceLeasePort = presenceLeasePort;
         this.eventGateway = eventGateway;
     }
 
     @Override
     public PlayerPresence sessionConnected(String sessionId, String userId, String instanceId) {
-        Optional<PlayerPresence> existing = presenceRepositoryPort.findById(userId);
-        boolean wasOnline = existing.map(PlayerPresence::isOnline).orElse(false);
-
-        presenceRepositoryPort.addSession(sessionId, userId, instanceId);
+        boolean becameOnline = presenceLeasePort.openSession(userId, sessionId);
+        if (!becameOnline) {
+            return get(userId);
+        }
 
         Instant now = Instant.now();
-        PlayerPresence presence = existing
+        PlayerPresence presence = presenceRepositoryPort.findById(userId)
                 .map(current -> current.toBuilder()
                         .status(PresenceStatus.ONLINE)
                         .lastSeenAt(now)
-                        .offlineDeadlineAt(null)
                         .build())
                 .orElseGet(() -> PlayerPresence.builder()
                         .userId(userId)
                         .status(PresenceStatus.ONLINE)
                         .lastSeenAt(now)
-                        .offlineDeadlineAt(null)
                         .build());
-
         PlayerPresence saved = presenceRepositoryPort.save(presence);
 
-        if (!wasOnline) {
-            eventGateway.publish(new PresenceEvent.PlayerWentOnlineEvent(userId, now));
-        }
+        eventGateway.publish(new PresenceEvent.PlayerWentOnlineEvent(userId, now));
         return saved;
     }
 
     @Override
     public PlayerPresence sessionDisconnected(String sessionId, String userId) {
-        presenceRepositoryPort.removeSession(sessionId);
-
-        if (presenceRepositoryPort.countSessions(userId) == 0) {
-            // Dernière session fermée : on fige le « last seen » et on arme l'échéance de grâce ;
-            // le balayeur confirmera le passage hors ligne si aucune reconnexion n'intervient.
+        boolean stillAlive = presenceLeasePort.closeSession(userId, sessionId);
+        if (!stillAlive) {
+            // Dernière session fermée : on fige le « last seen » ; le balayeur confirmera le
+            // passage hors ligne si aucune reconnexion n'intervient pendant la grâce.
             Instant now = Instant.now();
             presenceRepositoryPort.findById(userId).ifPresent(current ->
-                    presenceRepositoryPort.save(current.toBuilder()
-                            .lastSeenAt(now)
-                            .offlineDeadlineAt(now.plus(PresenceRules.DISCONNECT_GRACE))
-                            .build()));
+                    presenceRepositoryPort.save(current.toBuilder().lastSeenAt(now).build()));
         }
-
         return get(userId);
     }
 
@@ -88,39 +85,29 @@ public class PresenceService implements PresenceUseCase {
     }
 
     @Override
-    public void resetInstanceSessions(String instanceId, Instant startedAt) {
-        List<String> affectedUsers = presenceRepositoryPort.userIdsByInstanceBefore(instanceId, startedAt);
-        presenceRepositoryPort.deleteSessionsByInstanceBefore(instanceId, startedAt);
-
-        Instant now = Instant.now();
-        affectedUsers.stream()
-                .filter(userId -> presenceRepositoryPort.countSessions(userId) == 0)
-                .forEach(userId -> presenceRepositoryPort.findById(userId).ifPresent(current ->
-                        presenceRepositoryPort.save(current.toBuilder()
-                                .lastSeenAt(now)
-                                .offlineDeadlineAt(now.plus(PresenceRules.DISCONNECT_GRACE))
-                                .build())));
+    public void renewSessions(List<String> sessionIds) {
+        presenceLeasePort.renewSessions(sessionIds);
     }
 
     @Override
     public void expireOfflineDeadlines() {
-        Instant now = Instant.now();
-        presenceRepositoryPort.findDueOffline(now).forEach(presence -> {
-            if (presenceRepositoryPort.markOffline(presence.userId(), now)) {
+        for (String userId : presenceLeasePort.claimDueOffline(Instant.now())) {
+            presenceRepositoryPort.findById(userId).ifPresentOrElse(current -> {
+                presenceRepositoryPort.save(current.toBuilder()
+                        .status(PresenceStatus.OFFLINE)
+                        .build());
                 eventGateway.publish(new PresenceEvent.PlayerWentOfflineEvent(
-                        presence.userId(),
-                        presence.lastSeenAt()
-                ));
-            }
-        });
+                        userId,
+                        current.lastSeenAt() != null ? current.lastSeenAt() : Instant.now()));
+            }, () -> logger.warn("Passage hors ligne réclamé pour un joueur sans projection: userId={}", userId));
+        }
     }
 
-    private PlayerPresence offline(String userId) {
+    private static PlayerPresence offline(String userId) {
         return PlayerPresence.builder()
                 .userId(userId)
                 .status(PresenceStatus.OFFLINE)
                 .lastSeenAt(null)
-                .offlineDeadlineAt(null)
                 .build();
     }
 }

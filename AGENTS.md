@@ -26,16 +26,18 @@ honorifique et badges, attribués de façon idempotente à la fin de chaque duel
 `GameEndedEvent` de `quizup-game`). L'agrégat `PlayerProgressAggregate` est identifié par
 `progress:<userId>` (namespacé pour ne pas entrer en collision avec le `ProfileAggregate`).
 
-Il expose aussi la **présence joueur** (`/api/presence`) : read-model éphémère piloté par le cycle
-de vie des **sessions temps réel STOMP** (connexion/déconnexion), utilisé pour les pastilles
-« en ligne » et le forfait des duels. Plus de battement de cœur ni de polling.
+Il expose aussi la **présence joueur** (`/api/presence`) : **leases de session** dans le store
+chaud Redis (source de vérité `ONLINE`/`OFFLINE`), pilotés par le cycle de vie des sessions
+temps réel STOMP (connexion/déconnexion) et un heartbeat batch du BFF
+(`RenewPresenceSessionsCommand`). Utilisé pour les pastilles « en ligne » et le forfait des duels.
 
-**Passage hors ligne — TTL en base + balayeur** (pas de deadline Axon) : la fermeture de la
-dernière session arme `presence_entry.offline_deadline_at` (+15 s de grâce) ; un balayeur
-périodique (`PresenceOfflineSweeper`, 5 s) confirme la transition par un `UPDATE` conditionnel
-(idempotent, multi-instances) et publie `PlayerWentOfflineEvent`. Les sessions portent
-`instance_id` : au démarrage, le BFF purge ses propres sessions antérieures à son boot
-(`ResetInstanceSessionsCommand`), sans toucher aux autres instances ni aux connexions récentes.
+**Passage hors ligne — leases TTL + balayeur** (pas de deadline Axon) : chaque session est un
+lease `presence:session:{id}` (TTL 30 s) renouvelé par le BFF (1 commande batch /10 s/instance) ;
+la fermeture de la dernière session arme `PresenceRules.DISCONNECT_GRACE` (+15 s), et un lease
+non renouvelé (crash, coupure half-open) expire. Le balayeur (`PresenceOfflineSweeper`, 5 s)
+réclame atomiquement les échéances sans session vivante (script Lua, sûr entre instances) et
+publie `PlayerWentOfflineEvent`. `presence_entry` devient une projection durable des transitions
+(`lastSeenAt`) ; `ResetInstanceSessionsCommand` est un no-op conservé le temps du rollout.
 Les commandes de présence du BFF sont retentées tant que le routage distribué n'est pas prêt.
 
 **Package** : `io.github.quizup.profile`
