@@ -1,3 +1,9 @@
+## [3.1.2](https://github.com/quizup-organization/quizup-profile/compare/v3.1.1...v3.1.2) (2026-10-07)
+
+### Reverts
+
+* Revert "feat(presence): leases de session redis (source de verite de la presence)" ([e0c4395](https://github.com/quizup-organization/quizup-profile/commit/e0c4395b3aec41cd5812a721760b1851b6ab4cd6))
+
 ## [3.1.1](https://github.com/quizup-organization/quizup-profile/compare/v3.1.0...v3.1.1) (2026-10-07)
 
 ### Bug Fixes
