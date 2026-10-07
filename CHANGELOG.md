@@ -1,3 +1,9 @@
+## [3.1.0](https://github.com/quizup-organization/quizup-profile/compare/v3.0.0...v3.1.0) (2026-10-07)
+
+### Features
+
+* **presence:** leases de session redis (source de verite de la presence) ([f60b09a](https://github.com/quizup-organization/quizup-profile/commit/f60b09a9db9b80a5276ae232484a35f086c8ad18))
+
 ## [3.0.0](https://github.com/quizup-organization/quizup-profile/compare/v2.1.0...v3.0.0) (2026-09-30)
 
 ### ⚠ BREAKING CHANGES
