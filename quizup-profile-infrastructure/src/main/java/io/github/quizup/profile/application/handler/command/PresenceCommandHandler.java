@@ -6,10 +6,9 @@ import org.axonframework.commandhandling.CommandHandler;
 import org.springframework.stereotype.Component;
 
 /**
- * Expose le cycle de vie des sessions temps réel sur le bus de commandes distribué : le BFF
+ * Expose les transitions de session temps réel sur le bus de commandes distribué : le BFF
  * (seule surface STOMP) dispatche {@link PresenceCommand.ConnectPlayerCommand} /
- * {@link PresenceCommand.DisconnectPlayerCommand} et le heartbeat batch
- * {@link PresenceCommand.RenewPresenceSessionsCommand}.
+ * {@link PresenceCommand.DisconnectPlayerCommand} / {@link PresenceCommand.ResetInstanceSessionsCommand}.
  */
 @Component
 public class PresenceCommandHandler {
@@ -31,17 +30,7 @@ public class PresenceCommandHandler {
     }
 
     @CommandHandler
-    public void handle(PresenceCommand.RenewPresenceSessionsCommand command) {
-        presenceUseCase.renewSessions(command.sessionIds());
-    }
-
-    /**
-     * @deprecated Plus envoyée par le BFF (leases TTL) ; handler no-op conservé le temps du
-     * rollout pour les anciennes instances BFF encore en service.
-     */
-    @Deprecated
-    @CommandHandler
     public void handle(PresenceCommand.ResetInstanceSessionsCommand command) {
-        // no-op volontaire
+        presenceUseCase.resetInstanceSessions(command.instanceId(), command.startedAt());
     }
 }

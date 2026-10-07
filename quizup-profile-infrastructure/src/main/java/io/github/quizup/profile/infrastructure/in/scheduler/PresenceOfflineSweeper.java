@@ -5,9 +5,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Confirme périodiquement les passages hors ligne arrivés à échéance dans le store chaud (leases
- * non renouvelés ou grâce de déconnexion dépassée). Un simple balayage idempotent remplace les
- * deadlines par déconnexion : rejouable, multi-instances et indépendant de l'event bus.
+ * Confirme périodiquement les passages hors ligne arrivés à échéance (TTL en base). Un simple
+ * balayage idempotent remplace les deadlines par déconnexion : rejouable, multi-instances et
+ * indépendant de l'event bus.
  */
 @Component
 public class PresenceOfflineSweeper {

@@ -6,21 +6,17 @@ import io.github.quizup.profile.domain.event.PresenceEvent;
 import io.github.quizup.profile.domain.model.PlayerPresence;
 import io.github.quizup.profile.domain.model.PresenceRules;
 import io.github.quizup.profile.domain.model.PresenceStatus;
-import io.github.quizup.profile.domain.port.out.PresenceLeasePort;
 import io.github.quizup.profile.domain.port.out.PresenceRepositoryPort;
 import org.axonframework.eventhandling.gateway.EventGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,22 +25,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * Tests de l'orchestration présence : leases (store chaud) + projection durable.
- */
 class PresenceServiceTest {
 
     private InMemoryPresenceRepository repository;
-    private InMemoryPresenceLease lease;
     private EventGateway eventGateway;
     private PresenceService service;
 
     @BeforeEach
     void setUp() {
         repository = new InMemoryPresenceRepository();
-        lease = new InMemoryPresenceLease();
         eventGateway = mock(EventGateway.class);
-        service = new PresenceService(repository, lease, eventGateway);
+        service = new PresenceService(repository, eventGateway);
     }
 
     @Test
@@ -53,6 +44,7 @@ class PresenceServiceTest {
 
         assertThat(presence.status()).isEqualTo(PresenceStatus.ONLINE);
         assertThat(presence.lastSeenAt()).isNotNull();
+        assertThat(presence.offlineDeadlineAt()).isNull();
         verify(eventGateway, times(1)).publish(any(PresenceEvent.PlayerWentOnlineEvent.class));
     }
 
@@ -65,31 +57,33 @@ class PresenceServiceTest {
     }
 
     @Test
-    void closingLastSessionKeepsPlayerOnlineDuringGrace() {
+    void closingLastSessionArmsOfflineDeadlineAndStaysOnline() {
         service.sessionConnected("s1", "u1", "bff:1");
 
         PlayerPresence presence = service.sessionDisconnected("s1", "u1");
 
         assertThat(presence.status()).isEqualTo(PresenceStatus.ONLINE);
         assertThat(presence.lastSeenAt()).isNotNull();
-        assertThat(lease.deadlineOf("u1")).isNotNull();
+        assertThat(presence.offlineDeadlineAt())
+                .isAfter(Instant.now().plusSeconds(10))
+                .isBefore(Instant.now().plus(PresenceRules.DISCONNECT_GRACE).plusSeconds(5));
     }
 
     @Test
-    void closingSessionWithAnotherOpenSessionArmsNoDeadline() {
+    void closingSessionWithAnotherOpenSessionDoesNotArmDeadline() {
         service.sessionConnected("s1", "u1", "bff:1");
         service.sessionConnected("s2", "u1", "bff:1");
 
         service.sessionDisconnected("s1", "u1");
 
-        assertThat(lease.deadlineOf("u1")).isNull();
+        assertThat(service.get("u1").offlineDeadlineAt()).isNull();
     }
 
     @Test
     void expiryTurnsPlayerOfflineAndPublishesEvent() {
         service.sessionConnected("s1", "u1", "bff:1");
         service.sessionDisconnected("s1", "u1");
-        lease.forceDeadlineInThePast("u1");
+        repository.forceDeadlineInThePast("u1");
 
         service.expireOfflineDeadlines();
 
@@ -101,7 +95,7 @@ class PresenceServiceTest {
     void expiryIsNoOpWhenReconnected() {
         service.sessionConnected("s1", "u1", "bff:1");
         service.sessionDisconnected("s1", "u1");
-        lease.forceDeadlineInThePast("u1");
+        repository.forceDeadlineInThePast("u1");
         service.sessionConnected("s2", "u1", "bff:1");
 
         service.expireOfflineDeadlines();
@@ -111,10 +105,26 @@ class PresenceServiceTest {
     }
 
     @Test
-    void renewDelegatesToLeaseStore() {
-        service.renewSessions(List.of("s1", "s2"));
+    void resetInstanceSessionsPurgesOnlyThatInstanceAndArmsDeadlines() {
+        service.sessionConnected("s1", "u1", "bff:1");
+        service.sessionConnected("s2", "u2", "bff:2");
 
-        assertThat(lease.renewed).containsExactly("s1", "s2");
+        service.resetInstanceSessions("bff:1", Instant.now().plusSeconds(1));
+
+        assertThat(repository.countSessions("u1")).isZero();
+        assertThat(repository.countSessions("u2")).isEqualTo(1);
+        assertThat(service.get("u1").offlineDeadlineAt()).isNotNull();
+        assertThat(service.get("u2").offlineDeadlineAt()).isNull();
+    }
+
+    @Test
+    void resetInstanceSessionsKeepsSessionsOpenedAfterStart() {
+        service.sessionConnected("s1", "u1", "bff:1");
+
+        service.resetInstanceSessions("bff:1", Instant.now().minusSeconds(1));
+
+        assertThat(repository.countSessions("u1")).isEqualTo(1);
+        assertThat(service.get("u1").offlineDeadlineAt()).isNull();
     }
 
     @Test
@@ -125,6 +135,14 @@ class PresenceServiceTest {
     private static final class InMemoryPresenceRepository implements PresenceRepositoryPort {
 
         private final Map<String, PlayerPresence> presences = new HashMap<>();
+        private final Map<String, String> sessionOwners = new HashMap<>();
+        private final Map<String, String> sessionInstances = new HashMap<>();
+        private final Map<String, Instant> sessionConnectedAt = new HashMap<>();
+
+        void forceDeadlineInThePast(String userId) {
+            presences.computeIfPresent(userId, (id, presence) ->
+                    presence.toBuilder().offlineDeadlineAt(Instant.now().minusSeconds(1)).build());
+        }
 
         @Override
         public PlayerPresence save(PlayerPresence presence) {
@@ -149,66 +167,71 @@ class PresenceServiceTest {
                     .filter(Objects::nonNull)
                     .toList();
         }
-    }
-
-    private static final class InMemoryPresenceLease implements PresenceLeasePort {
-
-        private final Map<String, Set<String>> liveSessions = new HashMap<>();
-        private final Map<String, Instant> offlineDeadlines = new HashMap<>();
-        private final List<String> renewed = new ArrayList<>();
 
         @Override
-        public boolean openSession(String userId, String sessionId) {
-            boolean wasOnline = isOnline(userId);
-            liveSessions.computeIfAbsent(userId, key -> new HashSet<>()).add(sessionId);
-            offlineDeadlines.remove(userId);
-            return !wasOnline;
+        public void addSession(String sessionId, String userId, String instanceId) {
+            sessionOwners.put(sessionId, userId);
+            sessionInstances.put(sessionId, instanceId);
+            sessionConnectedAt.put(sessionId, Instant.now());
         }
 
         @Override
-        public boolean closeSession(String userId, String sessionId) {
-            Set<String> sessions = liveSessions.computeIfAbsent(userId, key -> new HashSet<>());
-            sessions.remove(sessionId);
-            if (sessions.isEmpty()) {
-                offlineDeadlines.put(userId, Instant.now().plus(PresenceRules.DISCONNECT_GRACE));
+        public void removeSession(String sessionId) {
+            sessionOwners.remove(sessionId);
+            sessionInstances.remove(sessionId);
+            sessionConnectedAt.remove(sessionId);
+        }
+
+        @Override
+        public long countSessions(String userId) {
+            return sessionOwners.values().stream().filter(userId::equals).count();
+        }
+
+        @Override
+        public List<String> userIdsByInstanceBefore(String instanceId, Instant before) {
+            return sessionInstances.entrySet().stream()
+                    .filter(entry -> instanceId.equals(entry.getValue()))
+                    .filter(entry -> sessionConnectedAt.get(entry.getKey()).isBefore(before))
+                    .map(entry -> sessionOwners.get(entry.getKey()))
+                    .distinct()
+                    .toList();
+        }
+
+        @Override
+        public void deleteSessionsByInstanceBefore(String instanceId, Instant before) {
+            List<String> sessionIds = sessionInstances.entrySet().stream()
+                    .filter(entry -> instanceId.equals(entry.getValue()))
+                    .filter(entry -> sessionConnectedAt.get(entry.getKey()).isBefore(before))
+                    .map(Map.Entry::getKey)
+                    .toList();
+            sessionIds.forEach(this::removeSession);
+        }
+
+        @Override
+        public List<PlayerPresence> findDueOffline(Instant now) {
+            return presences.values().stream()
+                    .filter(presence -> presence.status() == PresenceStatus.ONLINE)
+                    .filter(presence -> presence.offlineDeadlineAt() != null
+                            && !presence.offlineDeadlineAt().isAfter(now))
+                    .filter(presence -> countSessions(presence.userId()) == 0)
+                    .toList();
+        }
+
+        @Override
+        public boolean markOffline(String userId, Instant now) {
+            PlayerPresence presence = presences.get(userId);
+            if (presence == null
+                    || presence.status() != PresenceStatus.ONLINE
+                    || presence.offlineDeadlineAt() == null
+                    || presence.offlineDeadlineAt().isAfter(now)
+                    || countSessions(userId) > 0) {
                 return false;
             }
+            presences.put(userId, presence.toBuilder()
+                    .status(PresenceStatus.OFFLINE)
+                    .offlineDeadlineAt(null)
+                    .build());
             return true;
-        }
-
-        @Override
-        public void renewSessions(List<String> sessionIds) {
-            renewed.addAll(sessionIds);
-        }
-
-        @Override
-        public List<String> claimDueOffline(Instant now) {
-            List<String> claimed = new ArrayList<>();
-            for (Map.Entry<String, Instant> entry : Map.copyOf(offlineDeadlines).entrySet()) {
-                String userId = entry.getKey();
-                if (!entry.getValue().isAfter(now) && !hasLiveSessions(userId)) {
-                    offlineDeadlines.remove(userId);
-                    liveSessions.remove(userId);
-                    claimed.add(userId);
-                }
-            }
-            return claimed;
-        }
-
-        void forceDeadlineInThePast(String userId) {
-            offlineDeadlines.put(userId, Instant.now().minusSeconds(1));
-        }
-
-        Instant deadlineOf(String userId) {
-            return offlineDeadlines.get(userId);
-        }
-
-        private boolean hasLiveSessions(String userId) {
-            return !liveSessions.getOrDefault(userId, Set.of()).isEmpty();
-        }
-
-        private boolean isOnline(String userId) {
-            return hasLiveSessions(userId) || offlineDeadlines.containsKey(userId);
         }
     }
 }
