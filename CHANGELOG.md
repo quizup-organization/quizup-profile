@@ -1,3 +1,9 @@
+## [3.2.0](https://github.com/quizup-organization/quizup-profile/compare/v3.1.2...v3.2.0) (2026-10-08)
+
+### Features
+
+* **profile:** bail de session de presence (TTL + renouvellement BFF) ([e8f7fd5](https://github.com/quizup-organization/quizup-profile/commit/e8f7fd5aa85d5fa9b800c3fb428e84b90d545384))
+
 ## [3.1.2](https://github.com/quizup-organization/quizup-profile/compare/v3.1.1...v3.1.2) (2026-10-07)
 
 ### Reverts
