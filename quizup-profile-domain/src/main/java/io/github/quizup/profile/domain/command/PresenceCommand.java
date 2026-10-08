@@ -1,6 +1,7 @@
 package io.github.quizup.profile.domain.command;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Commandes de présence : émises par le BFF (seule surface STOMP) pour signaler le cycle de vie
@@ -30,6 +31,16 @@ public interface PresenceCommand {
     record ResetInstanceSessionsCommand(
             String instanceId,
             Instant startedAt
+    ) implements PresenceCommand {
+    }
+
+    /**
+     * Renouvelle le bail des sessions locales du BFF (heartbeat batch). Une session sans
+     * renouvellement pendant {@code PresenceRules.SESSION_LEASE_TTL} est considérée morte par le
+     * balayeur (crash d'instance, partition réseau).
+     */
+    record RenewPresenceSessionsCommand(
+            List<String> sessionIds
     ) implements PresenceCommand {
     }
 }

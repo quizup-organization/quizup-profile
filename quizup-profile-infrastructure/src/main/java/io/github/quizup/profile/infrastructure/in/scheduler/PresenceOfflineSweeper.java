@@ -5,9 +5,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Confirme périodiquement les passages hors ligne arrivés à échéance (TTL en base). Un simple
- * balayage idempotent remplace les deadlines par déconnexion : rejouable, multi-instances et
- * indépendant de l'event bus.
+ * Balayage périodique de la présence (TTL en base) :
+ * <ol>
+ *   <li>supprime les sessions dont le bail ({@code last_seen_at}) n'a pas été renouvelé par le
+ *       BFF depuis {@code SESSION_LEASE_TTL} (instance disparue, client mort) ;</li>
+ *   <li>confirme les passages hors ligne arrivés à échéance de grâce (aucune session restante)
+ *       et publie les événements correspondants.</li>
+ * </ol>
+ * Simple balayage idempotent, rejouable, multi-instances et indépendant de l'event bus.
  */
 @Component
 public class PresenceOfflineSweeper {
@@ -20,6 +25,7 @@ public class PresenceOfflineSweeper {
 
     @Scheduled(fixedDelayString = "${app.presence.sweep-interval-ms:5000}")
     public void sweep() {
+        presenceUseCase.expireStaleSessions();
         presenceUseCase.expireOfflineDeadlines();
     }
 }

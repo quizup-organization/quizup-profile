@@ -103,6 +103,34 @@ public class PresenceService implements PresenceUseCase {
     }
 
     @Override
+    public void renewSessions(List<String> sessionIds) {
+        if (sessionIds == null || sessionIds.isEmpty()) {
+            return;
+        }
+        presenceRepositoryPort.touchSessions(sessionIds, Instant.now());
+    }
+
+    @Override
+    public void expireStaleSessions() {
+        Instant now = Instant.now();
+        Instant cutoff = now.minus(PresenceRules.SESSION_LEASE_TTL);
+        List<String> affectedUsers = presenceRepositoryPort.findStaleSessionUserIds(cutoff);
+        if (affectedUsers.isEmpty()) {
+            return;
+        }
+        presenceRepositoryPort.deleteStaleSessions(cutoff);
+
+        Instant deadline = now.plus(PresenceRules.DISCONNECT_GRACE);
+        affectedUsers.stream()
+                .filter(userId -> presenceRepositoryPort.countSessions(userId) == 0)
+                .forEach(userId -> presenceRepositoryPort.findById(userId)
+                        .filter(PlayerPresence::isOnline)
+                        .ifPresent(current -> presenceRepositoryPort.save(current.toBuilder()
+                                .offlineDeadlineAt(deadline)
+                                .build())));
+    }
+
+    @Override
     public void expireOfflineDeadlines() {
         Instant now = Instant.now();
         presenceRepositoryPort.findDueOffline(now).forEach(presence -> {

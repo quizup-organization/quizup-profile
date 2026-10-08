@@ -2,6 +2,8 @@ package io.github.quizup.profile.domain.port.in;
 
 import io.github.quizup.profile.domain.model.PlayerPresence;
 
+import java.util.List;
+
 /**
  * Présence joueur : ouverture/fermeture de session temps réel, confirmation hors ligne à
  * l'échéance de grâce, lecture unitaire. La présence est un read-model éphémère (pas d'agrégat) :
@@ -39,4 +41,16 @@ public interface PresenceUseCase {
      * instances (transition conditionnelle en base).
      */
     void expireOfflineDeadlines();
+
+    /**
+     * Renouvelle le bail ({@code last_seen_at}) des sessions fournies — heartbeat batch du BFF.
+     */
+    void renewSessions(List<String> sessionIds);
+
+    /**
+     * Supprime les sessions sans renouvellement depuis {@code PresenceRules.SESSION_LEASE_TTL}
+     * (instance BFF disparue) et arme l'échéance hors ligne des joueurs qui n'ont plus de session.
+     * Idempotent et sûr entre instances.
+     */
+    void expireStaleSessions();
 }

@@ -12,15 +12,17 @@ import java.time.Instant;
 
 /**
  * Session temps réel STOMP d'un joueur (read-model éphémère), rattachée à l'instance BFF qui la
- * porte : la présence est dérivée du nombre de sessions ouvertes, et un redémarrage d'instance
- * purge uniquement les siennes.
+ * porte : la présence est dérivée du nombre de sessions ouvertes, un redémarrage d'instance purge
+ * les siennes, et {@code lastSeenAt} (bail renouvelé par le BFF) permet au balayeur de supprimer
+ * les sessions d'une instance disparue.
  */
 @Getter
 @Setter
 @Entity
 @Table(name = "presence_session", indexes = {
         @Index(name = "idx_presence_session_user", columnList = "user_id"),
-        @Index(name = "idx_presence_session_instance", columnList = "instance_id")
+        @Index(name = "idx_presence_session_instance", columnList = "instance_id"),
+        @Index(name = "idx_presence_session_last_seen", columnList = "last_seen_at")
 })
 public class PresenceSessionEntity {
 
@@ -36,4 +38,7 @@ public class PresenceSessionEntity {
 
     @Column(name = "connected_at", nullable = false)
     private Instant connectedAt;
+
+    @Column(name = "last_seen_at", nullable = false)
+    private Instant lastSeenAt;
 }

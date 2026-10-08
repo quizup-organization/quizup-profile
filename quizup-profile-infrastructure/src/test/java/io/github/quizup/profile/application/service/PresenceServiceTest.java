@@ -128,6 +128,49 @@ class PresenceServiceTest {
     }
 
     @Test
+    void staleSessionIsPurgedAndArmsOfflineDeadline() {
+        service.sessionConnected("s1", "u1", "bff:1");
+        repository.ageSession("s1", PresenceRules.SESSION_LEASE_TTL.plusSeconds(10));
+
+        service.expireStaleSessions();
+
+        assertThat(repository.countSessions("u1")).isZero();
+        assertThat(service.get("u1").status()).isEqualTo(PresenceStatus.ONLINE);
+        assertThat(service.get("u1").offlineDeadlineAt()).isNotNull();
+
+        repository.forceDeadlineInThePast("u1");
+        service.expireOfflineDeadlines();
+
+        assertThat(service.get("u1").status()).isEqualTo(PresenceStatus.OFFLINE);
+        verify(eventGateway).publish(any(PresenceEvent.PlayerWentOfflineEvent.class));
+    }
+
+    @Test
+    void renewedSessionSurvivesStaleSweep() {
+        service.sessionConnected("s1", "u1", "bff:1");
+        repository.ageSession("s1", PresenceRules.SESSION_LEASE_TTL.plusSeconds(10));
+
+        service.renewSessions(List.of("s1"));
+        service.expireStaleSessions();
+
+        assertThat(repository.countSessions("u1")).isEqualTo(1);
+        assertThat(service.get("u1").status()).isEqualTo(PresenceStatus.ONLINE);
+        assertThat(service.get("u1").offlineDeadlineAt()).isNull();
+    }
+
+    @Test
+    void staleSessionIsKeptWhenAnotherSessionIsAlive() {
+        service.sessionConnected("s1", "u1", "bff:1");
+        service.sessionConnected("s2", "u1", "bff:1");
+        repository.ageSession("s1", PresenceRules.SESSION_LEASE_TTL.plusSeconds(10));
+
+        service.expireStaleSessions();
+
+        assertThat(repository.countSessions("u1")).isEqualTo(1);
+        assertThat(service.get("u1").offlineDeadlineAt()).isNull();
+    }
+
+    @Test
     void unknownPlayerIsOffline() {
         assertThat(service.get("unknown").status()).isEqualTo(PresenceStatus.OFFLINE);
     }
@@ -138,10 +181,15 @@ class PresenceServiceTest {
         private final Map<String, String> sessionOwners = new HashMap<>();
         private final Map<String, String> sessionInstances = new HashMap<>();
         private final Map<String, Instant> sessionConnectedAt = new HashMap<>();
+        private final Map<String, Instant> sessionLastSeenAt = new HashMap<>();
 
         void forceDeadlineInThePast(String userId) {
             presences.computeIfPresent(userId, (id, presence) ->
                     presence.toBuilder().offlineDeadlineAt(Instant.now().minusSeconds(1)).build());
+        }
+
+        void ageSession(String sessionId, java.time.Duration age) {
+            sessionLastSeenAt.computeIfPresent(sessionId, (id, seen) -> Instant.now().minus(age));
         }
 
         @Override
@@ -170,9 +218,11 @@ class PresenceServiceTest {
 
         @Override
         public void addSession(String sessionId, String userId, String instanceId) {
+            Instant now = Instant.now();
             sessionOwners.put(sessionId, userId);
             sessionInstances.put(sessionId, instanceId);
-            sessionConnectedAt.put(sessionId, Instant.now());
+            sessionConnectedAt.put(sessionId, now);
+            sessionLastSeenAt.put(sessionId, now);
         }
 
         @Override
@@ -180,11 +230,36 @@ class PresenceServiceTest {
             sessionOwners.remove(sessionId);
             sessionInstances.remove(sessionId);
             sessionConnectedAt.remove(sessionId);
+            sessionLastSeenAt.remove(sessionId);
         }
 
         @Override
         public long countSessions(String userId) {
             return sessionOwners.values().stream().filter(userId::equals).count();
+        }
+
+        @Override
+        public void touchSessions(List<String> sessionIds, Instant now) {
+            sessionIds.forEach(sessionId -> sessionLastSeenAt.computeIfPresent(sessionId, (id, seen) -> now));
+        }
+
+        @Override
+        public List<String> findStaleSessionUserIds(Instant before) {
+            return sessionLastSeenAt.entrySet().stream()
+                    .filter(entry -> entry.getValue().isBefore(before))
+                    .map(entry -> sessionOwners.get(entry.getKey()))
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
+        }
+
+        @Override
+        public void deleteStaleSessions(Instant before) {
+            List<String> staleSessions = sessionLastSeenAt.entrySet().stream()
+                    .filter(entry -> entry.getValue().isBefore(before))
+                    .map(Map.Entry::getKey)
+                    .toList();
+            staleSessions.forEach(this::removeSession);
         }
 
         @Override

@@ -33,6 +33,15 @@ public interface PresenceRepositoryPort {
     /** Nombre de sessions temps réel encore ouvertes pour un joueur. */
     long countSessions(String userId);
 
+    /** Renouvelle le bail ({@code last_seen_at}) des sessions fournies (heartbeat batch du BFF). */
+    void touchSessions(List<String> sessionIds, Instant now);
+
+    /** Joueurs ayant au moins une session sans renouvellement depuis {@code before}. */
+    List<String> findStaleSessionUserIds(Instant before);
+
+    /** Supprime les sessions sans renouvellement depuis {@code before} (instance BFF disparue). */
+    void deleteStaleSessions(Instant before);
+
     /** Joueurs ayant au moins une session ouverte sur l'instance BFF donnée, ouverte avant {@code before}. */
     List<String> userIdsByInstanceBefore(String instanceId, Instant before);
 

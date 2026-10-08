@@ -27,16 +27,24 @@ honorifique et badges, attribués de façon idempotente à la fin de chaque duel
 `progress:<userId>` (namespacé pour ne pas entrer en collision avec le `ProfileAggregate`).
 
 Il expose aussi la **présence joueur** (`/api/presence`) : read-model éphémère piloté par le cycle
-de vie des **sessions temps réel STOMP** (connexion/déconnexion), utilisé pour les pastilles
-« en ligne » et le forfait des duels. Plus de battement de cœur ni de polling.
+de vie des **sessions temps réel STOMP** (connexion/déconnexion) et les **heartbeats** du broker
+(le BFF ferme un client silencieux en ~30 s) — utilisé pour les pastilles « en ligne » et le
+forfait des duels. Côté web, un onglet non visible est déconnecté proprement ; la grâce de 15 s
+absorbe les bascules rapides.
 
-**Passage hors ligne — TTL en base + balayeur** (pas de deadline Axon) : la fermeture de la
-dernière session arme `presence_entry.offline_deadline_at` (+15 s de grâce) ; un balayeur
-périodique (`PresenceOfflineSweeper`, 5 s) confirme la transition par un `UPDATE` conditionnel
-(idempotent, multi-instances) et publie `PlayerWentOfflineEvent`. Les sessions portent
-`instance_id` : au démarrage, le BFF purge ses propres sessions antérieures à son boot
-(`ResetInstanceSessionsCommand`), sans toucher aux autres instances ni aux connexions récentes.
-Les commandes de présence du BFF sont retentées tant que le routage distribué n'est pas prêt.
+**Passage hors ligne — TTL en base + balayeur** (pas de deadline Axon) :
+
+- la fermeture de la dernière session arme `presence_entry.offline_deadline_at` (+15 s de grâce) ;
+  un balayeur périodique (`PresenceOfflineSweeper`, 5 s) confirme la transition par un `UPDATE`
+  conditionnel (idempotent, multi-instances) et publie `PlayerWentOfflineEvent` ;
+- **bail de session** : chaque session porte `last_seen_at`, renouvelé par le BFF en batch
+  (`RenewPresenceSessionsCommand`, toutes les 10 s). Une session sans renouvellement depuis
+  `SESSION_LEASE_TTL` (30 s) est supprimée par le balayeur (crash d'instance, partition réseau),
+  ce qui évite toute session fantôme même si le BFF disparaît sans déconnexion propre ;
+- les sessions portent `instance_id` : au démarrage, le BFF purge en plus ses propres sessions
+  antérieures à son boot (`ResetInstanceSessionsCommand`) et déconnecte ses sessions locales à
+  l'arrêt (`@PreDestroy`). Les commandes de présence du BFF sont retentées tant que le routage
+  distribué n'est pas prêt.
 
 **Package** : `io.github.quizup.profile`
 

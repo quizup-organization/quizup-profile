@@ -66,11 +66,13 @@ public class PresenceRepositoryAdapter implements PresenceRepositoryPort {
     @Override
     @Transactional
     public void addSession(String sessionId, String userId, String instanceId) {
+        Instant now = Instant.now();
         PresenceSessionEntity session = new PresenceSessionEntity();
         session.setSessionId(sessionId);
         session.setUserId(userId);
         session.setInstanceId(instanceId);
-        session.setConnectedAt(Instant.now());
+        session.setConnectedAt(now);
+        session.setLastSeenAt(now);
         presenceSessionJpaRepository.save(session);
     }
 
@@ -96,6 +98,27 @@ public class PresenceRepositoryAdapter implements PresenceRepositoryPort {
     @Transactional
     public void deleteSessionsByInstanceBefore(String instanceId, Instant before) {
         presenceSessionJpaRepository.deleteByInstanceIdAndConnectedAtBefore(instanceId, before);
+    }
+
+    @Override
+    @Transactional
+    public void touchSessions(List<String> sessionIds, Instant now) {
+        if (sessionIds.isEmpty()) {
+            return;
+        }
+        presenceSessionJpaRepository.touchSessions(sessionIds, now);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> findStaleSessionUserIds(Instant before) {
+        return presenceSessionJpaRepository.findStaleSessionUserIds(before);
+    }
+
+    @Override
+    @Transactional
+    public void deleteStaleSessions(Instant before) {
+        presenceSessionJpaRepository.deleteByLastSeenAtBefore(before);
     }
 
     @Override
