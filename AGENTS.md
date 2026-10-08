@@ -3,7 +3,7 @@
 > Service **référence** des patterns hexagonaux QuizUp : agrégat + saga + projection.
 > Architecture : Axon Framework (CQRS/EDA) + JPA (projection) + JWT Resource Server (SDK).
 > Pour les règles de patterns :
-> [`../../best-practices/.backend/hexagonal-architecture.md`](../../best-practices/.backend/hexagonal-architecture.md).
+> [`../../best-practices/.backend/folder-structure.md`](../../best-practices/.backend/folder-structure.md).
 
 ---
 
