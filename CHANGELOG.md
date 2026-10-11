@@ -1,3 +1,9 @@
+## [3.2.1](https://github.com/quizup-organization/quizup-profile/compare/v3.2.0...v3.2.1) (2026-10-11)
+
+### Performance Improvements
+
+* **profile:** sagas CreateProfile/AwardProgress en fire-and-forget ([3952e61](https://github.com/quizup-organization/quizup-profile/commit/3952e6101b8b4056f5d0f3123b77835893fd1cd3))
+
 ## [3.2.0](https://github.com/quizup-organization/quizup-profile/compare/v3.1.2...v3.2.0) (2026-10-08)
 
 ### Features
