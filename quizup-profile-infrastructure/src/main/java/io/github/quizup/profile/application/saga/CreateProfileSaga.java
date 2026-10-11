@@ -44,7 +44,8 @@ public class CreateProfileSaga {
 
         logger.info("User registered, creating profile: userId={}", event.userId());
 
-        commandGateway.sendAndWait(
+        // Fire-and-forget : sendAndWait bloque le thread du tracking processor (perf).
+        commandGateway.send(
                 new ProfileCommand.CreateProfileCommand(
                         event.userId(),
                         event.email(),

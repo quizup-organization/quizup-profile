@@ -60,7 +60,8 @@ public class AwardProgressSaga {
                 ? event.player1FinalScore()
                 : event.player2FinalScore();
 
-        commandGateway.sendAndWait(new ProgressionCommand.AwardXpCommand(
+        // Fire-and-forget : sendAndWait bloque le thread du tracking processor (perf).
+        commandGateway.send(new ProgressionCommand.AwardXpCommand(
                 ProgressionRules.progressIdFor(playerId),
                 playerId,
                 event.gameId(),
