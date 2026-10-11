@@ -118,7 +118,8 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   projection, les événements antérieurs (`botGame=false`, `draw=false`) restent comptés.
 - **Activité journalière** : `ActivityProjection` alimente `progression_activity` (série
   courante/record, dernier jour actif) et `progression_activity_day` (parties par jour) depuis
-  `GameEndedEvent` ; exposée par `GET /api/profiles/{userId}/activity`.
+  `GameEndedEvent` ; capability conservée côté service mais **non exposée par le BFF pour le MVP**
+  (le panneau web a été retiré, à rebrancher plus tard).
 
 ### Vues BFF (queries dédiées)
 
