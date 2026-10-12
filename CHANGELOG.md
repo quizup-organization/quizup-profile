@@ -1,3 +1,9 @@
+## [3.5.0](https://github.com/quizup-organization/quizup-profile/compare/v3.4.0...v3.5.0) (2026-10-12)
+
+### Features
+
+* **console:** consume quizup-sdk 4.7.0 (lag, commandes en vol, snapshots, scheduled) ([ffbfe63](https://github.com/quizup-organization/quizup-profile/commit/ffbfe63a6a676973e5a86b7f39291b6e382e5078))
+
 ## [3.4.0](https://github.com/quizup-organization/quizup-profile/compare/v3.3.0...v3.4.0) (2026-10-12)
 
 ### Features
