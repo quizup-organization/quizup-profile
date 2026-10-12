@@ -1,3 +1,9 @@
+## [3.4.0](https://github.com/quizup-organization/quizup-profile/compare/v3.3.0...v3.4.0) (2026-10-12)
+
+### Features
+
+* **console:** consume quizup-sdk 4.6.0 (build-info + API interne event store/scheduled) ([d853a19](https://github.com/quizup-organization/quizup-profile/commit/d853a19f2447edfa63fb0b628427e47d128cf5dd))
+
 ## [3.3.0](https://github.com/quizup-organization/quizup-profile/compare/v3.2.1...v3.3.0) (2026-10-12)
 
 ### Features
