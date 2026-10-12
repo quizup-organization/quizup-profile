@@ -1,3 +1,9 @@
+## [3.5.1](https://github.com/quizup-organization/quizup-profile/compare/v3.5.0...v3.5.1) (2026-10-12)
+
+### Bug Fixes
+
+* **profile:** contrats game-domain 8.3.0 / identity-domain 2.5.0 (élagués) ([9912634](https://github.com/quizup-organization/quizup-profile/commit/9912634676cf9b0aa7e701db8194f129dc6af195))
+
 ## [3.5.0](https://github.com/quizup-organization/quizup-profile/compare/v3.4.0...v3.5.0) (2026-10-12)
 
 ### Features
