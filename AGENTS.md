@@ -86,7 +86,10 @@ social/matchmaking pour le pseudonyme), `ProfileExistsByIdQuery` (consommée par
 **Conso** : `quizup-identity-domain` (artifact Maven) — la saga
 `CreateProfileSaga` (`@StartSaga @SagaEventHandler(associationProperty = "userId")`) consomme
 `UserEvent.UserRegisteredEvent` via le bus Kafka partagé (transport Axon distributed). La saga est
-**idempotente** (garde sur `ProfileRepositoryPort.findById` : pas de commande si le profil existe).
+**idempotente sans lecture de projection** : `CreateProfileCommand` est idempotente dans
+`ProfileAggregate` (`@CreationPolicy(CREATE_IF_MISSING)`, no-op si le profil existe déjà) — la saga
+est replay-safe et ne dépend d'aucun read model
+(`best-practices/.backend/anti-patterns.md` § 4).
 
 **Seeding système** : `ProfileDataSeeder` (`CommandLineRunner`, `app.seed-data.enabled`) garantit
 les profils des utilisateurs système (`QuizUpConstants.SYSTEM_USER_ID`),

@@ -7,8 +7,10 @@ import io.github.quizup.profile.domain.exception.ProfileProblems;
 import io.github.quizup.profile.domain.model.ProfileRules;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
+import org.axonframework.modelling.command.AggregateCreationPolicy;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
+import org.axonframework.modelling.command.CreationPolicy;
 import org.axonframework.spring.stereotype.Aggregate;
 
 import java.time.Instant;
@@ -36,8 +38,17 @@ public class ProfileAggregate {
     protected ProfileAggregate() {
     }
 
+    /**
+     * Création idempotente ({@link CreationPolicy} {@code CREATE_IF_MISSING}) : un rejeu de la
+     * saga ou du seeding n'émet aucun nouvel événement si le profil existe déjà. La saga n'a donc
+     * plus besoin de lire une projection pour se protéger des doublons.
+     */
     @CommandHandler
-    public ProfileAggregate(ProfileCommand.CreateProfileCommand command) {
+    @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
+    public void handle(ProfileCommand.CreateProfileCommand command) {
+        if (pseudonym != null) {
+            return;
+        }
         validatePseudonym(command.userId(), command.initialPseudonym());
 
         AggregateLifecycle.apply(

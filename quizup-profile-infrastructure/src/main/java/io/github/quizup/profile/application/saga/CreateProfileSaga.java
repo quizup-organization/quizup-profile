@@ -3,47 +3,33 @@ package io.github.quizup.profile.application.saga;
 import io.github.quizup.identity.domain.event.UserEvent;
 import io.github.quizup.profile.domain.command.ProfileCommand;
 import io.github.quizup.profile.domain.model.PseudonymGenerator;
-import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * CreateProfileSaga - Orchestration : création du profil
- * dès qu'un utilisateur est enregistré par le service identity.
+ * CreateProfileSaga - Orchestration : création du profil dès qu'un utilisateur est enregistré
+ * par le service identity.
  *
- * <p>Idempotente : si le profil existe déjà (rejeu d'événement, seeding système), la commande
- * de création n'est pas renvoyée.</p>
+ * <p>Idempotente <b>sans lecture de projection</b> : la commande de création est idempotente dans
+ * l'agrégat ({@code CREATE_IF_MISSING}, no-op si le profil existe déjà). La saga ne dépend donc
+ * pas de l'état courant d'un read model (replay-safe) — voir
+ * {@code best-practices/.backend/anti-patterns.md}.</p>
  */
 @Saga
 @ProcessingGroup("create-profile-saga")
 public class CreateProfileSaga {
 
-    private static final Logger logger = LoggerFactory.getLogger(CreateProfileSaga.class);
-
     @Autowired
     private transient CommandGateway commandGateway;
-
-    @Autowired
-    private transient ProfileRepositoryPort profileRepositoryPort;
 
     @StartSaga
     @SagaEventHandler(associationProperty = "userId")
     public void on(UserEvent.UserRegisteredEvent event) {
-        if (profileRepositoryPort.findById(event.userId()).isPresent()) {
-            logger.debug("Profile already exists, skipping creation: userId={}", event.userId());
-            SagaLifecycle.end();
-            return;
-        }
-
-        logger.info("User registered, creating profile: userId={}", event.userId());
-
         // Fire-and-forget : sendAndWait bloque le thread du tracking processor (perf).
         commandGateway.send(
                 new ProfileCommand.CreateProfileCommand(

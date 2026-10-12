@@ -54,6 +54,14 @@ class ProfileAggregateTest {
     }
 
     @Test
+    void createWhenProfileAlreadyExists_emitsNoEvent() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.CreateProfileCommand("user-1", "replay@quizup.dev", "Autre"))
+                .expectNoEvents();
+    }
+
+    @Test
     void updatePseudonymByOwner_appliesPseudonymUpdatedEvent() {
         fixture
                 .given(createdProfile())
