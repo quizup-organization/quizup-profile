@@ -1,3 +1,9 @@
+## [3.6.0](https://github.com/quizup-organization/quizup-profile/compare/v3.5.1...v3.6.0) (2026-10-12)
+
+### Features
+
+* **profile:** bannière de profil (bannerUrl) ([bb133b7](https://github.com/quizup-organization/quizup-profile/commit/bb133b711474791b20dd196b3a27e07c3c34fa2b))
+
 ## [3.5.1](https://github.com/quizup-organization/quizup-profile/compare/v3.5.0...v3.5.1) (2026-10-12)
 
 ### Bug Fixes
