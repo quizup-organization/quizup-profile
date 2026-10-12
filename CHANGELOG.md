@@ -1,3 +1,9 @@
+## [3.3.0](https://github.com/quizup-organization/quizup-profile/compare/v3.2.1...v3.3.0) (2026-10-12)
+
+### Features
+
+* **console:** consume quizup-sdk 4.5.2 (DLQ Axon par défaut + agent console) ([ebc2d73](https://github.com/quizup-organization/quizup-profile/commit/ebc2d730f0929f426d0bd84c6615125d800e2263))
+
 ## [3.2.1](https://github.com/quizup-organization/quizup-profile/compare/v3.2.0...v3.2.1) (2026-10-11)
 
 ### Performance Improvements
