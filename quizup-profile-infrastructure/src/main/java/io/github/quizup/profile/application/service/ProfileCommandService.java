@@ -46,6 +46,11 @@ public class ProfileCommandService implements UpdateProfileUseCase, CreateProfil
     }
 
     @Override
+    public CompletableFuture<String> updateBanner(ProfileCommand.UpdateProfileBannerCommand command) {
+        return commandGateway.send(command);
+    }
+
+    @Override
     public CompletableFuture<String> updateLanguage(ProfileCommand.UpdateProfileLanguageCommand command) {
         return commandGateway.send(command);
     }

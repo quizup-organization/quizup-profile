@@ -162,6 +162,53 @@ class ProfileAggregateTest {
     }
 
     @Test
+    void updateBanner_appliesBannerUpdatedEvent() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateProfileBannerCommand("user-1", "user-1", "https://media.test/banner.jpg"))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ProfileEvent.ProfileBannerUpdatedEvent.class,
+                        e -> "https://media.test/banner.jpg"
+                                .equals(((ProfileEvent.ProfileBannerUpdatedEvent) e).bannerUrl())));
+    }
+
+    @Test
+    void updateBannerWithSameValue_emitsNoEvent() {
+        fixture
+                .given(createdProfile(),
+                        new ProfileEvent.ProfileBannerUpdatedEvent("user-1", "user-1", "https://media.test/banner.jpg", NOW))
+                .when(new ProfileCommand.UpdateProfileBannerCommand("user-1", "user-1", "https://media.test/banner.jpg"))
+                .expectNoEvents();
+    }
+
+    @Test
+    void updateBannerWithNull_clearsBanner() {
+        fixture
+                .given(createdProfile(),
+                        new ProfileEvent.ProfileBannerUpdatedEvent("user-1", "user-1", "https://media.test/banner.jpg", NOW))
+                .when(new ProfileCommand.UpdateProfileBannerCommand("user-1", "user-1", null))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ProfileEvent.ProfileBannerUpdatedEvent.class,
+                        e -> ((ProfileEvent.ProfileBannerUpdatedEvent) e).bannerUrl() == null));
+    }
+
+    @Test
+    void updateBannerTooLong_throwsValidationProblem() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateProfileBannerCommand("user-1", "user-1", "https://x.test/" + "a".repeat(1100)))
+                .expectException(ProfileProblems.BannerUrlTooLongProblem.class);
+    }
+
+    @Test
+    void updateBannerByNonOwner_throwsPermissionProblem() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateProfileBannerCommand("user-1", "intruder", "https://media.test/banner.jpg"))
+                .expectException(ProfileProblems.ProfileNotOwnerProblem.class);
+    }
+
+    @Test
     void updateLanguage_appliesLanguageUpdatedEvent() {
         fixture
                 .given(createdProfile())

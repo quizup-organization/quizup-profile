@@ -77,6 +77,16 @@ public interface ProfileProblems {
         }
     }
 
+    class BannerUrlTooLongProblem extends ProfileProblem {
+        public BannerUrlTooLongProblem(String userId) {
+            super(userId, "urn:quizup:profile:bannerUrlTooLong",
+                    ProblemCategory.VALIDATION,
+                    "Banner URL too long",
+                    "The banner URL must not exceed " + ProfileRules.MAX_BANNER_URL_LENGTH + " characters",
+                    null);
+        }
+    }
+
     class LanguageMissingProblem extends ProfileProblem {
         public LanguageMissingProblem(String userId) {
             super(userId, "urn:quizup:profile:languageMissing",

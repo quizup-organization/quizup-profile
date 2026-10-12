@@ -10,7 +10,7 @@
 ## 1. Rôle
 
 Propriétaire des **données modifiables** du profil utilisateur (`pseudonym`, `bio`, `country`,
-`avatarOptions`, `language`).
+`avatarOptions`, `bannerUrl`, `language`).
 Identity (`quizup-identity`) reste le IdP : identité immuable + JWT (lecture du profil côté
 frontend = claims du JWT). Ce service est **créé par événement** (saga sur
 `UserRegisteredEvent` d'identity) et mis à jour **uniquement par le propriétaire**, **champ par
@@ -53,6 +53,10 @@ absorbe les bascules rapides.
 le propriétaire. **Aucun stockage d'image** : l'avatar est régénéré côté client de façon déterministe
 à partir de ces options (repli sur `userId` si `null`).
 
+**Bannière** : le profil porte `bannerUrl` (URL http(s) ≤1024, `null` = aucune), uploadée via
+`POST /api/media` (BFF → MinIO) puis attachée par `PUT /api/profiles/{userId}/banner` ; l'image est
+affichée derrière l'avatar des fiches joueur (web). Migration `V7__add_banner_url_to_profile_entry.sql`.
+
 ---
 
 ## 2. Surface (headless)
@@ -64,7 +68,7 @@ exposée par le service.
 ## 3. Use cases (ports entrants — `domain/port/in/`)
 
 - `GetProfileUseCase` — récupération par userId (404 si inconnu)
-- `UpdateProfileUseCase` — mise à jour par champ (pseudonyme, bio, pays, avatar, langue) ;
+- `UpdateProfileUseCase` — mise à jour par champ (pseudonyme, bio, pays, avatar, bannière, langue) ;
   propriétaire uniquement, no-op si la valeur est inchangée
 - `CreateProfileUseCase` — création (utilisée par le seeding système ; en nominal par la saga)
 - `CheckProfileUseCase` — vérification d'existence (`existsById`)

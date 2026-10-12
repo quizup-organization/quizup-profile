@@ -46,6 +46,17 @@ public interface ProfileCommand {
     ) implements ProfileCommand {
     }
 
+    /**
+     * Bannière de profil (visuel panoramique affiché derrière l'avatar sur les fiches joueur).
+     * {@code bannerUrl} {@code null} efface la bannière.
+     */
+    record UpdateProfileBannerCommand(
+            @TargetAggregateIdentifier String userId,
+            String requestedBy,
+            String bannerUrl
+    ) implements ProfileCommand {
+    }
+
     record UpdateProfileLanguageCommand(
             @TargetAggregateIdentifier String userId,
             String requestedBy,

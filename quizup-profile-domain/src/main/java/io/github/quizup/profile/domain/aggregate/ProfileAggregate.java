@@ -32,6 +32,7 @@ public class ProfileAggregate {
     private String bio;
     private String country;
     private String avatarOptions;
+    private String bannerUrl;
     private Language language;
 
     // Constructeur par défaut requis par Axon
@@ -134,6 +135,24 @@ public class ProfileAggregate {
     }
 
     @CommandHandler
+    public void handle(ProfileCommand.UpdateProfileBannerCommand command) {
+        requireOwner(command.requestedBy());
+        validateBannerUrl(command.userId(), command.bannerUrl());
+        if (Objects.equals(command.bannerUrl(), this.bannerUrl)) {
+            return;
+        }
+
+        AggregateLifecycle.apply(
+                new ProfileEvent.ProfileBannerUpdatedEvent(
+                        command.userId(),
+                        command.requestedBy(),
+                        command.bannerUrl(),
+                        Instant.now()
+                )
+        );
+    }
+
+    @CommandHandler
     public void handle(ProfileCommand.UpdateProfileLanguageCommand command) {
         requireOwner(command.requestedBy());
         if (command.language() == null) {
@@ -181,6 +200,11 @@ public class ProfileAggregate {
     }
 
     @EventSourcingHandler
+    public void on(ProfileEvent.ProfileBannerUpdatedEvent event) {
+        this.bannerUrl = event.bannerUrl();
+    }
+
+    @EventSourcingHandler
     public void on(ProfileEvent.ProfileLanguageUpdatedEvent event) {
         this.language = event.language();
     }
@@ -215,6 +239,12 @@ public class ProfileAggregate {
     private static void validateAvatarOptions(String userId, String avatarOptions) {
         if (avatarOptions != null && avatarOptions.length() > ProfileRules.MAX_AVATAR_OPTIONS_LENGTH) {
             throw new ProfileProblems.AvatarOptionsTooLongProblem(userId);
+        }
+    }
+
+    private static void validateBannerUrl(String userId, String bannerUrl) {
+        if (bannerUrl != null && bannerUrl.length() > ProfileRules.MAX_BANNER_URL_LENGTH) {
+            throw new ProfileProblems.BannerUrlTooLongProblem(userId);
         }
     }
 }

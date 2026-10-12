@@ -19,5 +19,7 @@ public interface UpdateProfileUseCase {
 
     CompletableFuture<String> updateAvatar(ProfileCommand.UpdateProfileAvatarCommand command);
 
+    CompletableFuture<String> updateBanner(ProfileCommand.UpdateProfileBannerCommand command);
+
     CompletableFuture<String> updateLanguage(ProfileCommand.UpdateProfileLanguageCommand command);
 }

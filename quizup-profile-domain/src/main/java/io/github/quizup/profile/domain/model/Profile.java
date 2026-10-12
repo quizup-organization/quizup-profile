@@ -18,6 +18,7 @@ public record Profile(
         String bio,
         String country,
         String avatarOptions,
+        String bannerUrl,
         Language language,
         Instant createdAt,
         Instant updatedAt

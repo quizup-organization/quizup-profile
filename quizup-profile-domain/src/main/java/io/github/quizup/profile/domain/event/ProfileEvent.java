@@ -55,6 +55,14 @@ public interface ProfileEvent {
     ) implements ProfileEvent {
     }
 
+    record ProfileBannerUpdatedEvent(
+            String userId,
+            String requestedBy,
+            String bannerUrl,
+            Instant updatedAt
+    ) implements ProfileEvent {
+    }
+
     record ProfileLanguageUpdatedEvent(
             String userId,
             String requestedBy,

@@ -82,6 +82,13 @@ public class ProfileProjection {
 
     @EventHandler
     @Transactional
+    public void on(ProfileEvent.ProfileBannerUpdatedEvent event) {
+        update(event.userId(), event.updatedAt(),
+                profile -> profile.toBuilder().bannerUrl(event.bannerUrl()).build());
+    }
+
+    @EventHandler
+    @Transactional
     public void on(ProfileEvent.ProfileLanguageUpdatedEvent event) {
         update(event.userId(), event.updatedAt(),
                 profile -> profile.toBuilder().language(event.language()).build());

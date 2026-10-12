@@ -43,6 +43,10 @@ public class ProfileEntity {
     @Column(name = "avatar_options", length = 2000)
     private String avatarOptions;
 
+    /** URL externe optionnelle de la bannière de profil (image panoramique, max 1024). */
+    @Column(name = "banner_url", length = 1024)
+    private String bannerUrl;
+
     /** Code ISO 639-1 de la langue préférée du joueur (fr, en). */
     @Column(name = "language", length = 5, nullable = false)
     private String language;
