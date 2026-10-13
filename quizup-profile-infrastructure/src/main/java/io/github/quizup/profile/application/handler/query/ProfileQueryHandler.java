@@ -2,6 +2,7 @@ package io.github.quizup.profile.application.handler.query;
 
 import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.profile.domain.exception.ProfileProblems;
+import io.github.quizup.profile.domain.model.ImageReferenceCount;
 import io.github.quizup.profile.domain.model.Profile;
 import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
 import io.github.quizup.profile.domain.query.ProfileQuery;
@@ -48,5 +49,10 @@ public class ProfileQueryHandler {
     @QueryHandler
     public List<Profile> handle(ProfileQuery.GetProfileSuggestionsQuery query) {
         return profileRepositoryPort.findSuggestions(query.nameQuery(), query.limit());
+    }
+
+    @QueryHandler
+    public List<ImageReferenceCount> handle(ProfileQuery.CountImageReferencesQuery query) {
+        return profileRepositoryPort.countReferencesByBannerUrls(query.imageUrls());
     }
 }

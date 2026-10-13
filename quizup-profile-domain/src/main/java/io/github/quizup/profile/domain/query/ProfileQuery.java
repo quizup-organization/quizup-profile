@@ -26,4 +26,11 @@ public interface ProfileQuery {
      */
     record GetProfileSuggestionsQuery(String nameQuery, int limit) implements ProfileQuery {
     }
+
+    /**
+     * Comptage, pour chaque URL demandée, des références de bannière de profil.
+     * Réservée aux surfaces d'administration (console média du BFF).
+     */
+    record CountImageReferencesQuery(List<String> imageUrls) implements ProfileQuery {
+    }
 }

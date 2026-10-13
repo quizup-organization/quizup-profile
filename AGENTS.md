@@ -135,5 +135,8 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
 - `ProgressionQuery.GetGamesXpQuery(userId, gameIds)` → `List<GameXp>` : XP réellement attribuée
   par partie, lue depuis le journal `progression_awarded_game` (colonne `xp`, migr. V3).
 - `ProfileQuery.GetProfileSuggestionsQuery(nameQuery, limit)` : suggestions ⌘K par nom.
+- `ProfileQuery.CountImageReferencesQuery(imageUrls)` → `List<ImageReferenceCount>` : comptage batch
+  des bannières de profil référencées, réservé à la **console média admin** du BFF
+  (`/api/admin/media`, `ROLE_ADMIN` — une suppression d'objet référencé est bloquée).
 - `GetProgressionsByIdsQuery` est désormais consommée par le BFF (niveaux des listes de personnes) ;
   `SearchProfileUseCase` / `SearchChallengeUseCase` restent pour les futures surfaces d'administration.

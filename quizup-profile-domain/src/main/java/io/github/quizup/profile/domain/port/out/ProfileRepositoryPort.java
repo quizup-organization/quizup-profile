@@ -2,6 +2,7 @@ package io.github.quizup.profile.domain.port.out;
 
 import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchResponse;
 import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
+import io.github.quizup.profile.domain.model.ImageReferenceCount;
 import io.github.quizup.profile.domain.model.Profile;
 
 import java.util.List;
@@ -58,4 +59,13 @@ public interface ProfileRepositoryPort {
      * @param limit     nombre maximum de suggestions
      */
     List<Profile> findSuggestions(String nameQuery, int limit);
+
+    /**
+     * Compte, pour chaque URL demandée, le nombre de bannières de profil qui la référencent.
+     * Les URLs absentes du read model ne sont pas retournées.
+     *
+     * @param imageUrls URLs recherchées (liste vide = aucun résultat)
+     * @return un compteur par URL trouvée
+     */
+    List<ImageReferenceCount> countReferencesByBannerUrls(List<String> imageUrls);
 }

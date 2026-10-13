@@ -4,6 +4,7 @@ import io.github.quizup.microservice.core.infrastructure.in.api.response.SearchR
 import io.github.quizup.microservice.core.infrastructure.in.api.request.SearchRequest;
 import io.github.quizup.microservice.core.infrastructure.adapter.AnnotationSearchableEntity;
 import io.github.quizup.microservice.core.infrastructure.adapter.JpaSearchAdapter;
+import io.github.quizup.profile.domain.model.ImageReferenceCount;
 import io.github.quizup.profile.domain.model.Profile;
 import io.github.quizup.profile.domain.port.out.ProfileRepositoryPort;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.ProfileEntity;
@@ -61,6 +62,16 @@ public class ProfileRepositoryAdapter implements ProfileRepositoryPort {
         return profileJpaRepository
                 .findByPseudonymContainingIgnoreCaseOrderByPseudonymAsc(nameQuery, Limit.of(limit)).stream()
                 .map(ProfileEntityMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<ImageReferenceCount> countReferencesByBannerUrls(List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return List.of();
+        }
+        return profileJpaRepository.countByBannerUrlIn(imageUrls).stream()
+                .map(row -> new ImageReferenceCount((String) row[0], ((Number) row[1]).longValue()))
                 .toList();
     }
 }
