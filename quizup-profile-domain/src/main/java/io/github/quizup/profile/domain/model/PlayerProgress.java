@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * Modèle domaine (read model) de la progression d'un joueur :
- * XP totale + XP par thème, niveau, titre et badges.
+ * XP totale + XP par thème, parties humaines par thème, niveau, titre et badges.
  */
 @Builder(toBuilder = true)
 public record PlayerProgress(
@@ -17,6 +17,7 @@ public record PlayerProgress(
         int level,
         String title,
         Map<String, Integer> xpByTopic,
+        Map<String, Integer> gamesByTopic,
         Set<Badge> badges,
         int gamesPlayed,
         int wins,
@@ -38,6 +39,7 @@ public record PlayerProgress(
                 .level(1)
                 .title(ProgressionRules.titleFor(1))
                 .xpByTopic(Map.of())
+                .gamesByTopic(Map.of())
                 .badges(Set.of())
                 .gamesPlayed(0)
                 .wins(0)
@@ -52,6 +54,11 @@ public record PlayerProgress(
 
     public int xpForTopic(String topicId) {
         return xpByTopic.getOrDefault(topicId, 0);
+    }
+
+    /** Parties humaines jouées sur un thème (duels bot exclus). */
+    public int gamesForTopic(String topicId) {
+        return gamesByTopic.getOrDefault(topicId, 0);
     }
 
     public int xpForNextLevel() {

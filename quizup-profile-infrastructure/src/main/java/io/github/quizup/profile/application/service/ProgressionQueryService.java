@@ -8,6 +8,7 @@ import io.github.quizup.profile.domain.query.ProgressionQuery;
 import org.axonframework.queryhandling.QueryGateway;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -31,5 +32,10 @@ public class ProgressionQueryService implements GetProgressionUseCase {
     @Override
     public CompletableFuture<TopicProgress> getTopic(ProgressionQuery.GetTopicProgressionQuery query) {
         return queryGateway.query(query, QueryResponseTypes.instanceOf(TopicProgress.class));
+    }
+
+    @Override
+    public CompletableFuture<List<TopicProgress>> getTopics(ProgressionQuery.GetTopicProgressionsQuery query) {
+        return queryGateway.query(query, QueryResponseTypes.multipleInstancesOf(TopicProgress.class));
     }
 }

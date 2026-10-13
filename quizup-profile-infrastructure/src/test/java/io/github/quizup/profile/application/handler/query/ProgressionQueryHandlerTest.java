@@ -2,12 +2,16 @@ package io.github.quizup.profile.application.handler.query;
 
 import io.github.quizup.profile.domain.model.GameXp;
 import io.github.quizup.profile.domain.model.PlayerProgress;
+import io.github.quizup.profile.domain.model.ProgressionRules;
+import io.github.quizup.profile.domain.model.TopicProgress;
 import io.github.quizup.profile.domain.port.out.ProgressionAwardedGameRepositoryPort;
 import io.github.quizup.profile.domain.port.out.ProgressionRepositoryPort;
 import io.github.quizup.profile.domain.query.ProgressionQuery;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -46,5 +50,52 @@ class ProgressionQueryHandlerTest {
         assertThat(result.get(0).userId()).isEqualTo("known");
         assertThat(result.get(1).userId()).isEqualTo("unknown");
         assertThat(result.get(1).level()).isEqualTo(1);
+    }
+
+    @Test
+    void topic_progressions_are_sorted_by_games_then_xp() {
+        when(progressionRepository.findById("me")).thenReturn(Optional.of(
+                PlayerProgress.empty("me").toBuilder()
+                        .xpByTopic(Map.of("dota", 500, "space", 200, "frozen", 300))
+                        .gamesByTopic(Map.of("dota", 3, "space", 7, "frozen", 3))
+                        .build()));
+
+        List<TopicProgress> result = handler.handle(
+                new ProgressionQuery.GetTopicProgressionsQuery("me"));
+
+        assertThat(result).hasSize(3);
+        assertThat(result).extracting(TopicProgress::topicId)
+                .containsExactly("space", "dota", "frozen");
+        assertThat(result.get(0).games()).isEqualTo(7);
+        assertThat(result.get(0).xp()).isEqualTo(200);
+        assertThat(result.get(0).level()).isEqualTo(ProgressionRules.levelFor(200));
+        assertThat(result.get(1).games()).isEqualTo(3);
+    }
+
+    @Test
+    void topic_progressions_keep_bot_only_topics_with_zero_games() {
+        when(progressionRepository.findById("me")).thenReturn(Optional.of(
+                PlayerProgress.empty("me").toBuilder()
+                        .xpByTopic(Map.of("bot-topic", 120))
+                        .gamesByTopic(Map.of())
+                        .build()));
+
+        List<TopicProgress> result = handler.handle(
+                new ProgressionQuery.GetTopicProgressionsQuery("me"));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).topicId()).isEqualTo("bot-topic");
+        assertThat(result.get(0).xp()).isEqualTo(120);
+        assertThat(result.get(0).games()).isZero();
+    }
+
+    @Test
+    void topic_progressions_return_empty_for_unknown_user() {
+        when(progressionRepository.findById("unknown")).thenReturn(Optional.empty());
+
+        List<TopicProgress> result = handler.handle(
+                new ProgressionQuery.GetTopicProgressionsQuery("unknown"));
+
+        assertThat(result).isEmpty();
     }
 }

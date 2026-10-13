@@ -65,6 +65,12 @@ public class ProgressEntity {
     private Map<String, Integer> xpByTopic = new HashMap<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "progression_topic_games", joinColumns = @JoinColumn(name = "user_id"))
+    @MapKeyColumn(name = "topic_id", length = 255)
+    @Column(name = "games", nullable = false)
+    private Map<String, Integer> gamesByTopic = new HashMap<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "progression_badge", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "badge", length = 50, nullable = false)
     @Enumerated(EnumType.STRING)

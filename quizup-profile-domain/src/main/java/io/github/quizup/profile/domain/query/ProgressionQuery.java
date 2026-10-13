@@ -17,6 +17,13 @@ public interface ProgressionQuery {
     }
 
     /**
+     * Répartition de la progression par thème (XP, niveau et parties humaines), triée par
+     * parties décroissantes — alimente le donut « Sujets joués » du profil.
+     */
+    record GetTopicProgressionsQuery(String userId) implements ProgressionQuery {
+    }
+
+    /**
      * XP attribuée pour une liste de parties (écran de résultat / historique).
      */
     record GetGamesXpQuery(String userId, List<String> gameIds) implements ProgressionQuery {

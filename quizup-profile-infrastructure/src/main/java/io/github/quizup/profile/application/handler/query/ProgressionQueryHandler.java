@@ -9,8 +9,11 @@ import io.github.quizup.profile.domain.query.ProgressionQuery;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,11 +50,35 @@ public class ProgressionQueryHandler {
 
     @QueryHandler
     public TopicProgress handle(ProgressionQuery.GetTopicProgressionQuery query) {
-        int xp = progressionRepositoryPort.findById(query.userId())
-                .map(progress -> progress.xpForTopic(query.topicId()))
-                .orElse(0);
+        PlayerProgress progress = progressionRepositoryPort.findById(query.userId())
+                .orElseGet(() -> PlayerProgress.empty(query.userId()));
 
-        return TopicProgress.of(query.topicId(), xp);
+        return TopicProgress.of(query.topicId(),
+                progress.xpForTopic(query.topicId()),
+                progress.gamesForTopic(query.topicId()));
+    }
+
+    /**
+     * Répartition par thème (XP, niveau et parties humaines), triée par parties décroissantes
+     * puis par XP décroissante — les thèmes joués uniquement contre bot (0 partie) restent
+     * présents pour leur XP.
+     */
+    @QueryHandler
+    public List<TopicProgress> handle(ProgressionQuery.GetTopicProgressionsQuery query) {
+        PlayerProgress progress = progressionRepositoryPort.findById(query.userId())
+                .orElseGet(() -> PlayerProgress.empty(query.userId()));
+
+        Set<String> topicIds = new LinkedHashSet<>(progress.xpByTopic().keySet());
+        topicIds.addAll(progress.gamesByTopic().keySet());
+
+        return topicIds.stream()
+                .map(topicId -> TopicProgress.of(topicId,
+                        progress.xpForTopic(topicId),
+                        progress.gamesForTopic(topicId)))
+                .sorted(Comparator.comparingInt(TopicProgress::games).reversed()
+                        .thenComparing(Comparator.comparingInt(TopicProgress::xp).reversed())
+                        .thenComparing(TopicProgress::topicId))
+                .toList();
     }
 
     @QueryHandler

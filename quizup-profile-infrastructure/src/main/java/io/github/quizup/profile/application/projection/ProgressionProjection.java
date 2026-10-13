@@ -65,11 +65,18 @@ public class ProgressionProjection {
                 : current.currentWinStreak();
         int bestWinStreak = Math.max(current.bestWinStreak(), currentWinStreak);
 
+        // Parties humaines par thème (les duels bot restent exclus, comme les stats V/N/D).
+        Map<String, Integer> gamesByTopic = new HashMap<>(current.gamesByTopic());
+        if (humanDuel) {
+            gamesByTopic.merge(event.topicId(), 1, Integer::sum);
+        }
+
         progressionRepositoryPort.save(current.toBuilder()
                 .xpTotal(xpTotal)
                 .level(level)
                 .title(ProgressionRules.titleFor(level))
                 .xpByTopic(xpByTopic)
+                .gamesByTopic(gamesByTopic)
                 .gamesPlayed(current.gamesPlayed() + (humanDuel ? 1 : 0))
                 .wins(current.wins() + (humanDuel && event.won() ? 1 : 0))
                 .losses(current.losses() + (humanDuel && !event.won() && !event.draw() ? 1 : 0))
