@@ -1,3 +1,9 @@
+## [3.7.0](https://github.com/quizup-organization/quizup-profile/compare/v3.6.0...v3.7.0) (2026-10-13)
+
+### Features
+
+* **profile:** comptage des références de bannière (console média admin) ([373f206](https://github.com/quizup-organization/quizup-profile/commit/373f206b0077cecbc80c92e9f01553c68d83a211))
+
 ## [3.6.0](https://github.com/quizup-organization/quizup-profile/compare/v3.5.1...v3.6.0) (2026-10-12)
 
 ### Features
