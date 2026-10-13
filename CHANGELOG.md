@@ -1,3 +1,9 @@
+## [3.8.0](https://github.com/quizup-organization/quizup-profile/compare/v3.7.0...v3.8.0) (2026-10-13)
+
+### Features
+
+* **profile:** parties humaines par thème (donut « Sujets joués ») ([bbed79e](https://github.com/quizup-organization/quizup-profile/commit/bbed79efdd1434f3299da86c11baf3de0917dc1f))
+
 ## [3.7.0](https://github.com/quizup-organization/quizup-profile/compare/v3.6.0...v3.7.0) (2026-10-13)
 
 ### Features
