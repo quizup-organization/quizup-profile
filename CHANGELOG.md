@@ -1,3 +1,9 @@
+## [3.8.1](https://github.com/quizup-organization/quizup-profile/compare/v3.8.0...v3.8.1) (2026-10-14)
+
+### Bug Fixes
+
+* **profile:** migration V8 pour les parties par thème (conflit Flyway avec V7) ([e940b7a](https://github.com/quizup-organization/quizup-profile/commit/e940b7aeb4cb00907c606cf6f7db410d6e37fec9))
+
 ## [3.8.0](https://github.com/quizup-organization/quizup-profile/compare/v3.7.0...v3.8.0) (2026-10-13)
 
 ### Features
