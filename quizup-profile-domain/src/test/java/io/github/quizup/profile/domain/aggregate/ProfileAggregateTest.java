@@ -235,6 +235,72 @@ class ProfileAggregateTest {
                 .expectException(ProfileProblems.LanguageMissingProblem.class);
     }
 
+    @Test
+    void updateEquippedTitle_appliesEquippedTitleUpdatedEvent() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateEquippedTitleCommand("user-1", "user-1", "topic-1:CONFIRME"))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ProfileEvent.ProfileEquippedTitleUpdatedEvent.class,
+                        e -> "topic-1:CONFIRME".equals(
+                                ((ProfileEvent.ProfileEquippedTitleUpdatedEvent) e).titleKey())));
+    }
+
+    @Test
+    void updateEquippedTitleWithNull_clearsIt() {
+        fixture
+                .given(createdProfile(),
+                        new ProfileEvent.ProfileEquippedTitleUpdatedEvent(
+                                "user-1", "user-1", "topic-1:CONFIRME", NOW))
+                .when(new ProfileCommand.UpdateEquippedTitleCommand("user-1", "user-1", null))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ProfileEvent.ProfileEquippedTitleUpdatedEvent.class,
+                        e -> ((ProfileEvent.ProfileEquippedTitleUpdatedEvent) e).titleKey() == null));
+    }
+
+    @Test
+    void updateEquippedTitleWithSameValue_emitsNoEvent() {
+        fixture
+                .given(createdProfile(),
+                        new ProfileEvent.ProfileEquippedTitleUpdatedEvent(
+                                "user-1", "user-1", "topic-1:CONFIRME", NOW))
+                .when(new ProfileCommand.UpdateEquippedTitleCommand("user-1", "user-1", "topic-1:CONFIRME"))
+                .expectNoEvents();
+    }
+
+    @Test
+    void updateEquippedTitleWithMalformedKey_throwsValidationProblem() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateEquippedTitleCommand("user-1", "user-1", "topic-1"))
+                .expectException(ProfileProblems.EquippedTitleInvalidProblem.class);
+    }
+
+    @Test
+    void updateEquippedTitleWithUnknownGrade_throwsValidationProblem() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateEquippedTitleCommand("user-1", "user-1", "topic-1:GRAND_MAITRE"))
+                .expectException(ProfileProblems.EquippedTitleInvalidProblem.class);
+    }
+
+    @Test
+    void updateEquippedTitleWithTooLongKey_throwsValidationProblem() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateEquippedTitleCommand(
+                        "user-1", "user-1", "x".repeat(120) + ":CONFIRME"))
+                .expectException(ProfileProblems.EquippedTitleTooLongProblem.class);
+    }
+
+    @Test
+    void updateEquippedTitleByAnotherUser_isRejected() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.UpdateEquippedTitleCommand("user-1", "user-2", "topic-1:CONFIRME"))
+                .expectException(ProfileProblems.ProfileNotOwnerProblem.class);
+    }
+
     private ProfileEvent.ProfileCreatedEvent createdProfile() {
         return new ProfileEvent.ProfileCreatedEvent("user-1", "user@quizup.dev", "Alice", NOW);
     }

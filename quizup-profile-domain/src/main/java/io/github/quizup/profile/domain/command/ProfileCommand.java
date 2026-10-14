@@ -63,4 +63,17 @@ public interface ProfileCommand {
             Language language
     ) implements ProfileCommand {
     }
+
+    /**
+     * Titre thématique **porté** (affiché sur le profil, les cartes et les listes).
+     * {@code titleKey} est la clé stable {@code topicId:GRADE} (cf. {@code PlayerTitle}) ;
+     * {@code null} efface le titre porté. L'appartenance du titre au joueur (grade réellement
+     * atteint dans ce sujet) est vérifiée par l'appelant, qui prépare la commande.
+     */
+    record UpdateEquippedTitleCommand(
+            @TargetAggregateIdentifier String userId,
+            String requestedBy,
+            String titleKey
+    ) implements ProfileCommand {
+    }
 }

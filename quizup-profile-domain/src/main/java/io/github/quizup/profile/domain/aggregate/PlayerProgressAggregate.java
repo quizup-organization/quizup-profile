@@ -3,6 +3,7 @@ package io.github.quizup.profile.domain.aggregate;
 import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.event.ProgressionEvent;
 import io.github.quizup.profile.domain.model.Badge;
+import io.github.quizup.profile.domain.model.BadgeRules;
 import io.github.quizup.profile.domain.model.ProgressionRules;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -25,12 +26,13 @@ import java.util.Set;
  * <p>Identifiant d'agrégat namespacé ({@code progress:<userId>}). Créé à la volée
  * au premier {@code AwardXpCommand} ({@link AggregateCreationPolicy#CREATE_IF_MISSING}).
  * L'attribution est idempotente : un même {@code gameId} n'est crédité qu'une fois.</p>
+ *
+ * <p>L'agrégat porte les compteurs nécessaires à l'évaluation des badges (duels et victoires
+ * **entre joueurs**, séries par thème) : les règles de badge sont purement locales, sans aucune
+ * lecture externe.</p>
  */
 @Aggregate
 public class PlayerProgressAggregate {
-
-    private static final int LIGHTNING_FAST_ANSWERS = 5;
-    private static final int STREAK_MASTER_WINS = 10;
 
     @AggregateIdentifier
     private String progressId;
@@ -45,6 +47,8 @@ public class PlayerProgressAggregate {
     private int xpTotal;
     private int level = 1;
     private String title = ProgressionRules.titleFor(1);
+    private int humanDuels;
+    private int humanWins;
 
     protected PlayerProgressAggregate() {
     }
@@ -63,7 +67,7 @@ public class PlayerProgressAggregate {
             return;
         }
 
-        int xp = ProgressionRules.xpFor(command.gameScore(), command.won());
+        int xp = ProgressionRules.xpFor(command.gameScore(), command.won(), command.botGame());
         int newTotal = xpTotal + xp;
         int previousLevel = level;
         Instant now = Instant.now();
@@ -93,35 +97,24 @@ public class PlayerProgressAggregate {
             ));
         }
 
-        if (command.won() && !badges.contains(Badge.FIRST_WIN)) {
-            AggregateLifecycle.apply(new ProgressionEvent.BadgeEarnedEvent(
-                    command.userId(),
-                    Badge.FIRST_WIN,
-                    now
-            ));
-        }
+        // Les compteurs (duels et victoires entre joueurs, séries, XP du sujet) sont à jour :
+        // l'événement d'attribution vient d'être appliqué, donc le temps réel et le replay
+        // évaluent sur le même état.
+        BadgeRules.DuelFacts facts = new BadgeRules.DuelFacts(
+                command.gameScore(),
+                command.won(),
+                command.fastAnswers(),
+                humanDuels,
+                humanWins,
+                xpByTopic.getOrDefault(command.topicId(), 0),
+                winStreakByTopic.getOrDefault(command.topicId(), 0)
+        );
 
-        if (command.gameScore() >= ProgressionRules.PERFECT_SCORE && !badges.contains(Badge.PERFECT)) {
+        // Ordre stable (EnumSet) : le flux d'événements reste déterministe au replay.
+        for (Badge badge : BadgeRules.evaluate(facts, badges)) {
             AggregateLifecycle.apply(new ProgressionEvent.BadgeEarnedEvent(
                     command.userId(),
-                    Badge.PERFECT,
-                    now
-            ));
-        }
-
-        if (command.fastAnswers() >= LIGHTNING_FAST_ANSWERS && !badges.contains(Badge.LIGHTNING)) {
-            AggregateLifecycle.apply(new ProgressionEvent.BadgeEarnedEvent(
-                    command.userId(),
-                    Badge.LIGHTNING,
-                    now
-            ));
-        }
-
-        if (winStreakByTopic.getOrDefault(command.topicId(), 0) >= STREAK_MASTER_WINS
-                && !badges.contains(Badge.STREAK_MASTER)) {
-            AggregateLifecycle.apply(new ProgressionEvent.BadgeEarnedEvent(
-                    command.userId(),
-                    Badge.STREAK_MASTER,
+                    badge,
                     now
             ));
         }
@@ -136,6 +129,15 @@ public class PlayerProgressAggregate {
         this.xpTotal += event.xp();
         this.level = ProgressionRules.levelFor(this.xpTotal);
         this.title = ProgressionRules.titleFor(this.level);
+
+        // Compteurs de badges : seuls les duels entre joueurs comptent (l'entraînement contre
+        // bot n'alimente ni le volume, ni les victoires).
+        if (!event.botGame()) {
+            this.humanDuels++;
+            if (event.won()) {
+                this.humanWins++;
+            }
+        }
 
         if (event.won()) {
             this.winStreakByTopic.merge(event.topicId(), 1, Integer::sum);

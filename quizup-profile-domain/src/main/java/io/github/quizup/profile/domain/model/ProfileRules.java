@@ -19,6 +19,9 @@ public final class ProfileRules {
     /** URL externe de la bannière de profil (image panoramique, http/https). */
     public static final int MAX_BANNER_URL_LENGTH = 1024;
 
+    /** Clé du titre porté (`topicId:GRADE`, cf. {@link PlayerTitle}). */
+    public static final int MAX_EQUIPPED_TITLE_LENGTH = 128;
+
     /** Langue par défaut d'un profil (appliquée à la création). */
     public static final Language DEFAULT_LANGUAGE = Language.FR;
 

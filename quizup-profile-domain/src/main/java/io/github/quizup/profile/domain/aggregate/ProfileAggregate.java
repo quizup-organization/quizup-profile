@@ -4,6 +4,7 @@ import io.github.quizup.microservice.core.domain.model.i18n.Language;
 import io.github.quizup.profile.domain.command.ProfileCommand;
 import io.github.quizup.profile.domain.event.ProfileEvent;
 import io.github.quizup.profile.domain.exception.ProfileProblems;
+import io.github.quizup.profile.domain.model.PlayerTitle;
 import io.github.quizup.profile.domain.model.ProfileRules;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -33,6 +34,7 @@ public class ProfileAggregate {
     private String country;
     private String avatarOptions;
     private String bannerUrl;
+    private String equippedTitle;
     private Language language;
 
     // Constructeur par défaut requis par Axon
@@ -172,6 +174,29 @@ public class ProfileAggregate {
         );
     }
 
+    /**
+     * Titre thématique **porté** : clé {@code topicId:GRADE} (cf. {@code PlayerTitle}) ou
+     * {@code null} pour n'en afficher aucun. L'appartenance du titre au joueur (grade réellement
+     * atteint dans ce sujet) est vérifiée par l'appelant, qui prépare la commande.
+     */
+    @CommandHandler
+    public void handle(ProfileCommand.UpdateEquippedTitleCommand command) {
+        requireOwner(command.requestedBy());
+        validateEquippedTitle(command.userId(), command.titleKey());
+        if (Objects.equals(command.titleKey(), this.equippedTitle)) {
+            return;
+        }
+
+        AggregateLifecycle.apply(
+                new ProfileEvent.ProfileEquippedTitleUpdatedEvent(
+                        command.userId(),
+                        command.requestedBy(),
+                        command.titleKey(),
+                        Instant.now()
+                )
+        );
+    }
+
     @EventSourcingHandler
     public void on(ProfileEvent.ProfileCreatedEvent event) {
         this.userId = event.userId();
@@ -207,6 +232,11 @@ public class ProfileAggregate {
     @EventSourcingHandler
     public void on(ProfileEvent.ProfileLanguageUpdatedEvent event) {
         this.language = event.language();
+    }
+
+    @EventSourcingHandler
+    public void on(ProfileEvent.ProfileEquippedTitleUpdatedEvent event) {
+        this.equippedTitle = event.titleKey();
     }
 
     private void requireOwner(String requestedBy) {
@@ -245,6 +275,22 @@ public class ProfileAggregate {
     private static void validateBannerUrl(String userId, String bannerUrl) {
         if (bannerUrl != null && bannerUrl.length() > ProfileRules.MAX_BANNER_URL_LENGTH) {
             throw new ProfileProblems.BannerUrlTooLongProblem(userId);
+        }
+    }
+
+    /**
+     * Titre porté : {@code null} efface le titre ; sinon la clé doit être une clé de titre
+     * valide ({@code topicId:GRADE}) et tenir dans la colonne.
+     */
+    private static void validateEquippedTitle(String userId, String titleKey) {
+        if (titleKey == null) {
+            return;
+        }
+        if (titleKey.length() > ProfileRules.MAX_EQUIPPED_TITLE_LENGTH) {
+            throw new ProfileProblems.EquippedTitleTooLongProblem(userId);
+        }
+        if (PlayerTitle.parse(titleKey).isEmpty()) {
+            throw new ProfileProblems.EquippedTitleInvalidProblem(userId, titleKey);
         }
     }
 }

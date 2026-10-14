@@ -47,6 +47,13 @@ public class ProfileEntity {
     @Column(name = "banner_url", length = 1024)
     private String bannerUrl;
 
+    /**
+     * Clé du titre thématique **porté** ({@code topicId:GRADE}, cf. {@code PlayerTitle}) ;
+     * {@code null} = aucun titre affiché.
+     */
+    @Column(name = "equipped_title", length = 128)
+    private String equippedTitle;
+
     /** Code ISO 639-1 de la langue préférée du joueur (fr, en). */
     @Column(name = "language", length = 5, nullable = false)
     private String language;

@@ -94,6 +94,13 @@ public class ProfileProjection {
                 profile -> profile.toBuilder().language(event.language()).build());
     }
 
+    @EventHandler
+    @Transactional
+    public void on(ProfileEvent.ProfileEquippedTitleUpdatedEvent event) {
+        update(event.userId(), event.updatedAt(),
+                profile -> profile.toBuilder().equippedTitle(event.titleKey()).build());
+    }
+
     private void update(String userId, Instant updatedAt, UnaryOperator<Profile> patch) {
         profileRepositoryPort.findById(userId)
                 .ifPresent(profile -> profileRepositoryPort.save(

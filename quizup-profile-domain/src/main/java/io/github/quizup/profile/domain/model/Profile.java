@@ -19,6 +19,8 @@ public record Profile(
         String country,
         String avatarOptions,
         String bannerUrl,
+        /** Clé du titre thématique **porté** (`topicId:GRADE`, cf. {@link PlayerTitle}) ; null = aucun. */
+        String equippedTitle,
         Language language,
         Instant createdAt,
         Instant updatedAt

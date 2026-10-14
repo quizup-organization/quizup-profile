@@ -23,6 +23,7 @@ public final class ProfileEntityMapper {
                 .country(entity.getCountry())
                 .avatarOptions(entity.getAvatarOptions())
                 .bannerUrl(entity.getBannerUrl())
+                .equippedTitle(entity.getEquippedTitle())
                 .language(toLanguage(entity.getLanguage()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
@@ -41,6 +42,7 @@ public final class ProfileEntityMapper {
         entity.setCountry(profile.country());
         entity.setAvatarOptions(profile.avatarOptions());
         entity.setBannerUrl(profile.bannerUrl());
+        entity.setEquippedTitle(profile.equippedTitle());
         entity.setLanguage(profile.language() == null
                 ? ProfileRules.DEFAULT_LANGUAGE.code()
                 : profile.language().code());

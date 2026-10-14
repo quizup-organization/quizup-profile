@@ -70,4 +70,15 @@ public interface ProfileEvent {
             Instant updatedAt
     ) implements ProfileEvent {
     }
+
+    /**
+     * Titre thématique porté mis à jour ({@code titleKey} {@code null} = aucun titre affiché).
+     */
+    record ProfileEquippedTitleUpdatedEvent(
+            String userId,
+            String requestedBy,
+            String titleKey,
+            Instant updatedAt
+    ) implements ProfileEvent {
+    }
 }

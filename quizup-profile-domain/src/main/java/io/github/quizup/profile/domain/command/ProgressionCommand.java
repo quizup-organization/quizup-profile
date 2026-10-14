@@ -12,9 +12,10 @@ public interface ProgressionCommand {
      * (namespacé, cf. {@code ProgressionRules.progressIdFor}), distinct du
      * {@code userId} qui identifie le {@code ProfileAggregate}.</p>
      *
-     * <p>{@code draw} distingue l'égalité de la défaite ; {@code botGame} permet aux
-     * consommateurs (stats V/N/D, classement) d'exclure les duels contre bot — l'XP, le niveau
-     * et les badges restent attribués.</p>
+     * <p>{@code draw} distingue l'égalité de la défaite ; {@code botGame} signale un
+     * <b>entraînement</b> : aucune XP n'est attribuée (la progression ne vient que des duels
+     * entre joueurs), les badges restent évalués, et les consommateurs (stats V/N/D,
+     * classement) excluent ces duels.</p>
      */
     record AwardXpCommand(
             @TargetAggregateIdentifier String progressId,

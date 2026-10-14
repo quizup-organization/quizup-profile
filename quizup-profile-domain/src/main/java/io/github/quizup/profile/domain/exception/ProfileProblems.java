@@ -96,4 +96,27 @@ public interface ProfileProblems {
                     null);
         }
     }
+
+    /**
+     * Clé de titre porté invalide (format attendu {@code topicId:GRADE}, cf. {@code PlayerTitle}).
+     */
+    class EquippedTitleInvalidProblem extends ProfileProblem {
+        public EquippedTitleInvalidProblem(String userId, String titleKey) {
+            super(userId, "urn:quizup:profile:invalidEquippedTitle",
+                    ProblemCategory.VALIDATION,
+                    "Invalid title",
+                    "The equipped title must be a valid title key (topicId:GRADE)",
+                    Map.of("titleKey", String.valueOf(titleKey)));
+        }
+    }
+
+    class EquippedTitleTooLongProblem extends ProfileProblem {
+        public EquippedTitleTooLongProblem(String userId) {
+            super(userId, "urn:quizup:profile:equippedTitleTooLong",
+                    ProblemCategory.VALIDATION,
+                    "Title too long",
+                    "The equipped title must not exceed " + ProfileRules.MAX_EQUIPPED_TITLE_LENGTH + " characters",
+                    null);
+        }
+    }
 }

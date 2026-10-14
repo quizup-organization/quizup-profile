@@ -10,8 +10,9 @@ public interface ProgressionEvent {
 
     /**
      * XP attribuée pour un duel (un événement par joueur et par duel).
-     * {@code draw} distingue l'égalité de la défaite ; {@code botGame} signale un duel contre un
-     * bot (XP/badges conservés, stats V/N/D et classement exclus). Les événements antérieurs à ces
+     * {@code draw} distingue l'égalité de la défaite ; {@code botGame} signale un
+     * <b>entraînement</b> contre bot : {@code xp} vaut alors 0 (les badges restent évalués,
+     * les stats V/N/D et le classement excluent ces duels). Les événements antérieurs à ces
      * champs sont rejoués avec {@code false} (stats legacy).
      */
     record XpAwardedEvent(

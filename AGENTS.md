@@ -116,13 +116,62 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
 
 - `ProgressionResponse` porte `duelStats` (joués, victoires, défaites, égalités, winrate, meilleur
   score, meilleure série) et `TopicProgressResponse` porte `title` (titre par thème).
-- Badges implémentés : `FIRST_WIN`, `PERFECT`, `LIGHTNING` (« Éclair », 5 bonnes réponses < 3 s
-  **dans un même duel**), `STREAK_MASTER` (« Série de feu », 10 victoires consécutives dans un thème).
+- **Courbe de niveaux explicite et à départ accéléré** (remplace l'ancien `1 + √(xp/100)`) :
+  `ProgressionRules.xpThreshold(L) = (L−1)·(50L − 20)`, soit un palier de `100·L − 20` XP entre
+  les niveaux `L` et `L+1` — N2 = 80 XP (≈1 duel), N5 = 920 (≈8), N10 = 4 320 (≈36),
+  N20 = 18 620 (≈155). `levelFor` / `xpForNextLevel` / `xpFor` gardent leur signature ; le
+  niveau est recalculé à la lecture, la nouvelle courbe se répercute donc sans migration.
+- **Maîtrise par sujet** (`MasteryGrade`) : échelle **distincte** du niveau de compte, portée par
+  l'XP cumulée **dans le sujet**, en 7 grades à table de seuils explicite
+  (`Novice 0 · Apprenti 300 · Pratiquant 1 000 · Confirmé 2 500 · Expert 6 000 · Maître 14 000 ·
+  Légende 30 000`). C'est le support des **titres thématiques**.
+- **Titres portés** (`PlayerTitle`, clé stable `topicId:GRADE`) : le joueur choisit le titre
+  affiché sur son profil, les cartes et les listes. On persiste la **clé**, jamais le libellé :
+  celui-ci se compose à l'affichage (grade + nom du sujet, ex. « Confirmé · Histoire »), donc il
+  suit le renommage du sujet et la langue du lecteur. Champ `profile_entry.equipped_title`
+  (migration `V9`), commande `UpdateEquippedTitleCommand` (propriétaire uniquement, clé validée,
+  `null` efface) ; l'**appartenance** du titre (grade réellement atteint) est vérifiée par
+  l'appelant, qui prépare la commande.
+- **Catalogue de badges** (`Badge`) organisé en **familles × paliers × métrique** : `BadgeFamily`
+  (`VOLUME`, `MASTERY`, `EXPLOIT`, `COLLECTION`), `BadgeTier` (`BRONZE → ARGENT → OR`),
+  `BadgeMetric` (`HUMAN_DUELS`, `HUMAN_WINS`, `TOPIC_MASTERY`, `EARNED_BADGES`, `ONE_SHOT`) et
+  `target` — ce qui permet une **progression visible** (« 7/10 duels ») et laisse une raison de
+  continuer après le bronze. **Un palier = une constante** (`DUELIST_BRONZE`, … `DUELIST_OR`) :
+  les badges acquis restent un simple ensemble de noms, **sans migration** ; les 4 codes
+  historiques (`FIRST_WIN`, `PERFECT`, `LIGHTNING`, `STREAK_MASTER`) sont préservés (test dédié).
+  Les familles **Assiduité** (série de jours, à brancher sur `ActivityProjection`) et **Social**
+  (abonnements) restent hors catalogue pour l'instant.
 - `AwardXpCommand` / `XpAwardedEvent` portent `correctAnswers`, `fastAnswers`, `draw` et
-  `botGame` (issus de `GameEndedEvent`). **Règle produit** : les duels contre bot comptent pour
-  l'XP, le niveau et les badges, mais sont exclus des stats V/N/D (colonne `draws`, migr. V5) ;
-  les égalités sont comptées comme telles (jamais en défaite). Compteurs `duelStats` maintenus en
-  projection, les événements antérieurs (`botGame=false`, `draw=false`) restent comptés.
+  `botGame` (issus de `GameEndedEvent`). **Règle produit** : un duel contre bot est un
+  **entraînement** — `ProgressionRules.xpFor(score, won, botGame)` vaut **0 XP** (la progression
+  ne vient que des duels entre joueurs) ; les **badges restent évalués** (faits du duel), la
+  **série journalière** est créditée, et le duel est exclu des stats V/N/D (colonne `draws`,
+  migr. V5) et du classement. Les égalités sont comptées comme telles (jamais en défaite).
+  Compteurs `duelStats` maintenus en projection, les événements antérieurs (`botGame=false`,
+  `draw=false`) restent comptés.
+- **Attribution des paliers** (`BadgeRules`, règles **pures** testées sans Axon) : à la fin de
+  chaque duel, l'agrégat évalue les faits du duel et ses propres compteurs, puis émet un
+  `BadgeEarnedEvent` par badge nouvellement acquis. L'évaluation est **générique par métrique**
+  (`HUMAN_DUELS`, `HUMAN_WINS`, `TOPIC_MASTERY` : tout badge dont la cible est atteinte), donc
+  **ajouter un palier au catalogue l'active sans toucher à l'agrégat**. La famille `COLLECTION`
+  se débloque **en cascade** (un badge acquis peut franchir un palier de collection, qui en
+  franchit un autre). L'agrégat porte désormais `humanDuels` / `humanWins`, incrémentés **au
+  replay** depuis `XpAwardedEvent` et **uniquement pour les duels entre joueurs** : le volume et
+  la maîtrise ne progressent pas en entraînement, alors que les exploits (faits du duel) restent
+  acquis. Ordre d'émission stable (`EnumSet`) → replay déterministe.
+- **Exposition (à faire)** : `MasteryGrade`, `Badge` (famille/palier/cible) et `equippedTitle`
+  sont **côté producteur** ; leur exposition par le BFF (et l'UI : collection de badges, sélecteur
+  de titre, célébration de fin de duel) suit la **release de `quizup-profile` puis le bump du pin
+  `quizup.profile-domain.version` dans `quizup-bff`** (flux normal « fournisseur d'abord »). Le
+  titre de **compte** (`ProgressionRules.titleFor`) reste le libellé transitoire affiché tant que
+  l'UI n'est pas basculée sur les titres thématiques.
+  > ⚠️ **Ordre de déploiement obligatoire** : les nouveaux codes de badges (`DUELIST_*`,
+  > `WINNER_*`, `MASTER_*`, `COLLECTOR_*`) sont des constantes d'énumération qui traversent le
+  > query bus. Le Jackson par défaut **échoue sur une constante inconnue**
+  > (`READ_UNKNOWN_ENUM_VALUES_AS_NULL` désactivé) : un BFF encore épinglé sur l'ancienne version
+  > casserait la lecture de `PlayerProgress`. Il faut donc **release profile → bump du pin dans
+  > le BFF → déployer le BFF, puis déployer `quizup-profile`** (le BFF à jour tolère les deux
+  > jeux de badges, l'ancien non).
 - **Activité journalière** : `ActivityProjection` alimente `progression_activity` (série
   courante/record, dernier jour actif) et `progression_activity_day` (parties par jour) depuis
   `GameEndedEvent` ; capability conservée côté service mais **non exposée par le BFF pour le MVP**
