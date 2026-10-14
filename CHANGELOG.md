@@ -1,3 +1,9 @@
+## [3.9.0](https://github.com/quizup-organization/quizup-profile/compare/v3.8.1...v3.9.0) (2026-10-14)
+
+### Features
+
+* **progression:** courbe explicite, grades de maîtrise, catalogue de badges et titre porté ([c7ed6d8](https://github.com/quizup-organization/quizup-profile/commit/c7ed6d84d626e66ec6d637c3732014d25e3ff939))
+
 ## [3.8.1](https://github.com/quizup-organization/quizup-profile/compare/v3.8.0...v3.8.1) (2026-10-14)
 
 ### Bug Fixes
