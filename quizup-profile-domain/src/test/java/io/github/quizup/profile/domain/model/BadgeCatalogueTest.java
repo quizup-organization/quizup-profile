@@ -55,21 +55,33 @@ class BadgeCatalogueTest {
         });
     }
 
+    /** Chaque échelle (famille × métrique) porte ses **six** paliers, du bronze au diamant. */
+    @Test
+    void everyLadderHasTheSixTiers() {
+        Map<String, List<Badge>> ladders = java.util.Arrays.stream(Badge.values())
+                .filter(badge -> !badge.isOneShot())
+                .collect(Collectors.groupingBy(badge -> badge.family() + "/" + badge.metric()));
+
+        assertEquals(12, ladders.size(), "12 échelles dans le catalogue");
+        ladders.forEach((ladder, badges) -> {
+            assertEquals(6, badges.size(), ladder + " doit porter six paliers");
+            assertEquals(BadgeTier.DIAMANT, badges.stream()
+                    .max(Comparator.comparing(Badge::tier)).orElseThrow().tier());
+        });
+    }
+
     @Test
     void masteryBadgesTargetTheGradeThresholds() {
         assertEquals(MasteryGrade.CONFIRME.xpThreshold(), Badge.MASTER_BRONZE.target());
         assertEquals(MasteryGrade.EXPERT.xpThreshold(), Badge.MASTER_ARGENT.target());
-        assertEquals(MasteryGrade.LEGENDE.xpThreshold(), Badge.MASTER_OR.target());
+        assertEquals(MasteryGrade.MAITRE.xpThreshold(), Badge.MASTER_OR.target());
+        assertEquals(MasteryGrade.LEGENDE.xpThreshold(), Badge.MASTER_PLATINE.target());
     }
 
     @Test
     void volumeBadgesMeasureHumanDuelsAndWins() {
-        assertEquals(3, Badge.ofFamily(BadgeFamily.VOLUME).stream()
-                .filter(badge -> badge.metric() == BadgeMetric.HUMAN_DUELS)
-                .count());
-        assertEquals(3, Badge.ofFamily(BadgeFamily.VOLUME).stream()
-                .filter(badge -> badge.metric() == BadgeMetric.HUMAN_WINS)
-                .count());
+        assertEquals(6, Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_DUELS).size());
+        assertEquals(6, Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_WINS).size());
     }
 
     @Test
@@ -109,7 +121,11 @@ class BadgeCatalogueTest {
         assertEquals(0, BadgeTier.BRONZE.ordinal());
         assertEquals(1, BadgeTier.ARGENT.ordinal());
         assertEquals(2, BadgeTier.OR.ordinal());
-        assertTrue(BadgeTier.OR.isHighest());
+        assertEquals(3, BadgeTier.PLATINE.ordinal());
+        assertEquals(4, BadgeTier.EMERAUDE.ordinal());
+        assertEquals(5, BadgeTier.DIAMANT.ordinal());
+        assertTrue(BadgeTier.DIAMANT.isHighest());
+        assertFalse(BadgeTier.PLATINE.isHighest());
         assertFalse(BadgeTier.BRONZE.isHighest());
     }
 }

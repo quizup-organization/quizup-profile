@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -62,13 +63,18 @@ class BadgeRulesTest {
 
     @Test
     void exploringTopicsEarnsExplorerTiers() {
-        // 5 sujets joués → bronze ; 25 → argent ; 50 → or (famille EXPLORATION).
+        // Sujets joués : 5 bronze, 10 argent, 20 or, 40 platine, 70 émeraude, 103 diamant.
         Set<Badge> first = BadgeRules.evaluate(
                 facts(0, false, 0, 0, 0, 0, 0, 5), Set.of());
         assertEquals(Set.of(Badge.EXPLORER_BRONZE), first);
 
-        Set<Badge> all = BadgeRules.evaluate(facts(0, false, 0, 0, 0, 0, 0, 50), Set.of());
-        assertEquals(Set.of(Badge.EXPLORER_BRONZE, Badge.EXPLORER_ARGENT, Badge.EXPLORER_OR), all);
+        Set<Badge> half = BadgeRules.evaluate(facts(0, false, 0, 0, 0, 0, 0, 50), Set.of());
+        assertEquals(Set.of(Badge.EXPLORER_BRONZE, Badge.EXPLORER_ARGENT, Badge.EXPLORER_OR,
+                Badge.EXPLORER_PLATINE), half);
+
+        Set<Badge> all = BadgeRules.evaluate(facts(0, false, 0, 0, 0, 0, 0, 103), Set.of());
+        assertTrue(all.containsAll(
+                Badge.ofLadder(BadgeFamily.EXPLORATION, BadgeMetric.DISTINCT_TOPICS)));
     }
 
     @Test
@@ -115,12 +121,20 @@ class BadgeRulesTest {
         Set<Badge> bronze = BadgeRules.evaluate(facts(30, false, 0, 10, 0, 30, 0), Set.of());
         assertEquals(Set.of(Badge.DUELIST_BRONZE), bronze);
 
-        Set<Badge> silver = BadgeRules.evaluate(facts(30, false, 0, 100, 0, 30, 0), Set.of());
+        Set<Badge> silver = BadgeRules.evaluate(facts(30, false, 0, 50, 0, 30, 0), Set.of());
         assertEquals(Set.of(Badge.DUELIST_BRONZE, Badge.DUELIST_ARGENT), silver);
 
-        Set<Badge> gold = BadgeRules.evaluate(facts(30, false, 0, 500, 0, 30, 0), Set.of());
+        Set<Badge> gold = BadgeRules.evaluate(facts(30, false, 0, 100, 0, 30, 0), Set.of());
         assertEquals(
                 Set.of(Badge.DUELIST_BRONZE, Badge.DUELIST_ARGENT, Badge.DUELIST_OR), gold);
+
+        Set<Badge> emerald = BadgeRules.evaluate(facts(30, false, 0, 500, 0, 30, 0), Set.of());
+        assertTrue(emerald.containsAll(Set.of(Badge.DUELIST_BRONZE, Badge.DUELIST_ARGENT,
+                Badge.DUELIST_OR, Badge.DUELIST_PLATINE, Badge.DUELIST_EMERAUDE)));
+
+        Set<Badge> diamond = BadgeRules.evaluate(facts(30, false, 0, 1_000, 0, 30, 0), Set.of());
+        assertTrue(diamond.containsAll(Set.copyOf(
+                Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_DUELS))));
     }
 
     @Test
@@ -158,16 +172,33 @@ class BadgeRulesTest {
 
     @Test
     void collectionCascade_unlocksEveryCrossedTierInOneAward() {
-        // 4 badges possédés + 9 faits franchis = 13 → collection bronze (5) et argent (10) ;
-        // ces deux paliers portent le total à 15, ce qui débloque l'or (15) dans la foulée.
         Set<Badge> owned = EnumSet.of(Badge.FIRST_WIN, Badge.PERFECT, Badge.LIGHTNING,
                 Badge.STREAK_MASTER);
 
         Set<Badge> earned = BadgeRules.evaluate(facts(30, false, 0, 500, 500, 30_000, 0), owned);
 
-        assertEquals(12, earned.size());
-        assertTrue(earned.containsAll(Set.of(Badge.COLLECTOR_BRONZE, Badge.COLLECTOR_ARGENT,
-                Badge.COLLECTOR_OR)));
+        // La collection se débloque en cascade : chaque palier franchi porte le total, qui peut
+        // franchir le suivant. On vérifie contre le point fixe attendu (sans compte magique).
+        Set<Badge> collectors = earned.stream()
+                .filter(badge -> badge.family() == BadgeFamily.COLLECTION)
+                .collect(Collectors.toSet());
+        long others = earned.stream().filter(badge -> badge.family() != BadgeFamily.COLLECTION).count();
+
+        Set<Badge> expected = EnumSet.noneOf(Badge.class);
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            int total = owned.size() + (int) others + expected.size();
+            for (Badge collector : Badge.ofLadder(BadgeFamily.COLLECTION, BadgeMetric.EARNED_BADGES)) {
+                if (collector.target() <= total && expected.add(collector)) {
+                    changed = true;
+                }
+            }
+        }
+
+        assertEquals(expected, collectors);
+        assertTrue(collectors.containsAll(Set.of(Badge.COLLECTOR_BRONZE, Badge.COLLECTOR_ARGENT)),
+                "au moins bronze et argent : " + collectors);
     }
 
     @Test
