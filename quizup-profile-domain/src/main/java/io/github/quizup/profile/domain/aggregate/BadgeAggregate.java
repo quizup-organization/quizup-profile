@@ -4,6 +4,7 @@ import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.event.ProgressionEvent;
 import io.github.quizup.profile.domain.model.Badge;
 import io.github.quizup.profile.domain.model.BadgeRules;
+import io.github.quizup.profile.domain.model.ProgressionRules;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateCreationPolicy;
@@ -48,6 +49,8 @@ public class BadgeAggregate {
 
     private int humanDuels;
     private int humanWins;
+    private int perfectDuels;
+    private int fastAnswersTotal;
 
     protected BadgeAggregate() {
     }
@@ -89,7 +92,9 @@ public class BadgeAggregate {
                 humanWins,
                 xpByTopic.getOrDefault(command.topicId(), 0),
                 winStreakByTopic.getOrDefault(command.topicId(), 0),
-                (int) xpByTopic.values().stream().filter(value -> value > 0).count()
+                (int) xpByTopic.values().stream().filter(value -> value > 0).count(),
+                perfectDuels,
+                fastAnswersTotal
         );
 
         // Ordre stable (règles) : le flux d'événements reste déterministe au replay.
@@ -104,6 +109,12 @@ public class BadgeAggregate {
         this.userId = event.userId();
         this.evaluatedGameIds.add(event.gameId());
         this.xpByTopic.merge(event.topicId(), event.xp(), Integer::sum);
+
+        // Faits d'exploit du duel : comptés même en entraînement (comme PERFECT/ÉCLAIR).
+        if (event.gameScore() >= ProgressionRules.PERFECT_SCORE) {
+            this.perfectDuels++;
+        }
+        this.fastAnswersTotal += event.fastAnswers();
 
         // Volume et maîtrise : seuls les duels entre joueurs comptent.
         if (!event.botGame()) {

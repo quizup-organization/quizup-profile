@@ -18,6 +18,12 @@ public enum BadgeFamily {
     /** Série : victoires consécutives. */
     SERIES,
 
+    /** Précision : duels parfaits cumulés. */
+    PRECISION,
+
+    /** Rapidité : réponses rapides cumulées. */
+    SPEED,
+
     /** Exploration : nombre de sujets différents joués. */
     EXPLORATION,
 

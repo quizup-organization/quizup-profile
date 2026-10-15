@@ -65,6 +65,11 @@ public class ProgressionProjection {
                 : current.currentWinStreak();
         int bestWinStreak = Math.max(current.bestWinStreak(), currentWinStreak);
 
+        // Faits d'exploit cumulés (entraînement compris) : badges Précision / Rapidité.
+        int perfectDuels = current.perfectDuels()
+                + (event.gameScore() >= ProgressionRules.PERFECT_SCORE ? 1 : 0);
+        int fastAnswersTotal = current.fastAnswersTotal() + event.fastAnswers();
+
         // Parties humaines par thème (les duels bot restent exclus, comme les stats V/N/D).
         Map<String, Integer> gamesByTopic = new HashMap<>(current.gamesByTopic());
         if (humanDuel) {
@@ -84,6 +89,8 @@ public class ProgressionProjection {
                 .bestScore(humanDuel ? Math.max(current.bestScore(), event.gameScore()) : current.bestScore())
                 .currentWinStreak(currentWinStreak)
                 .bestWinStreak(bestWinStreak)
+                .perfectDuels(perfectDuels)
+                .fastAnswersTotal(fastAnswersTotal)
                 .updatedAt(event.awardedAt())
                 .build());
 

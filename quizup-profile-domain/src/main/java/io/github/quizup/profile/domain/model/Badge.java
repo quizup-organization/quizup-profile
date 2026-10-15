@@ -49,6 +49,16 @@ public enum Badge {
     SERIES_ARGENT("Imbattable", BadgeFamily.SERIES, BadgeTier.ARGENT, BadgeMetric.WIN_STREAK, 10),
     SERIES_OR("Invincible", BadgeFamily.SERIES, BadgeTier.OR, BadgeMetric.WIN_STREAK, 25),
 
+    // ── Précision : duels parfaits cumulés ────────────────────────────────────────────────
+    PRECISION_BRONZE("Métronome", BadgeFamily.PRECISION, BadgeTier.BRONZE, BadgeMetric.PERFECT_DUELS, 10),
+    PRECISION_ARGENT("Machine à points", BadgeFamily.PRECISION, BadgeTier.ARGENT, BadgeMetric.PERFECT_DUELS, 50),
+    PRECISION_OR("Sans-faute absolu", BadgeFamily.PRECISION, BadgeTier.OR, BadgeMetric.PERFECT_DUELS, 100),
+
+    // ── Rapidité : réponses rapides cumulées ──────────────────────────────────────────────
+    SPEED_BRONZE("Doigt sur la gâchette", BadgeFamily.SPEED, BadgeTier.BRONZE, BadgeMetric.FAST_ANSWERS, 50),
+    SPEED_ARGENT("Rafale", BadgeFamily.SPEED, BadgeTier.ARGENT, BadgeMetric.FAST_ANSWERS, 200),
+    SPEED_OR("Réflexe absolu", BadgeFamily.SPEED, BadgeTier.OR, BadgeMetric.FAST_ANSWERS, 500),
+
     // ── Exploration : nombre de sujets joués (XP > 0) ──────────────────────────────────────
     EXPLORER_BRONZE("Curieux", BadgeFamily.EXPLORATION, BadgeTier.BRONZE, BadgeMetric.DISTINCT_TOPICS, 5),
     EXPLORER_ARGENT("Touche-à-tout", BadgeFamily.EXPLORATION, BadgeTier.ARGENT, BadgeMetric.DISTINCT_TOPICS, 25),

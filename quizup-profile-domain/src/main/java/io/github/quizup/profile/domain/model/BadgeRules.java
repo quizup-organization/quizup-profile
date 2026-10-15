@@ -48,7 +48,11 @@ public final class BadgeRules {
             int topicXp,
             int winStreakInTopic,
             /** Nombre de sujets joués (XP > 0), entraînement exclu. */
-            int distinctTopics
+            int distinctTopics,
+            /** Duels parfaits cumulés (entraînement compris : fait d'exploit du duel). */
+            int perfectDuels,
+            /** Réponses rapides cumulées (entraînement compris : fait d'exploit du duel). */
+            int fastAnswersTotal
     ) {
     }
 
@@ -69,6 +73,8 @@ public final class BadgeRules {
         collectReached(owned, BadgeMetric.TOPIC_MASTERY, facts.topicXp());
         collectReached(owned, BadgeMetric.DISTINCT_TOPICS, facts.distinctTopics());
         collectReached(owned, BadgeMetric.WIN_STREAK, facts.winStreakInTopic());
+        collectReached(owned, BadgeMetric.PERFECT_DUELS, facts.perfectDuels());
+        collectReached(owned, BadgeMetric.FAST_ANSWERS, facts.fastAnswersTotal());
 
         // Collection : le total possédé grandit à chaque badge ajouté → boucle jusqu'à stabilité.
         boolean changed = true;

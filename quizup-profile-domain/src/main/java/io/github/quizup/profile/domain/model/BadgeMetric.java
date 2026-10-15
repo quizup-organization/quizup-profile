@@ -24,6 +24,12 @@ public enum BadgeMetric {
     /** Victoires consécutives ({@code winStreakInTopic} au moment du duel). */
     WIN_STREAK,
 
+    /** Duels parfaits cumulés (score maximal atteint). */
+    PERFECT_DUELS,
+
+    /** Réponses rapides cumulées (tous duels confondus). */
+    FAST_ANSWERS,
+
     /** Nombre de badges obtenus (famille {@code COLLECTION}). */
     EARNED_BADGES,
 

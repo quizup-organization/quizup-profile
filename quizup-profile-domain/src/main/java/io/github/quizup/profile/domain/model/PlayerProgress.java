@@ -26,6 +26,8 @@ public record PlayerProgress(
         int bestScore,
         int currentWinStreak,
         int bestWinStreak,
+        int perfectDuels,
+        int fastAnswersTotal,
         Instant updatedAt
 ) {
 
@@ -48,6 +50,8 @@ public record PlayerProgress(
                 .bestScore(0)
                 .currentWinStreak(0)
                 .bestWinStreak(0)
+                .perfectDuels(0)
+                .fastAnswersTotal(0)
                 .updatedAt(Instant.now())
                 .build();
     }

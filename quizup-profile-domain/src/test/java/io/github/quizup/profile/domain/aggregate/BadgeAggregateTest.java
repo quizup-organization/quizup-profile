@@ -107,6 +107,22 @@ class BadgeAggregateTest {
     }
 
     @Test
+    void tenthPerfectDuel_earnsPrecisionBronze() {
+        fixture.given(perfectDuels(9))
+                .when(duel("game-10", "topic-1", 160, 160, false, false, 0))
+                .expectEventsMatching(earned(Badge.PRECISION_BRONZE));
+    }
+
+    @Test
+    void fiftyFastAnswers_earnsSpeedBronze() {
+        fixture.given(new ProgressionEvent.BadgeFactsRecordedEvent(
+                        BADGE_ID, "user-1", "game-1", "topic-1", 30, 30, false, false, 45,
+                        Instant.now()))
+                .when(duel("game-2", "topic-1", 30, 30, false, false, 5))
+                .expectEventsMatching(earned(Badge.SPEED_BRONZE));
+    }
+
+    @Test
     void exploringTopics_earnsExplorerBronze() {
         fixture.given(distinctTopics(4))
                 .when(duel("game-5", "topic-5", 30, 30, false, false, 0))
@@ -164,6 +180,17 @@ class BadgeAggregateTest {
         for (int index = 0; index < count; index++) {
             duels[index] = new ProgressionEvent.BadgeFactsRecordedEvent(
                     BADGE_ID, "user-1", "bot-" + index, "topic-1", 0, 10, false, true, 0,
+                    Instant.now());
+        }
+        return duels;
+    }
+
+    private static ProgressionEvent.BadgeFactsRecordedEvent[] perfectDuels(int count) {
+        ProgressionEvent.BadgeFactsRecordedEvent[] duels =
+                new ProgressionEvent.BadgeFactsRecordedEvent[count];
+        for (int index = 0; index < count; index++) {
+            duels[index] = new ProgressionEvent.BadgeFactsRecordedEvent(
+                    BADGE_ID, "user-1", "perfect-" + index, "topic-1", 160, 160, true, false, 0,
                     Instant.now());
         }
         return duels;

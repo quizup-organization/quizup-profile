@@ -58,6 +58,14 @@ public class ProgressEntity {
     @Column(name = "best_win_streak", nullable = false)
     private int bestWinStreak;
 
+    /** Duels parfaits cumulés (faits d'exploit, entraînement compris) — badge Précision. */
+    @Column(name = "perfect_duels", nullable = false)
+    private int perfectDuels;
+
+    /** Réponses rapides cumulées (faits d'exploit, entraînement compris) — badge Rapidité. */
+    @Column(name = "fast_answers_total", nullable = false)
+    private int fastAnswersTotal;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "progression_topic_entry", joinColumns = @JoinColumn(name = "user_id"))
     @MapKeyColumn(name = "topic_id", length = 255)

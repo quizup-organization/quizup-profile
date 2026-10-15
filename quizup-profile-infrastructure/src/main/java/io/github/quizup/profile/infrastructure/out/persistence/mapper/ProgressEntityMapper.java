@@ -30,6 +30,8 @@ public final class ProgressEntityMapper {
                 .bestScore(entity.getBestScore())
                 .currentWinStreak(entity.getCurrentWinStreak())
                 .bestWinStreak(entity.getBestWinStreak())
+                .perfectDuels(entity.getPerfectDuels())
+                .fastAnswersTotal(entity.getFastAnswersTotal())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
     }
@@ -50,6 +52,8 @@ public final class ProgressEntityMapper {
         entity.setBestScore(progress.bestScore());
         entity.setCurrentWinStreak(progress.currentWinStreak());
         entity.setBestWinStreak(progress.bestWinStreak());
+        entity.setPerfectDuels(progress.perfectDuels());
+        entity.setFastAnswersTotal(progress.fastAnswersTotal());
         entity.setUpdatedAt(progress.updatedAt());
         return entity;
     }
