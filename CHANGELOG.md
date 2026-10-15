@@ -1,3 +1,13 @@
+## [4.0.0](https://github.com/quizup-organization/quizup-profile/compare/v3.10.0...v4.0.0) (2026-10-15)
+
+### ⚠ BREAKING CHANGES
+
+* **profile:** badges dans un agregat dedie + famille Serie
+
+### Features
+
+* **profile:** badges dans un agregat dedie + famille Serie ([1805c46](https://github.com/quizup-organization/quizup-profile/commit/1805c46c4af9917f942c50e5a558f509e643ec0e))
+
 ## [3.10.0](https://github.com/quizup-organization/quizup-profile/compare/v3.9.0...v3.10.0) (2026-10-15)
 
 ### Features
