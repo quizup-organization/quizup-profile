@@ -2,6 +2,7 @@ package io.github.quizup.profile.domain.aggregate;
 
 import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.event.ProgressionEvent;
+import io.github.quizup.profile.domain.model.MasteryGrade;
 import io.github.quizup.profile.domain.model.ProgressionRules;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -77,6 +78,19 @@ public class PlayerProgressAggregate {
                 command.imageCorrectAnswers(),
                 now
         ));
+
+        // Titre thématique : le grade de maîtrise du sujet franchi est annoncé (célébration).
+        int topicXpAfter = xpByTopic.getOrDefault(command.topicId(), 0);
+        MasteryGrade gradeBefore = MasteryGrade.gradeFor(topicXpAfter - xp);
+        MasteryGrade gradeAfter = MasteryGrade.gradeFor(topicXpAfter);
+        if (gradeAfter.ordinal() > gradeBefore.ordinal()) {
+            AggregateLifecycle.apply(new ProgressionEvent.MasteryGradeReachedEvent(
+                    command.userId(),
+                    command.topicId(),
+                    gradeAfter,
+                    now
+            ));
+        }
 
         int newLevel = ProgressionRules.levelFor(newTotal);
 

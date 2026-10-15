@@ -3,6 +3,7 @@ package io.github.quizup.profile.domain.aggregate;
 import io.github.quizup.axon.test.QuizUpAxonMatchers;
 import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.event.ProgressionEvent;
+import io.github.quizup.profile.domain.model.MasteryGrade;
 import io.github.quizup.profile.domain.model.ProgressionRules;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,26 @@ class PlayerProgressAggregateTest {
                 .expectEventsMatching(QuizUpAxonMatchers.hasPayloadMatching(
                         ProgressionEvent.LevelReachedEvent.class,
                         e -> ((ProgressionEvent.LevelReachedEvent) e).level() == 2));
+    }
+
+    @Test
+    void crossingAMasteryGrade_announcesTheThematicTitle() {
+        // 2 500 XP dans le sujet = grade Confirmé (titre thématique débloqué).
+        fixture
+                .given(new ProgressionEvent.XpAwardedEvent(
+                        "user-1", "game-0", "topic-1", 2_400, 160, true, false, false, 4, 2, 0,
+                        Instant.now()))
+                .when(new ProgressionCommand.AwardXpCommand(
+                        ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1",
+                        160, true, false, false, 4, 2, 0))
+                .expectEventsMatching(QuizUpAxonMatchers.hasPayloadMatching(
+                        ProgressionEvent.MasteryGradeReachedEvent.class,
+                        e -> {
+                            ProgressionEvent.MasteryGradeReachedEvent reached =
+                                    (ProgressionEvent.MasteryGradeReachedEvent) e;
+                            return MasteryGrade.CONFIRME == reached.grade()
+                                    && "topic-1".equals(reached.topicId());
+                        }));
     }
 
     @Test
