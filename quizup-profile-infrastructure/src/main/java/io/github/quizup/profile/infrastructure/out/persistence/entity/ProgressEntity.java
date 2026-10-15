@@ -67,6 +67,14 @@ public class ProgressEntity {
     @Column(name = "fast_answers_total", nullable = false)
     private int fastAnswersTotal;
 
+    /** Abonnés gagnés (cumulés) — badge Social. */
+    @Column(name = "followers_gained", nullable = false)
+    private int followersGained;
+
+    /** Défis nominatifs lancés — badge Défis. */
+    @Column(name = "challenges_sent", nullable = false)
+    private int challengesSent;
+
     /** Série courante de jours joués — badge Assiduité (même règle que la projection d'activité). */
     @Column(name = "current_day_streak", nullable = false)
     private int currentDayStreak;

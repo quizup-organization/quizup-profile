@@ -59,6 +59,37 @@ public final class BadgeRules {
     }
 
     /**
+     * Compteurs **hors duel** d'un joueur (alimentés par les autres services : abonnements,
+     * défis nominatifs), à jour au moment de l'évaluation.
+     */
+    public record CounterFacts(
+            /** Abonnés gagnés, cumulés. */
+            int followersGained,
+            /** Défis nominatifs lancés. */
+            int challengesSent
+    ) {
+    }
+
+    /**
+     * Badges nouvellement acquis par un **compteur hors duel** (abonné gagné, défi lancé).
+     *
+     * @param facts         compteurs à jour
+     * @param alreadyEarned badges déjà possédés
+     * @return les seuls badges à émettre (ordre stable, par ordinal)
+     */
+    public static Set<Badge> evaluateCounters(CounterFacts facts, Set<Badge> alreadyEarned) {
+        Set<Badge> owned = EnumSet.noneOf(Badge.class);
+        owned.addAll(alreadyEarned);
+
+        collectReached(owned, BadgeMetric.FOLLOWERS_GAINED, facts.followersGained());
+        collectReached(owned, BadgeMetric.CHALLENGES_SENT, facts.challengesSent());
+        cascadeCollection(owned);
+
+        owned.removeAll(alreadyEarned);
+        return owned;
+    }
+
+    /**
      * Badges nouvellement acquis à l'issue du duel.
      *
      * @param facts        faits du duel et compteurs à jour
@@ -79,14 +110,18 @@ public final class BadgeRules {
         collectReached(owned, BadgeMetric.FAST_ANSWERS, facts.fastAnswersTotal());
         collectReached(owned, BadgeMetric.DAILY_STREAK, facts.dayStreak());
 
-        // Collection : le total possédé grandit à chaque badge ajouté → boucle jusqu'à stabilité.
+        cascadeCollection(owned);
+
+        owned.removeAll(alreadyEarned);
+        return owned;
+    }
+
+    /** Collection : le total possédé grandit à chaque badge ajouté → boucle jusqu'à stabilité. */
+    private static void cascadeCollection(Set<Badge> owned) {
         boolean changed = true;
         while (changed) {
             changed = collectReached(owned, BadgeMetric.EARNED_BADGES, owned.size());
         }
-
-        owned.removeAll(alreadyEarned);
-        return owned;
     }
 
     private static void collectExploits(Set<Badge> owned, DuelFacts facts) {

@@ -54,6 +54,8 @@ public class BadgeAggregate {
 
     private int humanDuels;
     private int humanWins;
+    private int followersGained;
+    private int challengesSent;
     private int perfectDuels;
     private int fastAnswersTotal;
 
@@ -107,6 +109,51 @@ public class BadgeAggregate {
         // Ordre stable (règles) : le flux d'événements reste déterministe au replay.
         for (Badge badge : BadgeRules.evaluate(facts, badges)) {
             apply(new ProgressionEvent.BadgeEarnedEvent(command.userId(), badge, now));
+        }
+    }
+
+    /**
+     * Compteur **hors duel** (abonné gagné, défi lancé) : incrémente le compteur de la métrique
+     * puis réévalue les badges. La livraison est au-moins-une-fois (saga) : un rejeu ne peut que
+     * faire progresser un badge cosmétique, jamais le retirer.
+     */
+    @CommandHandler
+    @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
+    public void handle(ProgressionCommand.RecordBadgeCounterCommand command) {
+        if (this.badgeId == null) {
+            this.badgeId = command.badgeId();
+        }
+        if (this.userId == null) {
+            this.userId = command.userId();
+        }
+
+        Instant now = Instant.now();
+        apply(new ProgressionEvent.BadgeCounterRecordedEvent(
+                command.badgeId(),
+                command.userId(),
+                command.metric(),
+                command.sourceId(),
+                now
+        ));
+
+        // Compteurs à jour : l'évaluation (et le replay) portent sur le même état.
+        BadgeRules.CounterFacts facts =
+                new BadgeRules.CounterFacts(followersGained, challengesSent);
+        for (Badge badge : BadgeRules.evaluateCounters(facts, badges)) {
+            apply(new ProgressionEvent.BadgeEarnedEvent(command.userId(), badge, now));
+        }
+    }
+
+    @EventSourcingHandler
+    public void on(ProgressionEvent.BadgeCounterRecordedEvent event) {
+        this.badgeId = event.badgeId();
+        this.userId = event.userId();
+        switch (event.metric()) {
+            case FOLLOWERS_GAINED -> this.followersGained++;
+            case CHALLENGES_SENT -> this.challengesSent++;
+            default -> {
+                // Métriques alimentées par les duels : rien à faire ici.
+            }
         }
     }
 

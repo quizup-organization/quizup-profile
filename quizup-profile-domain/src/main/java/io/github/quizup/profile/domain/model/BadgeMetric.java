@@ -33,6 +33,12 @@ public enum BadgeMetric {
     /** Meilleure série de jours joués consécutifs (assiduité). */
     DAILY_STREAK,
 
+    /** Abonnés gagnés (cumulés, se désabonner ne retire rien) — famille Social. */
+    FOLLOWERS_GAINED,
+
+    /** Défis nominatifs lancés — famille Défis. */
+    CHALLENGES_SENT,
+
     /** Nombre de badges obtenus (famille {@code COLLECTION}). */
     EARNED_BADGES,
 

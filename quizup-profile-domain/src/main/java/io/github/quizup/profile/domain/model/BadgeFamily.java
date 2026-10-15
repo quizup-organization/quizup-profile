@@ -21,6 +21,12 @@ public enum BadgeFamily {
     /** Assiduité : jours joués consécutifs. */
     ASSIDUITY,
 
+    /** Social : abonnés gagnés. */
+    SOCIAL,
+
+    /** Défis : défis nominatifs lancés. */
+    CHALLENGES,
+
     /** Précision : duels parfaits cumulés. */
     PRECISION,
 

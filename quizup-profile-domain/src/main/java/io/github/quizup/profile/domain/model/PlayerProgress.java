@@ -29,6 +29,8 @@ public record PlayerProgress(
         int bestWinStreak,
         int perfectDuels,
         int fastAnswersTotal,
+        int followersGained,
+        int challengesSent,
         int currentDayStreak,
         int bestDayStreak,
         LocalDate lastActiveDate,
@@ -56,6 +58,8 @@ public record PlayerProgress(
                 .bestWinStreak(0)
                 .perfectDuels(0)
                 .fastAnswersTotal(0)
+                .followersGained(0)
+                .challengesSent(0)
                 .currentDayStreak(0)
                 .bestDayStreak(0)
                 .lastActiveDate(null)

@@ -32,6 +32,8 @@ public final class ProgressEntityMapper {
                 .bestWinStreak(entity.getBestWinStreak())
                 .perfectDuels(entity.getPerfectDuels())
                 .fastAnswersTotal(entity.getFastAnswersTotal())
+                .followersGained(entity.getFollowersGained())
+                .challengesSent(entity.getChallengesSent())
                 .currentDayStreak(entity.getCurrentDayStreak())
                 .bestDayStreak(entity.getBestDayStreak())
                 .lastActiveDate(entity.getLastActiveDate())
@@ -57,6 +59,8 @@ public final class ProgressEntityMapper {
         entity.setBestWinStreak(progress.bestWinStreak());
         entity.setPerfectDuels(progress.perfectDuels());
         entity.setFastAnswersTotal(progress.fastAnswersTotal());
+        entity.setFollowersGained(progress.followersGained());
+        entity.setChallengesSent(progress.challengesSent());
         entity.setCurrentDayStreak(progress.currentDayStreak());
         entity.setBestDayStreak(progress.bestDayStreak());
         entity.setLastActiveDate(progress.lastActiveDate());

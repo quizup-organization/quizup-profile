@@ -38,6 +38,19 @@ public interface ProgressionCommand {
      * <p>Les faits du duel sont ceux de {@code XpAwardedEvent} ; l'agrégat porte lui-même les
      * compteurs nécessaires (duels/victoires entre joueurs, séries par thème, XP par thème).</p>
      */
+    /**
+     * Incrémente un compteur de badge **hors duel** (abonné gagné, défi lancé) puis réévalue les
+     * badges de l'agrégat.
+     */
+    record RecordBadgeCounterCommand(
+            @TargetAggregateIdentifier String badgeId,
+            String userId,
+            io.github.quizup.profile.domain.model.BadgeMetric metric,
+            String sourceId,
+            java.time.Instant recordedAt
+    ) implements ProgressionCommand {
+    }
+
     record EvaluateBadgesCommand(
             @TargetAggregateIdentifier String badgeId,
             String userId,

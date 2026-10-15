@@ -64,6 +64,16 @@ public enum Badge {
     SPEED_ARGENT("Rafale", BadgeFamily.SPEED, BadgeTier.ARGENT, BadgeMetric.FAST_ANSWERS, 200),
     SPEED_OR("Réflexe absolu", BadgeFamily.SPEED, BadgeTier.OR, BadgeMetric.FAST_ANSWERS, 500),
 
+    // ── Social : abonnés gagnés (cumulés) ────────────────────────────────────────────────
+    SOCIAL_BRONZE("Populaire", BadgeFamily.SOCIAL, BadgeTier.BRONZE, BadgeMetric.FOLLOWERS_GAINED, 5),
+    SOCIAL_ARGENT("Célébrité", BadgeFamily.SOCIAL, BadgeTier.ARGENT, BadgeMetric.FOLLOWERS_GAINED, 50),
+    SOCIAL_OR("Icône", BadgeFamily.SOCIAL, BadgeTier.OR, BadgeMetric.FOLLOWERS_GAINED, 200),
+
+    // ── Défis : défis nominatifs lancés ───────────────────────────────────────────────────
+    CHALLENGES_BRONZE("Challenger", BadgeFamily.CHALLENGES, BadgeTier.BRONZE, BadgeMetric.CHALLENGES_SENT, 1),
+    CHALLENGES_ARGENT("Provocateur", BadgeFamily.CHALLENGES, BadgeTier.ARGENT, BadgeMetric.CHALLENGES_SENT, 10),
+    CHALLENGES_OR("Maître du défi", BadgeFamily.CHALLENGES, BadgeTier.OR, BadgeMetric.CHALLENGES_SENT, 50),
+
     // ── Exploration : nombre de sujets joués (XP > 0) ──────────────────────────────────────
     EXPLORER_BRONZE("Curieux", BadgeFamily.EXPLORATION, BadgeTier.BRONZE, BadgeMetric.DISTINCT_TOPICS, 5),
     EXPLORER_ARGENT("Touche-à-tout", BadgeFamily.EXPLORATION, BadgeTier.ARGENT, BadgeMetric.DISTINCT_TOPICS, 25),

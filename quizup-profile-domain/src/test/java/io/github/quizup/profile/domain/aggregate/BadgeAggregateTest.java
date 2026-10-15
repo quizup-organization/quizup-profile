@@ -4,6 +4,7 @@ import io.github.quizup.axon.test.QuizUpAxonMatchers;
 import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.event.ProgressionEvent;
 import io.github.quizup.profile.domain.model.Badge;
+import io.github.quizup.profile.domain.model.BadgeMetric;
 import io.github.quizup.profile.domain.model.ProgressionRules;
 import org.axonframework.eventhandling.EventMessage;
 import org.axonframework.test.aggregate.AggregateTestFixture;
@@ -157,6 +158,22 @@ class BadgeAggregateTest {
     }
 
     @Test
+    void fiveFollowers_earnSocialBronze() {
+        fixture.given(followers(4))
+                .when(follower("follow-5"))
+                .expectEventsMatching(earned(Badge.SOCIAL_BRONZE));
+    }
+
+    @Test
+    void firstChallenge_earnsChallengesBronze() {
+        fixture.givenNoPriorActivity()
+                .when(new ProgressionCommand.RecordBadgeCounterCommand(
+                        BADGE_ID, "user-1", BadgeMetric.CHALLENGES_SENT, "challenge-1",
+                        Instant.now()))
+                .expectEventsMatching(earned(Badge.CHALLENGES_BRONZE));
+    }
+
+    @Test
     void exploringTopics_earnsExplorerBronze() {
         fixture.given(distinctTopics(4))
                 .when(duel("game-5", "topic-5", 30, 30, false, false, 0))
@@ -224,6 +241,22 @@ class BadgeAggregateTest {
                     Instant.now(), null);
         }
         return duels;
+    }
+
+    private static ProgressionCommand.RecordBadgeCounterCommand follower(String sourceId) {
+        return new ProgressionCommand.RecordBadgeCounterCommand(
+                BADGE_ID, "user-1", BadgeMetric.FOLLOWERS_GAINED, sourceId, Instant.now());
+    }
+
+    private static ProgressionEvent.BadgeCounterRecordedEvent[] followers(int count) {
+        ProgressionEvent.BadgeCounterRecordedEvent[] events =
+                new ProgressionEvent.BadgeCounterRecordedEvent[count];
+        for (int index = 0; index < count; index++) {
+            events[index] = new ProgressionEvent.BadgeCounterRecordedEvent(
+                    BADGE_ID, "user-1", BadgeMetric.FOLLOWERS_GAINED, "follow-" + index,
+                    Instant.now());
+        }
+        return events;
     }
 
     private static ProgressionEvent.BadgeFactsRecordedEvent[] perfectDuels(int count) {

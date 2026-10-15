@@ -129,6 +129,36 @@ public class ProgressionProjection {
                         .build()));
     }
 
+    /**
+     * Compteurs **hors duel** (abonnés gagnés, défis lancés) : les badges sont déjà évalués par
+     * l'agrégat, on ne fait ici qu'exposer la progression au BFF.
+     */
+    @EventHandler
+    @Transactional
+    public void on(ProgressionEvent.BadgeCounterRecordedEvent event) {
+        PlayerProgress current = progressionRepositoryPort.findById(event.userId())
+                .orElseGet(() -> PlayerProgress.empty(event.userId()));
+
+        PlayerProgress updated = switch (event.metric()) {
+            case FOLLOWERS_GAINED -> current.toBuilder()
+                    .followersGained(current.followersGained() + 1)
+                    .updatedAt(event.recordedAt())
+                    .build();
+            case CHALLENGES_SENT -> current.toBuilder()
+                    .challengesSent(current.challengesSent() + 1)
+                    .updatedAt(event.recordedAt())
+                    .build();
+            default -> null;
+        };
+        if (updated == null) {
+            return;
+        }
+
+        progressionRepositoryPort.save(updated);
+        logger.debug("Compteur de badge projeté: userId={}, métrique={}",
+                event.userId(), event.metric());
+    }
+
     @EventHandler
     @Transactional
     public void on(ProgressionEvent.BadgeEarnedEvent event) {

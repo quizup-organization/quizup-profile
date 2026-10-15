@@ -56,6 +56,16 @@ public interface ProgressionEvent {
      * évaluation) : duels/victoires entre joueurs, XP et série du sujet, score et réponses
      * rapides. L'entraînement contre bot n'alimente **aucun** compteur de volume/maîtrise.
      */
+    /** Compteur hors duel enregistré (abonné gagné, défi lancé) avant évaluation. */
+    record BadgeCounterRecordedEvent(
+            String badgeId,
+            String userId,
+            io.github.quizup.profile.domain.model.BadgeMetric metric,
+            String sourceId,
+            Instant recordedAt
+    ) implements ProgressionEvent {
+    }
+
     record BadgeFactsRecordedEvent(
             String badgeId,
             String userId,
