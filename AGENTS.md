@@ -21,10 +21,11 @@ autres services : social et matchmaking n'interrogent plus identity mais **profi
 `ProfileQuery.ProfileExistsByIdQuery` / `ProfileQuery.GetProfileQuery` sur le bus partagé).
 Le `PseudonymGenerator` (pseudonyme déterministe généré à la création) vit dans ce domaine.
 
-Il porte enfin la **progression du joueur** (RPG) : XP totale + XP **par thème**, niveau, titre
-honorifique et badges, attribués de façon idempotente à la fin de chaque duel (saga sur
-`GameEndedEvent` de `quizup-game`). L'agrégat `PlayerProgressAggregate` est identifié par
-`progress:<userId>` (namespacé pour ne pas entrer en collision avec le `ProfileAggregate`).
+Il porte enfin la **progression du joueur** (RPG) : XP totale + XP **par thème**, niveau et titre
+honorifique (`PlayerProgressAggregate`, `progress:<userId>`) et **badges**
+(`BadgeAggregate`, `badges:<userId>` — namespacés pour ne pas entrer en collision avec le
+`ProfileAggregate`). Les deux sont attribués de façon idempotente à la fin de chaque duel (sagas
+sur `GameEndedEvent` de `quizup-game`).
 
 Il expose aussi la **présence joueur** (`/api/presence`) : read-model éphémère piloté par le cycle
 de vie des **sessions temps réel STOMP** (connexion/déconnexion) et les **heartbeats** du broker
@@ -133,14 +134,23 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   `null` efface) ; l'**appartenance** du titre (grade réellement atteint) est vérifiée par
   l'appelant, qui prépare la commande.
 - **Catalogue de badges** (`Badge`) organisé en **familles × paliers × métrique** : `BadgeFamily`
-  (`VOLUME`, `MASTERY`, `EXPLOIT`, `COLLECTION`), `BadgeTier` (`BRONZE → ARGENT → OR`),
-  `BadgeMetric` (`HUMAN_DUELS`, `HUMAN_WINS`, `TOPIC_MASTERY`, `EARNED_BADGES`, `ONE_SHOT`) et
-  `target` — ce qui permet une **progression visible** (« 7/10 duels ») et laisse une raison de
-  continuer après le bronze. **Un palier = une constante** (`DUELIST_BRONZE`, … `DUELIST_OR`) :
-  les badges acquis restent un simple ensemble de noms, **sans migration** ; les 4 codes
-  historiques (`FIRST_WIN`, `PERFECT`, `LIGHTNING`, `STREAK_MASTER`) sont préservés (test dédié).
-  Les familles **Assiduité** (série de jours, à brancher sur `ActivityProjection`) et **Social**
-  (abonnements) restent hors catalogue pour l'instant.
+  (`VOLUME`, `MASTERY`, `EXPLOIT`, `COLLECTION`, puis `SERIES`, `EXPLORATION`, `PRECISION`,
+  `SPEED`), `BadgeTier` (`BRONZE → ARGENT → OR`), `BadgeMetric` (`HUMAN_DUELS`, `HUMAN_WINS`,
+  `TOPIC_MASTERY`, `DISTINCT_TOPICS`, `WIN_STREAK`, `PERFECT_DUELS`, `FAST_ANSWERS`,
+  `EARNED_BADGES`, `ONE_SHOT`) et `target` — ce qui permet une **progression visible** (« 7/10
+  duels ») et laisse une raison de continuer après le bronze. **Un palier = une constante**
+  (`DUELIST_BRONZE`, … `DUELIST_OR`) : les badges acquis restent un simple ensemble de noms,
+  **sans migration** ; les 4 codes historiques (`FIRST_WIN`, `PERFECT`, `LIGHTNING`,
+  `STREAK_MASTER`) sont préservés (test dédié).
+  Familles : **Volume** (duels/victoires entre joueurs), **Maîtrise** (XP du meilleur sujet),
+  **Exploit** (faits ponctuels : première victoire, duel parfait, 5 réponses rapides, série de
+  victoires), **Collection** (nombre de badges acquis), **Série** (`WIN_STREAK` : victoires
+  consécutives — En série / Imbattable / Invincible), **Exploration** (`DISTINCT_TOPICS` :
+  sujets joués — Curieux / Touche-à-tout / Encyclopédie), **Précision** (`PERFECT_DUELS` : duels
+  parfaits cumulés — Métronome 10 / Machine à points 50 / Sans-faute absolu 100) et **Rapidité**
+  (`FAST_ANSWERS` : réponses rapides cumulées — Doigt sur la gâchette 50 / Rafale 200 / Réflexe
+  absolu 500). Les familles **Assiduité** (série de jours, à brancher sur `ActivityProjection`) et
+  **Social** (abonnements) restent hors catalogue pour l'instant.
 - `AwardXpCommand` / `XpAwardedEvent` portent `correctAnswers`, `fastAnswers`, `draw` et
   `botGame` (issus de `GameEndedEvent`). **Règle produit** : un duel contre bot est un
   **entraînement** — `ProgressionRules.xpFor(score, won, botGame)` vaut **0 XP** (la progression
@@ -149,29 +159,37 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   migr. V5) et du classement. Les égalités sont comptées comme telles (jamais en défaite).
   Compteurs `duelStats` maintenus en projection, les événements antérieurs (`botGame=false`,
   `draw=false`) restent comptés.
-- **Attribution des paliers** (`BadgeRules`, règles **pures** testées sans Axon) : à la fin de
-  chaque duel, l'agrégat évalue les faits du duel et ses propres compteurs, puis émet un
-  `BadgeEarnedEvent` par badge nouvellement acquis. L'évaluation est **générique par métrique**
-  (`HUMAN_DUELS`, `HUMAN_WINS`, `TOPIC_MASTERY` : tout badge dont la cible est atteinte), donc
-  **ajouter un palier au catalogue l'active sans toucher à l'agrégat**. La famille `COLLECTION`
-  se débloque **en cascade** (un badge acquis peut franchir un palier de collection, qui en
-  franchit un autre). L'agrégat porte désormais `humanDuels` / `humanWins`, incrémentés **au
-  replay** depuis `XpAwardedEvent` et **uniquement pour les duels entre joueurs** : le volume et
-  la maîtrise ne progressent pas en entraînement, alors que les exploits (faits du duel) restent
-  acquis. Ordre d'émission stable (`EnumSet`) → replay déterministe.
-- **Exposition (à faire)** : `MasteryGrade`, `Badge` (famille/palier/cible) et `equippedTitle`
-  sont **côté producteur** ; leur exposition par le BFF (et l'UI : collection de badges, sélecteur
-  de titre, célébration de fin de duel) suit la **release de `quizup-profile` puis le bump du pin
-  `quizup.profile-domain.version` dans `quizup-bff`** (flux normal « fournisseur d'abord »). Le
-  titre de **compte** (`ProgressionRules.titleFor`) reste le libellé transitoire affiché tant que
-  l'UI n'est pas basculée sur les titres thématiques.
+- **Attribution des paliers** (`BadgeRules`, règles **pures** testées sans Axon) : les badges
+  vivent dans un **agrégat dédié `BadgeAggregate`** (`badges:<userId>`), séparé de
+  `PlayerProgressAggregate` (qui ne porte plus que XP/niveau/titre). La saga
+  **`AwardBadgesSaga`** consomme `XpAwardedEvent` (qui porte déjà tous les faits du duel) et
+  envoie un `EvaluateBadgesCommand` ; `BadgeAggregate` maintient ses propres compteurs (duels et
+  victoires entre joueurs, XP et série de victoires par sujet, duels parfaits et réponses rapides
+  cumulés, sujets joués), les met à jour **au replay** depuis `BadgeFactsRecordedEvent`
+  (idempotent par `gameId`), puis évalue les faits et émet un `BadgeEarnedEvent` par badge
+  nouvellement acquis. L'évaluation est **générique par métrique** (tout badge dont la cible est
+  atteinte), donc **ajouter un palier au catalogue l'active sans toucher à l'agrégat**. La famille
+  `COLLECTION` se débloque **en cascade** (un badge acquis peut franchir un palier de collection,
+  qui en franchit un autre). Le volume et la maîtrise ne progressent **que** sur les duels entre
+  joueurs, alors que les exploits (faits du duel : score parfait, réponses rapides) restent acquis
+  **même en entraînement**. Ordre d'émission stable (`EnumSet`) → replay déterministe. Le read
+  model des badges est inchangé (badges écrits par la projection) ; deux compteurs ont été
+  ajoutés à `progression_entry` pour l'affichage de la progression (`perfect_duels`,
+  `fast_answers_total`, migration `V10`).
+- **Exposition** : `MasteryGrade`, `Badge` (famille/palier/cible), les titres thématiques
+  (`equippedTitle`) et les badges sont exposés par le BFF (`/api/profiles/{id}/badges`,
+  `/titles`, `/title`) et affichés par le web (collection de badges par familles, sélecteur de
+  titre porté). Le titre de **compte** (`ProgressionRules.titleFor`) reste le libellé transitoire
+  affiché tant qu'aucun titre thématique n'est porté.
   > ⚠️ **Ordre de déploiement obligatoire** : les nouveaux codes de badges (`DUELIST_*`,
-  > `WINNER_*`, `MASTER_*`, `COLLECTOR_*`) sont des constantes d'énumération qui traversent le
-  > query bus. Le Jackson par défaut **échoue sur une constante inconnue**
-  > (`READ_UNKNOWN_ENUM_VALUES_AS_NULL` désactivé) : un BFF encore épinglé sur l'ancienne version
-  > casserait la lecture de `PlayerProgress`. Il faut donc **release profile → bump du pin dans
-  > le BFF → déployer le BFF, puis déployer `quizup-profile`** (le BFF à jour tolère les deux
-  > jeux de badges, l'ancien non).
+  > `WINNER_*`, `MASTER_*`, `COLLECTOR_*`, `SERIES_*`, `EXPLORER_*`, `PRECISION_*`, `SPEED_*`) et
+  > les familles/métriques ajoutées (`SERIES`, `EXPLORATION`, `PRECISION`, `SPEED` ;
+  > `DISTINCT_TOPICS`, `WIN_STREAK`, `PERFECT_DUELS`, `FAST_ANSWERS`) sont des constantes
+  > d'énumération qui traversent le query bus. Le Jackson par défaut **échoue sur une constante
+  > inconnue** (`READ_UNKNOWN_ENUM_VALUES_AS_NULL` désactivé) : un BFF encore épinglé sur
+  > l'ancienne version casserait la lecture de `PlayerProgress`. Il faut donc **release profile →
+  > bump du pin dans le BFF → déployer le BFF, puis déployer `quizup-profile`** (le BFF à jour
+  > tolère les deux jeux de badges, l'ancien non).
 - **Activité journalière** : `ActivityProjection` alimente `progression_activity` (série
   courante/record, dernier jour actif) et `progression_activity_day` (parties par jour) depuis
   `GameEndedEvent` ; capability conservée côté service mais **non exposée par le BFF pour le MVP**
