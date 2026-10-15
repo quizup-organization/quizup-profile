@@ -1,3 +1,9 @@
+## [4.4.0](https://github.com/quizup-organization/quizup-profile/compare/v4.3.0...v4.4.0) (2026-10-15)
+
+### Features
+
+* **profile:** annonce du grade de maitrise franchi (titre thematique) ([eedecd8](https://github.com/quizup-organization/quizup-profile/commit/eedecd84e197ec1a0a559f9e7758d06bc7dae225))
+
 ## [4.3.0](https://github.com/quizup-organization/quizup-profile/compare/v4.2.0...v4.3.0) (2026-10-15)
 
 ### Features
