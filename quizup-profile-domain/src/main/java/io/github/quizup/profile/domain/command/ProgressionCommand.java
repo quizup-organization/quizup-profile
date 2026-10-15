@@ -27,7 +27,9 @@ public interface ProgressionCommand {
             boolean draw,
             boolean botGame,
             int correctAnswers,
-            int fastAnswers
+            int fastAnswers,
+            /** Bonnes réponses sur les questions illustrées (badge « Œil de lynx »). */
+            int imageCorrectAnswers
     ) implements ProgressionCommand {
     }
 
@@ -61,6 +63,8 @@ public interface ProgressionCommand {
             boolean won,
             boolean botGame,
             int fastAnswers,
+            /** Bonnes réponses sur les questions illustrées du duel. */
+            int imageCorrectAnswers,
             /** Jour local du duel (fuseau d'activité), préparé par la saga pour l'assiduité. */
             java.time.LocalDate activeDay
     ) implements ProgressionCommand {

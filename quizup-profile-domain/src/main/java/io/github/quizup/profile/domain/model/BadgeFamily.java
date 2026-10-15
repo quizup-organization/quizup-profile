@@ -27,6 +27,9 @@ public enum BadgeFamily {
     /** Défis : défis nominatifs lancés. */
     CHALLENGES,
 
+    /** Vision : bonnes réponses sur les questions illustrées. */
+    VISION,
+
     /** Précision : duels parfaits cumulés. */
     PRECISION,
 

@@ -39,6 +39,9 @@ public enum BadgeMetric {
     /** Défis nominatifs lancés — famille Défis. */
     CHALLENGES_SENT,
 
+    /** Bonnes réponses cumulées sur les questions illustrées — famille Vision. */
+    IMAGE_CORRECT,
+
     /** Nombre de badges obtenus (famille {@code COLLECTION}). */
     EARNED_BADGES,
 

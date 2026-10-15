@@ -60,6 +60,7 @@ public class AwardBadgesSaga {
                 event.won(),
                 event.botGame(),
                 event.fastAnswers(),
+                event.imageCorrectAnswers(),
                 event.awardedAt().atZone(zone).toLocalDate()
         ));
         logger.debug("Badges évalués: userId={}, gameId={}", event.userId(), event.gameId());

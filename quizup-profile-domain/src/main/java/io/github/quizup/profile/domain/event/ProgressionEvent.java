@@ -26,6 +26,8 @@ public interface ProgressionEvent {
             boolean botGame,
             int correctAnswers,
             int fastAnswers,
+            /** Bonnes réponses sur les questions illustrées (badge « Œil de lynx »). */
+            int imageCorrectAnswers,
             Instant awardedAt
     ) implements ProgressionEvent {
     }
@@ -76,6 +78,7 @@ public interface ProgressionEvent {
             boolean won,
             boolean botGame,
             int fastAnswers,
+            int imageCorrectAnswers,
             Instant recordedAt,
             /** Jour local du duel (fuseau d'activité) : alimente la série de jours joués. */
             java.time.LocalDate activeDay

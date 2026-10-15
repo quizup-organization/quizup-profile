@@ -58,6 +58,7 @@ public class BadgeAggregate {
     private int challengesSent;
     private int perfectDuels;
     private int fastAnswersTotal;
+    private int imageCorrectTotal;
 
     protected BadgeAggregate() {
     }
@@ -87,6 +88,7 @@ public class BadgeAggregate {
                 command.won(),
                 command.botGame(),
                 command.fastAnswers(),
+                command.imageCorrectAnswers(),
                 now,
                 command.activeDay()
         ));
@@ -103,7 +105,8 @@ public class BadgeAggregate {
                 (int) xpByTopic.values().stream().filter(value -> value > 0).count(),
                 perfectDuels,
                 fastAnswersTotal,
-                activity.longestStreak()
+                activity.longestStreak(),
+                imageCorrectTotal
         );
 
         // Ordre stable (règles) : le flux d'événements reste déterministe au replay.
@@ -170,6 +173,7 @@ public class BadgeAggregate {
             this.perfectDuels++;
         }
         this.fastAnswersTotal += event.fastAnswers();
+        this.imageCorrectTotal += event.imageCorrectAnswers();
 
         // Volume et maîtrise : seuls les duels entre joueurs comptent.
         if (!event.botGame()) {

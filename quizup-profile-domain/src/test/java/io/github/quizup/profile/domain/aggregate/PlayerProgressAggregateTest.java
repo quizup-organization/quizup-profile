@@ -22,7 +22,7 @@ class PlayerProgressAggregateTest {
     void firstAward_createsAggregateAndAppliesXpAwardedEvent() {
         fixture
                 .givenNoPriorActivity()
-                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 100, false, false, false, 4, 2))
+                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 100, false, false, false, 4, 2, 0))
                 .expectEventsMatching(QuizUpAxonMatchers.hasPayloadMatching(
                         ProgressionEvent.XpAwardedEvent.class,
                         e -> {
@@ -38,7 +38,7 @@ class PlayerProgressAggregateTest {
     void botGame_isTrainingAndAwardsNoXpEvenOnWin() {
         fixture
                 .givenNoPriorActivity()
-                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 160, true, false, true, 4, 2))
+                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 160, true, false, true, 4, 2, 0))
                 .expectEventsMatching(QuizUpAxonMatchers.hasPayloadMatching(
                         ProgressionEvent.XpAwardedEvent.class,
                         e -> {
@@ -51,7 +51,7 @@ class PlayerProgressAggregateTest {
     void crossingThreshold_appliesLevelReachedEvent() {
         fixture
                 .givenNoPriorActivity()
-                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 100, true, false, false, 4, 2))
+                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 100, true, false, false, 4, 2, 0))
                 .expectEventsMatching(QuizUpAxonMatchers.hasPayloadMatching(
                         ProgressionEvent.LevelReachedEvent.class,
                         e -> ((ProgressionEvent.LevelReachedEvent) e).level() == 2));
@@ -61,8 +61,8 @@ class PlayerProgressAggregateTest {
     void sameGameId_isIdempotent() {
         fixture
                 .given(new ProgressionEvent.XpAwardedEvent(
-                        "user-1", "game-1", "topic-1", 100, 100, false, false, false, 4, 2, Instant.now()))
-                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 100, true, false, false, 4, 2))
+                        "user-1", "game-1", "topic-1", 100, 100, false, false, false, 4, 2, 0, Instant.now()))
+                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 100, true, false, false, 4, 2, 0))
                 .expectNoEvents();
     }
 }

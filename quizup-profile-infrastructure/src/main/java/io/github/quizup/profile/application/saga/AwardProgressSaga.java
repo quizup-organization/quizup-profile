@@ -39,10 +39,12 @@ public class AwardProgressSaga {
 
         award(event.player1Id(), event, player1Won, draw,
                 QuizUpConstants.SYSTEM_USER_ID.equals(event.player2Id()),
-                event.player1CorrectAnswers(), event.player1FastAnswers());
+                event.player1CorrectAnswers(), event.player1FastAnswers(),
+                event.player1ImageCorrectAnswers());
         award(event.player2Id(), event, player2Won, draw,
                 QuizUpConstants.SYSTEM_USER_ID.equals(event.player1Id()),
-                event.player2CorrectAnswers(), event.player2FastAnswers());
+                event.player2CorrectAnswers(), event.player2FastAnswers(),
+                event.player2ImageCorrectAnswers());
 
         logger.info("Progression attribuée: gameId={}, topicId={}, winner={}",
                 event.gameId(), event.topicId(), event.winnerId());
@@ -51,7 +53,8 @@ public class AwardProgressSaga {
     }
 
     private void award(String playerId, GameEvent.GameEndedEvent event, boolean won, boolean draw,
-                       boolean botGame, int correctAnswers, int fastAnswers) {
+                       boolean botGame, int correctAnswers, int fastAnswers,
+                       int imageCorrectAnswers) {
         if (playerId == null || QuizUpConstants.SYSTEM_USER_ID.equals(playerId)) {
             return;
         }
@@ -71,7 +74,8 @@ public class AwardProgressSaga {
                 draw,
                 botGame,
                 correctAnswers,
-                fastAnswers
+                fastAnswers,
+                imageCorrectAnswers
         ));
     }
 }

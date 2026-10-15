@@ -31,6 +31,7 @@ public record PlayerProgress(
         int fastAnswersTotal,
         int followersGained,
         int challengesSent,
+        int imageCorrectTotal,
         int currentDayStreak,
         int bestDayStreak,
         LocalDate lastActiveDate,
@@ -60,6 +61,7 @@ public record PlayerProgress(
                 .fastAnswersTotal(0)
                 .followersGained(0)
                 .challengesSent(0)
+                .imageCorrectTotal(0)
                 .currentDayStreak(0)
                 .bestDayStreak(0)
                 .lastActiveDate(null)

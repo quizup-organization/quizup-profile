@@ -64,6 +64,11 @@ public enum Badge {
     SPEED_ARGENT("Rafale", BadgeFamily.SPEED, BadgeTier.ARGENT, BadgeMetric.FAST_ANSWERS, 200),
     SPEED_OR("Réflexe absolu", BadgeFamily.SPEED, BadgeTier.OR, BadgeMetric.FAST_ANSWERS, 500),
 
+    // ── Vision : questions illustrées (bonnes réponses cumulées) ─────────────────────────
+    VISION_BRONZE("Observateur", BadgeFamily.VISION, BadgeTier.BRONZE, BadgeMetric.IMAGE_CORRECT, 15),
+    VISION_ARGENT("Œil de lynx", BadgeFamily.VISION, BadgeTier.ARGENT, BadgeMetric.IMAGE_CORRECT, 100),
+    VISION_OR("Vision absolue", BadgeFamily.VISION, BadgeTier.OR, BadgeMetric.IMAGE_CORRECT, 300),
+
     // ── Social : abonnés gagnés (cumulés) ────────────────────────────────────────────────
     SOCIAL_BRONZE("Populaire", BadgeFamily.SOCIAL, BadgeTier.BRONZE, BadgeMetric.FOLLOWERS_GAINED, 5),
     SOCIAL_ARGENT("Célébrité", BadgeFamily.SOCIAL, BadgeTier.ARGENT, BadgeMetric.FOLLOWERS_GAINED, 50),

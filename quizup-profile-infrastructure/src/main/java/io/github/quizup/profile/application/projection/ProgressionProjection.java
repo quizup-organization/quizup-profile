@@ -86,6 +86,7 @@ public class ProgressionProjection {
         int perfectDuels = current.perfectDuels()
                 + (event.gameScore() >= ProgressionRules.PERFECT_SCORE ? 1 : 0);
         int fastAnswersTotal = current.fastAnswersTotal() + event.fastAnswers();
+        int imageCorrectTotal = current.imageCorrectTotal() + event.imageCorrectAnswers();
 
         // Parties humaines par thème (les duels bot restent exclus, comme les stats V/N/D).
         Map<String, Integer> gamesByTopic = new HashMap<>(current.gamesByTopic());
@@ -108,6 +109,7 @@ public class ProgressionProjection {
                 .bestWinStreak(bestWinStreak)
                 .perfectDuels(perfectDuels)
                 .fastAnswersTotal(fastAnswersTotal)
+                .imageCorrectTotal(imageCorrectTotal)
                 .currentDayStreak(activity.currentStreak())
                 .bestDayStreak(activity.longestStreak())
                 .lastActiveDate(activity.lastActiveDate())

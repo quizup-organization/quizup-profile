@@ -54,7 +54,9 @@ public final class BadgeRules {
             /** Réponses rapides cumulées (entraînement compris : fait d'exploit du duel). */
             int fastAnswersTotal,
             /** Meilleure série de jours joués consécutifs, au moment du duel. */
-            int dayStreak
+            int dayStreak,
+            /** Bonnes réponses cumulées sur les questions illustrées. */
+            int imageCorrect
     ) {
     }
 
@@ -109,6 +111,7 @@ public final class BadgeRules {
         collectReached(owned, BadgeMetric.PERFECT_DUELS, facts.perfectDuels());
         collectReached(owned, BadgeMetric.FAST_ANSWERS, facts.fastAnswersTotal());
         collectReached(owned, BadgeMetric.DAILY_STREAK, facts.dayStreak());
+        collectReached(owned, BadgeMetric.IMAGE_CORRECT, facts.imageCorrect());
 
         cascadeCollection(owned);
 

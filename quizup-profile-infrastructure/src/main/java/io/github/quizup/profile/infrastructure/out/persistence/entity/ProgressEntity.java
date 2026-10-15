@@ -67,6 +67,10 @@ public class ProgressEntity {
     @Column(name = "fast_answers_total", nullable = false)
     private int fastAnswersTotal;
 
+    /** Bonnes réponses cumulées sur les questions illustrées — badge Vision. */
+    @Column(name = "image_correct_total", nullable = false)
+    private int imageCorrectTotal;
+
     /** Abonnés gagnés (cumulés) — badge Social. */
     @Column(name = "followers_gained", nullable = false)
     private int followersGained;

@@ -74,6 +74,7 @@ public class PlayerProgressAggregate {
                 command.botGame(),
                 command.correctAnswers(),
                 command.fastAnswers(),
+                command.imageCorrectAnswers(),
                 now
         ));
 
