@@ -1,3 +1,9 @@
+## [4.3.0](https://github.com/quizup-organization/quizup-profile/compare/v4.2.0...v4.3.0) (2026-10-15)
+
+### Features
+
+* **profile:** six paliers de badges (bronze a diamant) ([d4a88ba](https://github.com/quizup-organization/quizup-profile/commit/d4a88ba88e12fc4f9cbe3b0579cd2374eb1ca6c2))
+
 ## [4.2.0](https://github.com/quizup-organization/quizup-profile/compare/v4.1.0...v4.2.0) (2026-10-15)
 
 ### Features
