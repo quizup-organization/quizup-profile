@@ -18,6 +18,9 @@ public enum BadgeMetric {
     /** XP cumulée du sujet le mieux maîtrisé ({@code max(xpByTopic)}). */
     TOPIC_MASTERY,
 
+    /** Nombre de sujets joués (XP > 0) — l'entraînement (0 XP) ne compte pas. */
+    DISTINCT_TOPICS,
+
     /** Nombre de badges obtenus (famille {@code COLLECTION}). */
     EARNED_BADGES,
 

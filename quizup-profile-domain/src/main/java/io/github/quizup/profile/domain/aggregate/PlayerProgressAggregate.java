@@ -107,7 +107,9 @@ public class PlayerProgressAggregate {
                 humanDuels,
                 humanWins,
                 xpByTopic.getOrDefault(command.topicId(), 0),
-                winStreakByTopic.getOrDefault(command.topicId(), 0)
+                winStreakByTopic.getOrDefault(command.topicId(), 0),
+                // Sujets réellement joués (XP > 0) : l'entraînement (0 XP) n'explore rien.
+                (int) xpByTopic.values().stream().filter(value -> value > 0).count()
         );
 
         // Ordre stable (EnumSet) : le flux d'événements reste déterministe au replay.

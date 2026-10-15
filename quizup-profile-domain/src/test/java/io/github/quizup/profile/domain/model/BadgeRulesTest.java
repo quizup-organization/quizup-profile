@@ -23,8 +23,26 @@ class BadgeRulesTest {
     private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
                                               int humanDuels, int humanWins, int topicXp,
                                               int winStreakInTopic) {
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic, 0);
+    }
+
+    private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
+                                              int humanDuels, int humanWins, int topicXp,
+                                              int winStreakInTopic, int distinctTopics) {
         return new BadgeRules.DuelFacts(
-                gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic);
+                gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+                distinctTopics);
+    }
+
+    @Test
+    void exploringTopicsEarnsExplorerTiers() {
+        // 5 sujets joués → bronze ; 25 → argent ; 50 → or (famille EXPLORATION).
+        Set<Badge> first = BadgeRules.evaluate(
+                facts(0, false, 0, 0, 0, 0, 0, 5), Set.of());
+        assertEquals(Set.of(Badge.EXPLORER_BRONZE), first);
+
+        Set<Badge> all = BadgeRules.evaluate(facts(0, false, 0, 0, 0, 0, 0, 50), Set.of());
+        assertEquals(Set.of(Badge.EXPLORER_BRONZE, Badge.EXPLORER_ARGENT, Badge.EXPLORER_OR), all);
     }
 
     @Test

@@ -44,6 +44,11 @@ public enum Badge {
     MASTER_OR("Spécialiste", BadgeFamily.MASTERY, BadgeTier.OR, BadgeMetric.TOPIC_MASTERY,
             MasteryGrade.LEGENDE.xpThreshold()),
 
+    // ── Exploration : nombre de sujets joués (XP > 0) ──────────────────────────────────────
+    EXPLORER_BRONZE("Curieux", BadgeFamily.EXPLORATION, BadgeTier.BRONZE, BadgeMetric.DISTINCT_TOPICS, 5),
+    EXPLORER_ARGENT("Touche-à-tout", BadgeFamily.EXPLORATION, BadgeTier.ARGENT, BadgeMetric.DISTINCT_TOPICS, 25),
+    EXPLORER_OR("Encyclopédie", BadgeFamily.EXPLORATION, BadgeTier.OR, BadgeMetric.DISTINCT_TOPICS, 50),
+
     // ── Collection : nombre de badges obtenus ───────────────────────────────────────────────
     // Cibles bornées par le catalogue actuel (16 badges) : atteignables aujourd'hui, relevées
     // quand les familles Assiduité et Social rejoindront le catalogue.

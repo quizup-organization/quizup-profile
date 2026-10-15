@@ -46,7 +46,9 @@ public final class BadgeRules {
             int humanDuels,
             int humanWins,
             int topicXp,
-            int winStreakInTopic
+            int winStreakInTopic,
+            /** Nombre de sujets joués (XP > 0), entraînement exclu. */
+            int distinctTopics
     ) {
     }
 
@@ -65,6 +67,7 @@ public final class BadgeRules {
         collectReached(owned, BadgeMetric.HUMAN_DUELS, facts.humanDuels());
         collectReached(owned, BadgeMetric.HUMAN_WINS, facts.humanWins());
         collectReached(owned, BadgeMetric.TOPIC_MASTERY, facts.topicXp());
+        collectReached(owned, BadgeMetric.DISTINCT_TOPICS, facts.distinctTopics());
 
         // Collection : le total possédé grandit à chaque badge ajouté → boucle jusqu'à stabilité.
         boolean changed = true;

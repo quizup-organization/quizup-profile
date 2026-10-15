@@ -15,6 +15,9 @@ public enum BadgeFamily {
     /** Exploit ponctuel d'un duel (sans faute, éclair, série…). */
     EXPLOIT,
 
+    /** Exploration : nombre de sujets différents joués. */
+    EXPLORATION,
+
     /** Collection : nombre de badges obtenus. */
     COLLECTION
 }
