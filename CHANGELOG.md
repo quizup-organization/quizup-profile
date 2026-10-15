@@ -1,3 +1,9 @@
+## [4.2.0](https://github.com/quizup-organization/quizup-profile/compare/v4.1.0...v4.2.0) (2026-10-15)
+
+### Features
+
+* **profile:** badge Vision (questions illustrees) ([12d2cdd](https://github.com/quizup-organization/quizup-profile/commit/12d2cdd8f9fbdc0d9ec29e4411dce2b884bdc44e))
+
 ## [4.1.0](https://github.com/quizup-organization/quizup-profile/compare/v4.0.0...v4.1.0) (2026-10-15)
 
 ### Features
