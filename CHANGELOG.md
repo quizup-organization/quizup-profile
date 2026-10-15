@@ -1,3 +1,11 @@
+## [4.1.0](https://github.com/quizup-organization/quizup-profile/compare/v4.0.0...v4.1.0) (2026-10-15)
+
+### Features
+
+* **profile:** badge Assiduite (serie de jours joues) ([47adf43](https://github.com/quizup-organization/quizup-profile/commit/47adf435bf558bdcfc4593364d3dfcf9a32f4de9))
+* **profile:** badges Precision et Rapidite ([8c6b576](https://github.com/quizup-organization/quizup-profile/commit/8c6b576b1cdb2a01b2ebe17f55e53766d497f41e))
+* **profile:** badges Social et Defis ([90ef9ba](https://github.com/quizup-organization/quizup-profile/commit/90ef9babfeee2485df4c500b4a1772873d357fb3))
+
 ## [4.0.0](https://github.com/quizup-organization/quizup-profile/compare/v3.10.0...v4.0.0) (2026-10-15)
 
 ### ⚠ BREAKING CHANGES
