@@ -30,4 +30,24 @@ public interface ProgressionCommand {
             int fastAnswers
     ) implements ProgressionCommand {
     }
+
+    /**
+     * Évalue les **badges** d'un joueur à l'issue d'un duel (agrégat dédié
+     * {@code badges:<userId>}). Idempotente : un même {@code gameId} n'est évalué qu'une fois.
+     *
+     * <p>Les faits du duel sont ceux de {@code XpAwardedEvent} ; l'agrégat porte lui-même les
+     * compteurs nécessaires (duels/victoires entre joueurs, séries par thème, XP par thème).</p>
+     */
+    record EvaluateBadgesCommand(
+            @TargetAggregateIdentifier String badgeId,
+            String userId,
+            String gameId,
+            String topicId,
+            int xp,
+            int gameScore,
+            boolean won,
+            boolean botGame,
+            int fastAnswers
+    ) implements ProgressionCommand {
+    }
 }

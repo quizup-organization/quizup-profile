@@ -68,6 +68,7 @@ public final class BadgeRules {
         collectReached(owned, BadgeMetric.HUMAN_WINS, facts.humanWins());
         collectReached(owned, BadgeMetric.TOPIC_MASTERY, facts.topicXp());
         collectReached(owned, BadgeMetric.DISTINCT_TOPICS, facts.distinctTopics());
+        collectReached(owned, BadgeMetric.WIN_STREAK, facts.winStreakInTopic());
 
         // Collection : le total possédé grandit à chaque badge ajouté → boucle jusqu'à stabilité.
         boolean changed = true;

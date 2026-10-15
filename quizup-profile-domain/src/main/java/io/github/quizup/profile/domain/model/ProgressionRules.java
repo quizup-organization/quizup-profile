@@ -56,6 +56,14 @@ public final class ProgressionRules {
     }
 
     /**
+     * Identifiant de l'agrégat **badges** d'un joueur ({@code badges:<userId>}) — même convention
+     * de namespace que {@link #progressIdFor(String)} (les agrégats ne partagent jamais un id).
+     */
+    public static String badgeIdFor(String userId) {
+        return "badges:" + userId;
+    }
+
+    /**
      * XP gagnée à l'issue d'un duel.
      *
      * <p>Un duel contre bot est un <b>entraînement</b> : il n'attribue aucune XP — la

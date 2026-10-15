@@ -21,6 +21,9 @@ public enum BadgeMetric {
     /** Nombre de sujets joués (XP > 0) — l'entraînement (0 XP) ne compte pas. */
     DISTINCT_TOPICS,
 
+    /** Victoires consécutives ({@code winStreakInTopic} au moment du duel). */
+    WIN_STREAK,
+
     /** Nombre de badges obtenus (famille {@code COLLECTION}). */
     EARNED_BADGES,
 

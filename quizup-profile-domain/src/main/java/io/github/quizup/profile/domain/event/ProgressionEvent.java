@@ -50,4 +50,23 @@ public interface ProgressionEvent {
             Instant earnedAt
     ) implements ProgressionEvent {
     }
+
+    /**
+     * Faits d'un duel enregistrés par l'agrégat de **badges** (compteurs mis à jour avant
+     * évaluation) : duels/victoires entre joueurs, XP et série du sujet, score et réponses
+     * rapides. L'entraînement contre bot n'alimente **aucun** compteur de volume/maîtrise.
+     */
+    record BadgeFactsRecordedEvent(
+            String badgeId,
+            String userId,
+            String gameId,
+            String topicId,
+            int xp,
+            int gameScore,
+            boolean won,
+            boolean botGame,
+            int fastAnswers,
+            Instant recordedAt
+    ) implements ProgressionEvent {
+    }
 }
