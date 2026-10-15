@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -65,6 +66,18 @@ public class ProgressEntity {
     /** Réponses rapides cumulées (faits d'exploit, entraînement compris) — badge Rapidité. */
     @Column(name = "fast_answers_total", nullable = false)
     private int fastAnswersTotal;
+
+    /** Série courante de jours joués — badge Assiduité (même règle que la projection d'activité). */
+    @Column(name = "current_day_streak", nullable = false)
+    private int currentDayStreak;
+
+    /** Meilleure série de jours joués (monotone) — progression affichée du badge Assiduité. */
+    @Column(name = "best_day_streak", nullable = false)
+    private int bestDayStreak;
+
+    /** Dernier jour joué (fuseau d'activité) : idempotence de la série. */
+    @Column(name = "last_active_date")
+    private LocalDate lastActiveDate;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "progression_topic_entry", joinColumns = @JoinColumn(name = "user_id"))

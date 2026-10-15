@@ -3,7 +3,9 @@ package io.github.quizup.profile.domain.aggregate;
 import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.event.ProgressionEvent;
 import io.github.quizup.profile.domain.model.Badge;
+import io.github.quizup.profile.domain.model.ActivityRules;
 import io.github.quizup.profile.domain.model.BadgeRules;
+import io.github.quizup.profile.domain.model.PlayerActivity;
 import io.github.quizup.profile.domain.model.ProgressionRules;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -47,6 +49,9 @@ public class BadgeAggregate {
     private final Map<String, Integer> winStreakByTopic = new HashMap<>();
     private final Set<Badge> badges = new HashSet<>();
 
+    /** Assiduité (jours joués consécutifs) — même règle pure que la projection d'activité. */
+    private PlayerActivity activity = PlayerActivity.empty(null);
+
     private int humanDuels;
     private int humanWins;
     private int perfectDuels;
@@ -80,7 +85,8 @@ public class BadgeAggregate {
                 command.won(),
                 command.botGame(),
                 command.fastAnswers(),
-                now
+                now,
+                command.activeDay()
         ));
 
         // Les compteurs sont à jour : l'évaluation (et le replay) portent sur le même état.
@@ -94,7 +100,8 @@ public class BadgeAggregate {
                 winStreakByTopic.getOrDefault(command.topicId(), 0),
                 (int) xpByTopic.values().stream().filter(value -> value > 0).count(),
                 perfectDuels,
-                fastAnswersTotal
+                fastAnswersTotal,
+                activity.longestStreak()
         );
 
         // Ordre stable (règles) : le flux d'événements reste déterministe au replay.
@@ -108,6 +115,7 @@ public class BadgeAggregate {
         this.badgeId = event.badgeId();
         this.userId = event.userId();
         this.evaluatedGameIds.add(event.gameId());
+        this.activity = ActivityRules.advance(this.activity, event.activeDay());
         this.xpByTopic.merge(event.topicId(), event.xp(), Integer::sum);
 
         // Faits d'exploit du duel : comptés même en entraînement (comme PERFECT/ÉCLAIR).

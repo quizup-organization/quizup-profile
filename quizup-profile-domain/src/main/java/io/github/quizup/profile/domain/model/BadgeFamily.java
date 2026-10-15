@@ -18,6 +18,9 @@ public enum BadgeFamily {
     /** Série : victoires consécutives. */
     SERIES,
 
+    /** Assiduité : jours joués consécutifs. */
+    ASSIDUITY,
+
     /** Précision : duels parfaits cumulés. */
     PRECISION,
 

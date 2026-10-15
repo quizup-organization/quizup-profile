@@ -47,7 +47,9 @@ public interface ProgressionCommand {
             int gameScore,
             boolean won,
             boolean botGame,
-            int fastAnswers
+            int fastAnswers,
+            /** Jour local du duel (fuseau d'activité), préparé par la saga pour l'assiduité. */
+            java.time.LocalDate activeDay
     ) implements ProgressionCommand {
     }
 }

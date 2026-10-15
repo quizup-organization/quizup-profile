@@ -30,6 +30,9 @@ public enum BadgeMetric {
     /** Réponses rapides cumulées (tous duels confondus). */
     FAST_ANSWERS,
 
+    /** Meilleure série de jours joués consécutifs (assiduité). */
+    DAILY_STREAK,
+
     /** Nombre de badges obtenus (famille {@code COLLECTION}). */
     EARNED_BADGES,
 

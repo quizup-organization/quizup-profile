@@ -66,7 +66,9 @@ public interface ProgressionEvent {
             boolean won,
             boolean botGame,
             int fastAnswers,
-            Instant recordedAt
+            Instant recordedAt,
+            /** Jour local du duel (fuseau d'activité) : alimente la série de jours joués. */
+            java.time.LocalDate activeDay
     ) implements ProgressionEvent {
     }
 }

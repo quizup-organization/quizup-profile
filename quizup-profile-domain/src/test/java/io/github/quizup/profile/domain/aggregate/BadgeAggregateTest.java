@@ -11,6 +11,7 @@ import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 /**
  * Test Axon in-memory de {@link BadgeAggregate} : évaluation des badges (exploits, volume,
@@ -73,7 +74,7 @@ class BadgeAggregateTest {
     void masteryThreshold_earnsMasterBronze() {
         fixture.given(new ProgressionEvent.BadgeFactsRecordedEvent(
                         BADGE_ID, "user-1", "game-1", "topic-1", 2_400, 160, true, false, 2,
-                        Instant.now()))
+                        Instant.now(), null))
                 .when(duel("game-2", "topic-1", 150, 40, true, false, 2))
                 .expectEventsMatching(earned(Badge.MASTER_BRONZE));
     }
@@ -83,7 +84,7 @@ class BadgeAggregateTest {
         fixture.given(
                         new ProgressionEvent.BadgeFactsRecordedEvent(
                                 BADGE_ID, "user-1", "game-0", "topic-1", 10, 10, false, false, 0,
-                                Instant.now()),
+                                Instant.now(), null),
                         new ProgressionEvent.BadgeEarnedEvent("user-1", Badge.PERFECT, Instant.now()),
                         new ProgressionEvent.BadgeEarnedEvent("user-1", Badge.LIGHTNING, Instant.now()),
                         new ProgressionEvent.BadgeEarnedEvent("user-1", Badge.STREAK_MASTER, Instant.now()),
@@ -98,10 +99,10 @@ class BadgeAggregateTest {
         fixture.given(
                         new ProgressionEvent.BadgeFactsRecordedEvent(
                                 BADGE_ID, "user-1", "game-1", "topic-1", 20, 30, true, false, 0,
-                                Instant.now()),
+                                Instant.now(), null),
                         new ProgressionEvent.BadgeFactsRecordedEvent(
                                 BADGE_ID, "user-1", "game-2", "topic-1", 20, 30, true, false, 0,
-                                Instant.now()))
+                                Instant.now(), null))
                 .when(duel("game-3", "topic-1", 20, 30, true, false, 0))
                 .expectEventsMatching(earned(Badge.SERIES_BRONZE));
     }
@@ -117,9 +118,42 @@ class BadgeAggregateTest {
     void fiftyFastAnswers_earnsSpeedBronze() {
         fixture.given(new ProgressionEvent.BadgeFactsRecordedEvent(
                         BADGE_ID, "user-1", "game-1", "topic-1", 30, 30, false, false, 45,
-                        Instant.now()))
+                        Instant.now(), null))
                 .when(duel("game-2", "topic-1", 30, 30, false, false, 5))
                 .expectEventsMatching(earned(Badge.SPEED_BRONZE));
+    }
+
+    @Test
+    void threeConsecutiveDays_earnAssiduityBronze() {
+        // Deux jours consécutifs déjà joués : le 3e jour fait tomber « Régulier ».
+        LocalDate day = LocalDate.of(2026, 3, 1);
+        fixture.given(
+                        new ProgressionEvent.BadgeFactsRecordedEvent(
+                                BADGE_ID, "user-1", "game-1", "topic-1", 10, 10, false, false, 0,
+                                Instant.now(), day),
+                        new ProgressionEvent.BadgeFactsRecordedEvent(
+                                BADGE_ID, "user-1", "game-2", "topic-1", 10, 10, false, false, 0,
+                                Instant.now(), day.plusDays(1)))
+                .when(duelOnDay(day.plusDays(2), "game-3", "topic-1", 10, 10, false, false, 0))
+                .expectEventsMatching(earned(Badge.ASSIDUITY_BRONZE));
+    }
+
+    @Test
+    void aDayGap_restartsTheStreak() {
+        // Série rompue (veille + 2 jours) : le jour suivant repart à 1, pas de badge.
+        LocalDate day = LocalDate.of(2026, 3, 1);
+        fixture.given(
+                        new ProgressionEvent.BadgeFactsRecordedEvent(
+                                BADGE_ID, "user-1", "game-1", "topic-1", 10, 10, true, false, 0,
+                                Instant.now(), day),
+                        new ProgressionEvent.BadgeFactsRecordedEvent(
+                                BADGE_ID, "user-1", "game-2", "topic-1", 10, 10, true, false, 0,
+                                Instant.now(), day.plusDays(1)))
+                .when(duelOnDay(day.plusDays(5), "game-3", "topic-1", 10, 10, false, false, 0))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ProgressionEvent.BadgeFactsRecordedEvent.class,
+                        e -> "game-3".equals(
+                                ((ProgressionEvent.BadgeFactsRecordedEvent) e).gameId())));
     }
 
     @Test
@@ -133,7 +167,7 @@ class BadgeAggregateTest {
     void sameGameId_isIdempotent() {
         fixture.given(new ProgressionEvent.BadgeFactsRecordedEvent(
                         BADGE_ID, "user-1", "game-1", "topic-1", 100, 100, false, false, 2,
-                        Instant.now()))
+                        Instant.now(), null))
                 .when(duel("game-1", "topic-1", 100, 100, true, false, 2))
                 .expectNoEvents();
     }
@@ -143,7 +177,7 @@ class BadgeAggregateTest {
         fixture.given(
                         new ProgressionEvent.BadgeFactsRecordedEvent(
                                 BADGE_ID, "user-1", "game-1", "topic-1", 100, 100, true, false, 2,
-                                Instant.now()),
+                                Instant.now(), null),
                         new ProgressionEvent.BadgeEarnedEvent("user-1", Badge.FIRST_WIN, Instant.now()))
                 .when(duel("game-2", "topic-1", 30, 30, true, false, 2))
                 .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
@@ -151,10 +185,17 @@ class BadgeAggregateTest {
                         e -> "game-2".equals(((ProgressionEvent.BadgeFactsRecordedEvent) e).gameId())));
     }
 
+    private static ProgressionCommand.EvaluateBadgesCommand duelOnDay(
+            LocalDate day, String gameId, String topicId, int xp, int score, boolean won,
+            boolean bot, int fast) {
+        return new ProgressionCommand.EvaluateBadgesCommand(
+                BADGE_ID, "user-1", gameId, topicId, xp, score, won, bot, fast, day);
+    }
+
     private static ProgressionCommand.EvaluateBadgesCommand duel(
             String gameId, String topicId, int xp, int score, boolean won, boolean bot, int fast) {
         return new ProgressionCommand.EvaluateBadgesCommand(
-                BADGE_ID, "user-1", gameId, topicId, xp, score, won, bot, fast);
+                BADGE_ID, "user-1", gameId, topicId, xp, score, won, bot, fast, null);
     }
 
     private static Matcher<? extends java.util.List<? super EventMessage<?>>> earned(Badge badge) {
@@ -169,7 +210,7 @@ class BadgeAggregateTest {
         for (int index = 0; index < count; index++) {
             duels[index] = new ProgressionEvent.BadgeFactsRecordedEvent(
                     BADGE_ID, "user-1", "game-" + index, "topic-1", 10, 10, false, false, 0,
-                    Instant.now());
+                    Instant.now(), null);
         }
         return duels;
     }
@@ -180,7 +221,7 @@ class BadgeAggregateTest {
         for (int index = 0; index < count; index++) {
             duels[index] = new ProgressionEvent.BadgeFactsRecordedEvent(
                     BADGE_ID, "user-1", "bot-" + index, "topic-1", 0, 10, false, true, 0,
-                    Instant.now());
+                    Instant.now(), null);
         }
         return duels;
     }
@@ -191,7 +232,7 @@ class BadgeAggregateTest {
         for (int index = 0; index < count; index++) {
             duels[index] = new ProgressionEvent.BadgeFactsRecordedEvent(
                     BADGE_ID, "user-1", "perfect-" + index, "topic-1", 160, 160, true, false, 0,
-                    Instant.now());
+                    Instant.now(), null);
         }
         return duels;
     }
@@ -202,7 +243,7 @@ class BadgeAggregateTest {
         for (int index = 0; index < count; index++) {
             duels[index] = new ProgressionEvent.BadgeFactsRecordedEvent(
                     BADGE_ID, "user-1", "game-" + index, "topic-" + index, 30, 30, false, false, 0,
-                    Instant.now());
+                    Instant.now(), null);
         }
         return duels;
     }

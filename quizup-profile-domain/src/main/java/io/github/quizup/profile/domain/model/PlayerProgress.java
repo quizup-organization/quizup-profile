@@ -3,6 +3,7 @@ package io.github.quizup.profile.domain.model;
 import lombok.Builder;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +29,9 @@ public record PlayerProgress(
         int bestWinStreak,
         int perfectDuels,
         int fastAnswersTotal,
+        int currentDayStreak,
+        int bestDayStreak,
+        LocalDate lastActiveDate,
         Instant updatedAt
 ) {
 
@@ -52,6 +56,9 @@ public record PlayerProgress(
                 .bestWinStreak(0)
                 .perfectDuels(0)
                 .fastAnswersTotal(0)
+                .currentDayStreak(0)
+                .bestDayStreak(0)
+                .lastActiveDate(null)
                 .updatedAt(Instant.now())
                 .build();
     }

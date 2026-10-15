@@ -49,6 +49,11 @@ public enum Badge {
     SERIES_ARGENT("Imbattable", BadgeFamily.SERIES, BadgeTier.ARGENT, BadgeMetric.WIN_STREAK, 10),
     SERIES_OR("Invincible", BadgeFamily.SERIES, BadgeTier.OR, BadgeMetric.WIN_STREAK, 25),
 
+    // ── Assiduité : jours joués consécutifs ───────────────────────────────────────────────
+    ASSIDUITY_BRONZE("Régulier", BadgeFamily.ASSIDUITY, BadgeTier.BRONZE, BadgeMetric.DAILY_STREAK, 3),
+    ASSIDUITY_ARGENT("Accro", BadgeFamily.ASSIDUITY, BadgeTier.ARGENT, BadgeMetric.DAILY_STREAK, 7),
+    ASSIDUITY_OR("Increvable", BadgeFamily.ASSIDUITY, BadgeTier.OR, BadgeMetric.DAILY_STREAK, 30),
+
     // ── Précision : duels parfaits cumulés ────────────────────────────────────────────────
     PRECISION_BRONZE("Métronome", BadgeFamily.PRECISION, BadgeTier.BRONZE, BadgeMetric.PERFECT_DUELS, 10),
     PRECISION_ARGENT("Machine à points", BadgeFamily.PRECISION, BadgeTier.ARGENT, BadgeMetric.PERFECT_DUELS, 50),

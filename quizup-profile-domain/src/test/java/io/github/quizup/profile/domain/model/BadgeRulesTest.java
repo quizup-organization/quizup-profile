@@ -37,9 +37,18 @@ class BadgeRulesTest {
                                               int humanDuels, int humanWins, int topicXp,
                                               int winStreakInTopic, int distinctTopics,
                                               int perfectDuels, int fastAnswersTotal) {
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+                distinctTopics, perfectDuels, fastAnswersTotal, 0);
+    }
+
+    private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
+                                              int humanDuels, int humanWins, int topicXp,
+                                              int winStreakInTopic, int distinctTopics,
+                                              int perfectDuels, int fastAnswersTotal,
+                                              int dayStreak) {
         return new BadgeRules.DuelFacts(
                 gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
-                distinctTopics, perfectDuels, fastAnswersTotal);
+                distinctTopics, perfectDuels, fastAnswersTotal, dayStreak);
     }
 
     @Test

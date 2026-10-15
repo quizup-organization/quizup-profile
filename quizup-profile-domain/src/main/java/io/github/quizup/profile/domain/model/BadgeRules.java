@@ -52,7 +52,9 @@ public final class BadgeRules {
             /** Duels parfaits cumulés (entraînement compris : fait d'exploit du duel). */
             int perfectDuels,
             /** Réponses rapides cumulées (entraînement compris : fait d'exploit du duel). */
-            int fastAnswersTotal
+            int fastAnswersTotal,
+            /** Meilleure série de jours joués consécutifs, au moment du duel. */
+            int dayStreak
     ) {
     }
 
@@ -75,6 +77,7 @@ public final class BadgeRules {
         collectReached(owned, BadgeMetric.WIN_STREAK, facts.winStreakInTopic());
         collectReached(owned, BadgeMetric.PERFECT_DUELS, facts.perfectDuels());
         collectReached(owned, BadgeMetric.FAST_ANSWERS, facts.fastAnswersTotal());
+        collectReached(owned, BadgeMetric.DAILY_STREAK, facts.dayStreak());
 
         // Collection : le total possédé grandit à chaque badge ajouté → boucle jusqu'à stabilité.
         boolean changed = true;

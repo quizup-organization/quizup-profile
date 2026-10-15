@@ -1,9 +1,12 @@
 package io.github.quizup.profile.application.projection;
 
 import io.github.quizup.profile.domain.event.ProgressionEvent;
+import io.github.quizup.profile.domain.model.ActivityRules;
 import io.github.quizup.profile.domain.model.Badge;
+import io.github.quizup.profile.domain.model.PlayerActivity;
 import io.github.quizup.profile.domain.model.PlayerProgress;
 import io.github.quizup.profile.domain.model.ProgressionRules;
+import io.github.quizup.profile.infrastructure.properties.AppProperties;
 import io.github.quizup.profile.domain.port.out.ProgressionAwardedGameRepositoryPort;
 import io.github.quizup.profile.domain.port.out.ProgressionRepositoryPort;
 import org.axonframework.config.ProcessingGroup;
@@ -13,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,11 +34,14 @@ public class ProgressionProjection {
 
     private final ProgressionRepositoryPort progressionRepositoryPort;
     private final ProgressionAwardedGameRepositoryPort awardedGameRepositoryPort;
+    private final ZoneId activityZone;
 
     public ProgressionProjection(ProgressionRepositoryPort progressionRepositoryPort,
-                                 ProgressionAwardedGameRepositoryPort awardedGameRepositoryPort) {
+                                 ProgressionAwardedGameRepositoryPort awardedGameRepositoryPort,
+                                 AppProperties properties) {
         this.progressionRepositoryPort = progressionRepositoryPort;
         this.awardedGameRepositoryPort = awardedGameRepositoryPort;
+        this.activityZone = ZoneId.of(properties.activity().zone());
     }
 
     @EventHandler
@@ -65,6 +72,16 @@ public class ProgressionProjection {
                 : current.currentWinStreak();
         int bestWinStreak = Math.max(current.bestWinStreak(), currentWinStreak);
 
+        // Assiduité : même règle pure que la projection d'activité (idempotente par jour).
+        PlayerActivity activity = ActivityRules.advance(
+                PlayerActivity.builder()
+                        .userId(current.userId())
+                        .currentStreak(current.currentDayStreak())
+                        .longestStreak(current.bestDayStreak())
+                        .lastActiveDate(current.lastActiveDate())
+                        .build(),
+                event.awardedAt().atZone(activityZone).toLocalDate());
+
         // Faits d'exploit cumulés (entraînement compris) : badges Précision / Rapidité.
         int perfectDuels = current.perfectDuels()
                 + (event.gameScore() >= ProgressionRules.PERFECT_SCORE ? 1 : 0);
@@ -91,6 +108,9 @@ public class ProgressionProjection {
                 .bestWinStreak(bestWinStreak)
                 .perfectDuels(perfectDuels)
                 .fastAnswersTotal(fastAnswersTotal)
+                .currentDayStreak(activity.currentStreak())
+                .bestDayStreak(activity.longestStreak())
+                .lastActiveDate(activity.lastActiveDate())
                 .updatedAt(event.awardedAt())
                 .build());
 

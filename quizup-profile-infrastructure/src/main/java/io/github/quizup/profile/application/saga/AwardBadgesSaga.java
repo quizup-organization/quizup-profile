@@ -4,6 +4,7 @@ import io.github.quizup.microservice.core.domain.constant.QuizUpConstants;
 import io.github.quizup.profile.domain.command.ProgressionCommand;
 import io.github.quizup.profile.domain.event.ProgressionEvent;
 import io.github.quizup.profile.domain.model.ProgressionRules;
+import io.github.quizup.profile.infrastructure.properties.AppProperties;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.modelling.saga.SagaEventHandler;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.ZoneId;
 import java.util.Objects;
 
 /**
@@ -34,6 +36,10 @@ public class AwardBadgesSaga {
     @Autowired
     private transient CommandGateway commandGateway;
 
+    /** Fuseau d'activité : le jour local du duel est préparé ici (l'agrégat reste pur). */
+    @Autowired
+    private transient AppProperties appProperties;
+
     @StartSaga
     @SagaEventHandler(associationProperty = "userId")
     public void on(ProgressionEvent.XpAwardedEvent event) {
@@ -43,6 +49,7 @@ public class AwardBadgesSaga {
             return;
         }
 
+        ZoneId zone = ZoneId.of(appProperties.activity().zone());
         commandGateway.send(new ProgressionCommand.EvaluateBadgesCommand(
                 ProgressionRules.badgeIdFor(event.userId()),
                 event.userId(),
@@ -52,7 +59,8 @@ public class AwardBadgesSaga {
                 event.gameScore(),
                 event.won(),
                 event.botGame(),
-                event.fastAnswers()
+                event.fastAnswers(),
+                event.awardedAt().atZone(zone).toLocalDate()
         ));
         logger.debug("Badges évalués: userId={}, gameId={}", event.userId(), event.gameId());
         SagaLifecycle.end();
