@@ -1,3 +1,9 @@
+## [4.6.0](https://github.com/quizup-organization/quizup-profile/compare/v4.5.0...v4.6.0) (2026-10-16)
+
+### Features
+
+* **profile:** badges et titres acquis uniquement en parties contre des humains ([3edb233](https://github.com/quizup-organization/quizup-profile/commit/3edb233e21970c6c3037d26794e98fd90d9489f4))
+
 ## [4.5.0](https://github.com/quizup-organization/quizup-profile/compare/v4.4.0...v4.5.0) (2026-10-16)
 
 ### Features
