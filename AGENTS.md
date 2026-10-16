@@ -166,10 +166,14 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   Challenger 1 / Provocateur 10 / Maître du défi 50).
   > **Compteurs hors duel** (Social, Défis) : les sagas `SocialBadgesSaga` (sur
   > `UserFollowedEvent` de `quizup-social`) et `ChallengeBadgesSaga` (sur
-  > `ChallengeCreatedEvent` de `quizup-matchmaking`, propriétaire des défis) envoient un
+  > **`ChallengeStartedEvent`** de `quizup-matchmaking`, propriétaire des défis — émis quand la
+  > salle du défi **produit la partie** : un défi compte donc **uniquement s'il a été accepté et a
+  > abouti sur une partie**, ni la création ni l'acceptation seules ne créditent le compteur)
+  > envoient un
   > `RecordBadgeCounterCommand` ; l'agrégat incrémente le compteur de la métrique
   > (`BadgeCounterRecordedEvent`, consommé par la projection) puis réévalue. Ces services ne sont
-  > **pas modifiés** : `quizup-profile-infrastructure` consomme seulement leurs contrats (pins
+  > **pas modifiés** hors cet événement : `quizup-profile-infrastructure` consomme seulement leurs
+  > contrats (pins
   > `quizup-social-domain` / `quizup-matchmaking-domain`). Les désabonnements ne retirent rien
   > (un badge est définitif) et la livraison étant au-moins-une-fois, un rejeu ne peut que faire
   > progresser un badge cosmétique.

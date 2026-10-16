@@ -20,9 +20,10 @@ import java.util.Objects;
 /**
  * ChallengeBadgesSaga — crédite le badge **Défis** du joueur qui lance un défi nominatif.
  *
- * <p>Consomme {@link ChallengeEvent.ChallengeCreatedEvent} (émis par {@code quizup-matchmaking},
- * propriétaire des défis) et incrémente le compteur {@code CHALLENGES_SENT} de l'agrégat de
- * badges. Saga **sans état** : elle se termine aussitôt.</p>
+ * <p>Consomme {@link ChallengeEvent.ChallengeStartedEvent} (émis par {@code quizup-matchmaking},
+ * propriétaire des défis) : un défi ne compte **que s'il a été accepté et a abouti sur une partie**
+ * — la simple création (ou acceptation) du défi ne crédite rien. Saga **sans état** : elle se
+ * termine aussitôt.</p>
  */
 @Saga
 @ProcessingGroup("challenge-badges-saga")
@@ -35,7 +36,7 @@ public class ChallengeBadgesSaga {
 
     @StartSaga
     @SagaEventHandler(associationProperty = "challengerId")
-    public void on(ChallengeEvent.ChallengeCreatedEvent event) {
+    public void on(ChallengeEvent.ChallengeStartedEvent event) {
         if (event.challengerId() == null
                 || Objects.equals(QuizUpConstants.SYSTEM_USER_ID, event.challengerId())) {
             SagaLifecycle.end();
@@ -47,9 +48,10 @@ public class ChallengeBadgesSaga {
                 event.challengerId(),
                 BadgeMetric.CHALLENGES_SENT,
                 event.challengeId(),
-                event.createdAt()
+                event.startedAt()
         ));
-        logger.debug("Badge défi crédité: userId={}", event.challengerId());
+        logger.debug("Badge défi crédité (défi abouti): userId={}, gameId={}",
+                event.challengerId(), event.gameId());
         SagaLifecycle.end();
     }
 }
