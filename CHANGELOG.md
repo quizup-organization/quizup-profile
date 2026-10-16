@@ -1,3 +1,9 @@
+## [4.7.0](https://github.com/quizup-organization/quizup-profile/compare/v4.6.0...v4.7.0) (2026-10-16)
+
+### Features
+
+* **profile:** badge Defis credite quand le defi a abouti sur une partie ([203f754](https://github.com/quizup-organization/quizup-profile/commit/203f75402e677f0fab7ccb7f34721c32ab0a09a8))
+
 ## [4.6.0](https://github.com/quizup-organization/quizup-profile/compare/v4.5.0...v4.6.0) (2026-10-16)
 
 ### Features
