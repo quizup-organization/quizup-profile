@@ -13,9 +13,10 @@ import java.util.Set;
  * {@link Badge#target() cible} — ajouter un palier au catalogue suffit donc à l'activer, sans
  * toucher à l'agrégat.</p>
  *
- * <p><b>Portée</b> : les faits d'<i>exploit</i> sont des faits du duel et comptent même en
- * entraînement contre bot ; les familles de volume et de maîtrise, elles, ne progressent que
- * dans les **duels entre joueurs** (les compteurs ne sont incrémentés qu'à ces occasions).</p>
+ * <p><b>Portée</b> : un <b>entraînement</b> contre bot n'acquiert <b>aucun</b> badge — ni exploit,
+ * ni compteur (volume, maîtrise, séries, assiduité, précision, rapidité, vision et exploration ne
+ * progressent que sur les <b>duels entre joueurs</b>). Les badges de {@code SOCIAL} et
+ * {@code CHALLENGES} viennent de compteurs hors duel (abonnés, défis) et ne sont pas concernés.</p>
  *
  * <p>La famille {@code COLLECTION} se débloque <b>en cascade</b> : un badge acquis peut faire
  * franchir un palier de collection, qui peut lui-même en faire franchir un autre.</p>
@@ -49,14 +50,16 @@ public final class BadgeRules {
             int winStreakInTopic,
             /** Nombre de sujets joués (XP > 0), entraînement exclu. */
             int distinctTopics,
-            /** Duels parfaits cumulés (entraînement compris : fait d'exploit du duel). */
+            /** Duels parfaits cumulés (duels entre joueurs uniquement). */
             int perfectDuels,
-            /** Réponses rapides cumulées (entraînement compris : fait d'exploit du duel). */
+            /** Réponses rapides cumulées (duels entre joueurs uniquement). */
             int fastAnswersTotal,
             /** Meilleure série de jours joués consécutifs, au moment du duel. */
             int dayStreak,
             /** Bonnes réponses cumulées sur les questions illustrées. */
-            int imageCorrect
+            int imageCorrect,
+            /** Entraînement contre bot : aucun badge ne peut être acquis. */
+            boolean botGame
     ) {
     }
 
@@ -94,11 +97,19 @@ public final class BadgeRules {
     /**
      * Badges nouvellement acquis à l'issue du duel.
      *
+     * <p>Un **entraînement** contre bot n'en acquiert aucun : les badges et les titres ne
+     * s'obtiennent que sur des **duels entre joueurs** (l'appelant n'a d'ailleurs fait progresser
+     * aucun compteur).</p>
+     *
      * @param facts        faits du duel et compteurs à jour
      * @param alreadyEarned badges déjà possédés par le joueur
      * @return les seuls badges à émettre (ordre stable, par ordinal)
      */
     public static Set<Badge> evaluate(DuelFacts facts, Set<Badge> alreadyEarned) {
+        if (facts.botGame()) {
+            return Set.of();
+        }
+
         Set<Badge> owned = EnumSet.noneOf(Badge.class);
         owned.addAll(alreadyEarned);
 

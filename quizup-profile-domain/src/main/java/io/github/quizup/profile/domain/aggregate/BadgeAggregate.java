@@ -106,7 +106,8 @@ public class BadgeAggregate {
                 perfectDuels,
                 fastAnswersTotal,
                 activity.longestStreak(),
-                imageCorrectTotal
+                imageCorrectTotal,
+                command.botGame()
         );
 
         // Ordre stable (règles) : le flux d'événements reste déterministe au replay.
@@ -165,25 +166,26 @@ public class BadgeAggregate {
         this.badgeId = event.badgeId();
         this.userId = event.userId();
         this.evaluatedGameIds.add(event.gameId());
+
+        // **Entraînement** : le duel est tracé (idempotence du rejeu) mais aucun compteur ne bouge —
+        // ni volume, ni maîtrise, ni série de victoires, ni assiduité, ni faits d'exploit. Les
+        // badges et les titres ne s'acquièrent que sur des duels **entre joueurs**.
+        if (event.botGame()) {
+            return;
+        }
+
         this.activity = ActivityRules.advance(this.activity, event.activeDay());
         this.xpByTopic.merge(event.topicId(), event.xp(), Integer::sum);
 
-        // Faits d'exploit du duel : comptés même en entraînement (comme PERFECT/ÉCLAIR).
         if (event.gameScore() >= ProgressionRules.PERFECT_SCORE) {
             this.perfectDuels++;
         }
         this.fastAnswersTotal += event.fastAnswers();
         this.imageCorrectTotal += event.imageCorrectAnswers();
 
-        // Volume et maîtrise : seuls les duels entre joueurs comptent.
-        if (!event.botGame()) {
-            this.humanDuels++;
-            if (event.won()) {
-                this.humanWins++;
-            }
-        }
-
+        this.humanDuels++;
         if (event.won()) {
+            this.humanWins++;
             this.winStreakByTopic.merge(event.topicId(), 1, Integer::sum);
         } else {
             this.winStreakByTopic.put(event.topicId(), 0);

@@ -16,9 +16,9 @@ import java.time.LocalDate;
 
 /**
  * Test Axon in-memory de {@link BadgeAggregate} : évaluation des badges (exploits, volume,
- * maîtrise, séries, exploration, collection), idempotence par duel et portée « duels entre
- * joueurs » (l'entraînement n'alimente pas le volume/la maîtrise mais reste évalué pour les
- * exploits).
+ * maîtrise, séries, exploration, collection), idempotence par duel et portée « parties contre des
+ * humains » (un entraînement contre bot n'acquiert **aucun** badge et ne fait progresser aucun
+ * compteur).
  */
 class BadgeAggregateTest {
 
@@ -35,9 +35,20 @@ class BadgeAggregateTest {
     }
 
     @Test
-    void botGame_stillEvaluatesExploitBadges() {
+    void botGame_earnsNoBadgeAndMovesNoCounter() {
+        // Entraînement contre bot : **seul** le fait de duel est tracé (idempotence du rejeu) —
+        // aucune victoire, aucun exploit, aucun compteur n'est acquis.
         fixture.givenNoPriorActivity()
-                .when(duel("game-1", "topic-1", 0, 40, true, true, 2))
+                .when(duel("game-1", "topic-1", 0, 160, true, true, 5))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ProgressionEvent.BadgeFactsRecordedEvent.class,
+                        payload -> ((ProgressionEvent.BadgeFactsRecordedEvent) payload).botGame()));
+
+        // …et le duel entre joueurs suivant reste évalué normalement (l'entraînement n'a pas
+        // gonflé les compteurs : c'est bien le premier duel humain qui donne « Première
+        // victoire »).
+        fixture.given(humanDuels(9))
+                .when(duel("game-10", "topic-1", 40, 40, true, false, 2))
                 .expectEventsMatching(earned(Badge.FIRST_WIN));
     }
 

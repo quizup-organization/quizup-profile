@@ -56,9 +56,18 @@ class BadgeRulesTest {
                                               int winStreakInTopic, int distinctTopics,
                                               int perfectDuels, int fastAnswersTotal,
                                               int dayStreak, int imageCorrect) {
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+                distinctTopics, perfectDuels, fastAnswersTotal, dayStreak, imageCorrect, false);
+    }
+
+    private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
+                                              int humanDuels, int humanWins, int topicXp,
+                                              int winStreakInTopic, int distinctTopics,
+                                              int perfectDuels, int fastAnswersTotal,
+                                              int dayStreak, int imageCorrect, boolean botGame) {
         return new BadgeRules.DuelFacts(
                 gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
-                distinctTopics, perfectDuels, fastAnswersTotal, dayStreak, imageCorrect);
+                distinctTopics, perfectDuels, fastAnswersTotal, dayStreak, imageCorrect, botGame);
     }
 
     @Test
@@ -214,11 +223,16 @@ class BadgeRulesTest {
     }
 
     @Test
-    void trainingStillEarnsDuelFacts() {
-        // Un entraînement (compteurs entre joueurs inchangés) ne fait progresser ni le volume ni
-        // la maîtrise, mais ses exploits restent des faits du duel.
-        Set<Badge> earned = BadgeRules.evaluate(facts(160, true, 5, 0, 0, 0, 0), Set.of());
+    void trainingEarnsNoBadgeAtAll() {
+        // Un entraînement contre bot n'acquiert **rien** : ni exploit (victoire, score maximal,
+        // réponses rapides), ni compteur de duel — les badges et les titres ne s'obtiennent que
+        // sur des parties **contre des humains**.
+        assertEquals(Set.of(), BadgeRules.evaluate(
+                facts(160, true, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, true), Set.of()));
 
-        assertEquals(Set.of(Badge.FIRST_WIN, Badge.PERFECT, Badge.LIGHTNING), earned);
+        // …et ne retire jamais un badge déjà possédé.
+        assertEquals(Set.of(), BadgeRules.evaluate(
+                facts(160, true, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, true),
+                Set.of(Badge.FIRST_WIN, Badge.PERFECT)));
     }
 }

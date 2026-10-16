@@ -175,13 +175,15 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   > progresser un badge cosmétique.
 - `AwardXpCommand` / `XpAwardedEvent` portent `correctAnswers`, `fastAnswers`, `draw` et
   `botGame` (issus de `GameEndedEvent`). **Règle produit** : un duel contre bot est un
-  **entraînement** — `ProgressionRules.xpFor(score, won, botGame)` vaut **0 XP** (la progression
-  ne vient que des duels entre joueurs) ; les **badges restent évalués** (faits du duel), la
-  **série journalière** est créditée, et le duel est exclu des stats V/N/D (colonne `draws`,
-  migr. V5) et du classement. Les égalités sont comptées comme telles (jamais en défaite).
-  Compteurs `duelStats` maintenus en projection, les événements antérieurs (`botGame=false`,
-  `draw=false`) restent comptés. Le **jour local** du duel (`app.activity.zone`) est préparé par
-  la saga des badges et porté par la commande (l'agrégat reste pur).
+  **entraînement** — `ProgressionRules.xpFor(score, won, botGame)` vaut **0 XP** et
+  **aucun badge ni titre ne peut y être acquis** (`BadgeRules.evaluate` court-circuite
+  `botGame`, aucun compteur d'agrégat ni de projection ne bouge) : l'acquisition est réservée aux
+  **parties contre des humains**. Le duel est exclu des stats V/N/D (colonne `draws`, migr. V5),
+  du classement et de la série journalière ; les égalités sont comptées comme telles (jamais en
+  défaite). Compteurs `duelStats` maintenus en projection, les événements antérieurs
+  (`botGame=false`, `draw=false`) restent comptés. Le **jour local** du duel
+  (`app.activity.zone`) est préparé par la saga des badges et porté par la commande (l'agrégat
+  reste pur).
 - **Attribution des paliers** (`BadgeRules`, règles **pures** testées sans Axon) : les badges
   vivent dans un **agrégat dédié `BadgeAggregate`** (`badges:<userId>`), séparé de
   `PlayerProgressAggregate` (qui ne porte plus que XP/niveau/titre). La saga
@@ -193,9 +195,11 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   nouvellement acquis. L'évaluation est **générique par métrique** (tout badge dont la cible est
   atteinte), donc **ajouter un palier au catalogue l'active sans toucher à l'agrégat**. La famille
   `COLLECTION` se débloque **en cascade** (un badge acquis peut franchir un palier de collection,
-  qui en franchit un autre). Le volume et la maîtrise ne progressent **que** sur les duels entre
-  joueurs, alors que les exploits (faits du duel : score parfait, réponses rapides) restent acquis
-  **même en entraînement**. Ordre d'émission stable (`EnumSet`) → replay déterministe. Le read
+  qui en franchit un autre). **Aucun badge ne s'acquiert sur un entraînement contre bot** : ni
+  exploit (victoire, score parfait, réponses rapides), ni compteur de volume/maîtrise/série/
+  assiduité/précision/rapidité/vision — tous ne progressent que sur les **parties contre des
+  humains** (les compteurs affichés en projection suivent la même règle). Ordre d'émission stable
+  (`EnumSet`) → replay déterministe. Le read
   model des badges est inchangé (badges écrits par la projection) ; deux compteurs ont été
   ajoutés à `progression_entry` pour l'affichage de la progression (`perfect_duels`,
   `fast_answers_total`, migration `V10` ; `current_day_streak` / `best_day_streak` /

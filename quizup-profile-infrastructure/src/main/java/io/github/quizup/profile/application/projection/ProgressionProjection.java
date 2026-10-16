@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,21 +73,37 @@ public class ProgressionProjection {
                 : current.currentWinStreak();
         int bestWinStreak = Math.max(current.bestWinStreak(), currentWinStreak);
 
-        // Assiduité : même règle pure que la projection d'activité (idempotente par jour).
-        PlayerActivity activity = ActivityRules.advance(
-                PlayerActivity.builder()
-                        .userId(current.userId())
-                        .currentStreak(current.currentDayStreak())
-                        .longestStreak(current.bestDayStreak())
-                        .lastActiveDate(current.lastActiveDate())
-                        .build(),
-                event.awardedAt().atZone(activityZone).toLocalDate());
+        // Assiduité : même règle pure que la projection d'activité (idempotente par jour), mais
+        // **uniquement sur les parties contre des humains** — la progression affichée doit refléter
+        // ce qui peut réellement faire progresser un badge (un entraînement n'en acquiert aucun).
+        int currentDayStreak = current.currentDayStreak();
+        int bestDayStreak = current.bestDayStreak();
+        LocalDate lastActiveDate = current.lastActiveDate();
+        if (humanDuel) {
+            PlayerActivity activity = ActivityRules.advance(
+                    PlayerActivity.builder()
+                            .userId(current.userId())
+                            .currentStreak(current.currentDayStreak())
+                            .longestStreak(current.bestDayStreak())
+                            .lastActiveDate(current.lastActiveDate())
+                            .build(),
+                    event.awardedAt().atZone(activityZone).toLocalDate());
+            currentDayStreak = activity.currentStreak();
+            bestDayStreak = activity.longestStreak();
+            lastActiveDate = activity.lastActiveDate();
+        }
 
-        // Faits d'exploit cumulés (entraînement compris) : badges Précision / Rapidité.
-        int perfectDuels = current.perfectDuels()
-                + (event.gameScore() >= ProgressionRules.PERFECT_SCORE ? 1 : 0);
-        int fastAnswersTotal = current.fastAnswersTotal() + event.fastAnswers();
-        int imageCorrectTotal = current.imageCorrectTotal() + event.imageCorrectAnswers();
+        // Faits d'exploit cumulés : badges Précision / Rapidité / Vision — duels entre joueurs
+        // uniquement (un entraînement ne fait progresser aucun badge).
+        int perfectDuels = humanDuel
+                ? current.perfectDuels() + (event.gameScore() >= ProgressionRules.PERFECT_SCORE ? 1 : 0)
+                : current.perfectDuels();
+        int fastAnswersTotal = humanDuel
+                ? current.fastAnswersTotal() + event.fastAnswers()
+                : current.fastAnswersTotal();
+        int imageCorrectTotal = humanDuel
+                ? current.imageCorrectTotal() + event.imageCorrectAnswers()
+                : current.imageCorrectTotal();
 
         // Parties humaines par thème (les duels bot restent exclus, comme les stats V/N/D).
         Map<String, Integer> gamesByTopic = new HashMap<>(current.gamesByTopic());
@@ -110,9 +127,9 @@ public class ProgressionProjection {
                 .perfectDuels(perfectDuels)
                 .fastAnswersTotal(fastAnswersTotal)
                 .imageCorrectTotal(imageCorrectTotal)
-                .currentDayStreak(activity.currentStreak())
-                .bestDayStreak(activity.longestStreak())
-                .lastActiveDate(activity.lastActiveDate())
+                .currentDayStreak(currentDayStreak)
+                .bestDayStreak(bestDayStreak)
+                .lastActiveDate(lastActiveDate)
                 .updatedAt(event.awardedAt())
                 .build());
 
