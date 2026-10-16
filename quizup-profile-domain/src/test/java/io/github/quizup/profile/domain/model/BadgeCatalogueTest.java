@@ -81,7 +81,24 @@ class BadgeCatalogueTest {
     @Test
     void volumeBadgesMeasureHumanDuelsAndWins() {
         assertEquals(6, Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_DUELS).size());
-        assertEquals(6, Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_WINS).size());
+        // Les victoires ont leur **propre** famille : aucune famille ne mélange deux compteurs.
+        assertEquals(6, Badge.ofLadder(BadgeFamily.VICTORY, BadgeMetric.HUMAN_WINS).size());
+        assertTrue(Badge.ofFamily(BadgeFamily.VOLUME).stream()
+                .allMatch(badge -> badge.metric() == BadgeMetric.HUMAN_DUELS));
+        assertTrue(Badge.ofFamily(BadgeFamily.VICTORY).stream()
+                .allMatch(badge -> badge.metric() == BadgeMetric.HUMAN_WINS));
+    }
+
+    @Test
+    void everyFamilyCarriesExactlyOneLadder() {
+        Map<BadgeFamily, List<Badge>> byFamily = java.util.Arrays.stream(Badge.values())
+                .collect(Collectors.groupingBy(Badge::family));
+
+        assertEquals(BadgeFamily.values().length, byFamily.size(), "chaque famille est peuplée");
+        byFamily.forEach((family, badges) -> {
+            long metrics = badges.stream().map(Badge::metric).distinct().count();
+            assertEquals(1, metrics, family + " ne peut porter qu'une seule échelle");
+        });
     }
 
     @Test

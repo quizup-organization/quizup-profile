@@ -134,21 +134,23 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   `null` efface) ; l'**appartenance** du titre (grade réellement atteint) est vérifiée par
   l'appelant, qui prépare la commande.
 - **Catalogue de badges** (`Badge`) organisé en **familles × paliers × métrique** : `BadgeFamily`
-  (`VOLUME`, `MASTERY`, `EXPLOIT`, `COLLECTION`, puis `SERIES`, `ASSIDUITY`, `SOCIAL`,
+  (`VOLUME`, `VICTORY`, `MASTERY`, `EXPLOIT`, `COLLECTION`, puis `SERIES`, `ASSIDUITY`, `SOCIAL`,
   `CHALLENGES`, `VISION`, `EXPLORATION`, `PRECISION`, `SPEED`), `BadgeTier`
   (`BRONZE → ARGENT → OR → PLATINE → EMERAUDE → DIAMANT`), `BadgeMetric` (`HUMAN_DUELS`, `HUMAN_WINS`, `TOPIC_MASTERY`,
   `DISTINCT_TOPICS`, `WIN_STREAK`, `PERFECT_DUELS`, `FAST_ANSWERS`, `DAILY_STREAK`,
   `FOLLOWERS_GAINED`, `CHALLENGES_SENT`, `IMAGE_CORRECT`, `EARNED_BADGES`, `ONE_SHOT`) et
   `target` — ce qui permet une **progression visible** (« 7/10
   duels ») et laisse une raison de continuer après le bronze, jusqu'au diamant. Le catalogue
-  compte **12 échelles (famille × métrique) × 6 paliers = 76 badges** (les quatre exploits
-  historiques sont des **faits ponctuels** sans progression) ; chaque échelle monte ses paliers
+  compte **12 échelles × 6 paliers = 76 badges** réparties en **13 familles** (`VICTORY` incluse :
+  **une famille = une échelle**, aucune ne mélange deux compteurs ; les quatre exploits
+  ponctuels partagent `EXPLOIT`) ; chaque échelle monte ses paliers
   à cibles strictement croissantes (« Duelliste 10 · Bretteur 50 · Lame d'élite 100 · Légende des
   duels 250 · Maître d'armes 500 · Mythe vivant 1000 »). **Un palier = une constante**
   (`DUELIST_BRONZE`, … `DUELIST_OR`) : les badges acquis restent un simple ensemble de noms,
   **sans migration** ; les 4 codes historiques (`FIRST_WIN`, `PERFECT`, `LIGHTNING`,
   `STREAK_MASTER`) sont préservés (test dédié).
-  Familles : **Volume** (duels/victoires entre joueurs), **Maîtrise** (XP du meilleur sujet),
+  Familles : **Volume** (duels entre joueurs **joués**), **Victoires** (`VICTORY` : duels entre
+  joueurs **gagnés** — famille distincte, aucune famille ne mélange deux compteurs), **Maîtrise** (XP du meilleur sujet),
   **Exploit** (faits ponctuels : première victoire, duel parfait, 5 réponses rapides, série de
   victoires), **Collection** (nombre de badges acquis), **Série** (`WIN_STREAK` : victoires
   consécutives — En série / Imbattable / Invincible), **Assiduité** (`DAILY_STREAK` : jours

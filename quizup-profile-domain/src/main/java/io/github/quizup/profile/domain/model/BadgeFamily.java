@@ -2,12 +2,16 @@ package io.github.quizup.profile.domain.model;
 
 /**
  * Famille d'un {@link Badge} : ce que le badge célèbre. Sert au regroupement dans la collection
- * (et à l'affichage par sections « Volume / Maîtrise / Exploit / Collection »).
+ * (et à l'affichage par sections). **Une famille = une échelle** (12 échelles × 6 paliers + les
+ * 4 exploits ponctuels) : aucune famille ne mélange deux compteurs.
  */
 public enum BadgeFamily {
 
-    /** Volume de jeu entre joueurs (duels joués, victoires). */
+    /** Volume : **duels** joués entre joueurs. */
     VOLUME,
+
+    /** Victoires : **duels gagnés** entre joueurs. */
+    VICTORY,
 
     /** Maîtrise d'un sujet (grade atteint). */
     MASTERY,

@@ -37,13 +37,13 @@ public enum Badge {
     DUELIST_EMERAUDE("Maître d'armes", BadgeFamily.VOLUME, BadgeTier.EMERAUDE, BadgeMetric.HUMAN_DUELS, 500),
     DUELIST_DIAMANT("Mythe vivant", BadgeFamily.VOLUME, BadgeTier.DIAMANT, BadgeMetric.HUMAN_DUELS, 1000),
 
-    // ── Volume : victoires entre joueurs ──────────────────────────────────────────────────
-    WINNER_BRONZE("Vainqueur", BadgeFamily.VOLUME, BadgeTier.BRONZE, BadgeMetric.HUMAN_WINS, 10),
-    WINNER_ARGENT("Triomphateur", BadgeFamily.VOLUME, BadgeTier.ARGENT, BadgeMetric.HUMAN_WINS, 50),
-    WINNER_OR("Conquérant", BadgeFamily.VOLUME, BadgeTier.OR, BadgeMetric.HUMAN_WINS, 100),
-    WINNER_PLATINE("Roi de l'arène", BadgeFamily.VOLUME, BadgeTier.PLATINE, BadgeMetric.HUMAN_WINS, 250),
-    WINNER_EMERAUDE("Empereur du quiz", BadgeFamily.VOLUME, BadgeTier.EMERAUDE, BadgeMetric.HUMAN_WINS, 500),
-    WINNER_DIAMANT("Légende absolue", BadgeFamily.VOLUME, BadgeTier.DIAMANT, BadgeMetric.HUMAN_WINS, 1000),
+    // ── Victoires : duels entre joueurs gagnés ────────────────────────────────────────────
+    WINNER_BRONZE("Vainqueur", BadgeFamily.VICTORY, BadgeTier.BRONZE, BadgeMetric.HUMAN_WINS, 10),
+    WINNER_ARGENT("Triomphateur", BadgeFamily.VICTORY, BadgeTier.ARGENT, BadgeMetric.HUMAN_WINS, 50),
+    WINNER_OR("Conquérant", BadgeFamily.VICTORY, BadgeTier.OR, BadgeMetric.HUMAN_WINS, 100),
+    WINNER_PLATINE("Roi de l'arène", BadgeFamily.VICTORY, BadgeTier.PLATINE, BadgeMetric.HUMAN_WINS, 250),
+    WINNER_EMERAUDE("Empereur du quiz", BadgeFamily.VICTORY, BadgeTier.EMERAUDE, BadgeMetric.HUMAN_WINS, 500),
+    WINNER_DIAMANT("Légende absolue", BadgeFamily.VICTORY, BadgeTier.DIAMANT, BadgeMetric.HUMAN_WINS, 1000),
 
     // ── Maîtrise : XP cumulée dans un même sujet (alignée sur les grades) ────────────────
     MASTER_BRONZE("Spécialiste", BadgeFamily.MASTERY, BadgeTier.BRONZE, BadgeMetric.TOPIC_MASTERY,
