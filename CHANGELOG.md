@@ -1,3 +1,9 @@
+## [4.5.0](https://github.com/quizup-organization/quizup-profile/compare/v4.4.0...v4.5.0) (2026-10-16)
+
+### Features
+
+* **profile:** famille VICTORY — une famille par échelle de badges ([a51bb99](https://github.com/quizup-organization/quizup-profile/commit/a51bb991bedffbd4524c612f5de4c0f0ae89e585))
+
 ## [4.4.0](https://github.com/quizup-organization/quizup-profile/compare/v4.3.0...v4.4.0) (2026-10-15)
 
 ### Features
