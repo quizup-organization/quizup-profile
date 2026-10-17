@@ -44,7 +44,7 @@ public enum Badge {
     // ── Victoires : duels entre joueurs gagnés ────────────────────────────────────────────
     WINNER_FER("Combattant", BadgeFamily.VICTORY, BadgeTier.FER, BadgeMetric.HUMAN_WINS, 1),
     WINNER_BRONZE("Vainqueur", BadgeFamily.VICTORY, BadgeTier.BRONZE, BadgeMetric.HUMAN_WINS, 3),
-    WINNER_ARGENT("Triomphateur", BadgeFamily.VICTORY, BadgeTier.ARGENT, BadgeMetric.HUMAN_WINS, 10),
+    WINNER_ARGENT("Champion", BadgeFamily.VICTORY, BadgeTier.ARGENT, BadgeMetric.HUMAN_WINS, 10),
     WINNER_OR("Conquérant", BadgeFamily.VICTORY, BadgeTier.OR, BadgeMetric.HUMAN_WINS, 30),
     WINNER_PLATINE("Roi de l'arène", BadgeFamily.VICTORY, BadgeTier.PLATINE,
             BadgeMetric.HUMAN_WINS, 100),
