@@ -1,3 +1,9 @@
+## [4.8.2](https://github.com/quizup-organization/quizup-profile/compare/v4.8.1...v4.8.2) (2026-10-17)
+
+### Bug Fixes
+
+* **profile:** rend la série de victoires globale pour les badges ([969e4b7](https://github.com/quizup-organization/quizup-profile/commit/969e4b7e8ddaf2dc2fe5e821996958ca260e826b))
+
 ## [4.8.1](https://github.com/quizup-organization/quizup-profile/compare/v4.8.0...v4.8.1) (2026-10-17)
 
 ### Bug Fixes
