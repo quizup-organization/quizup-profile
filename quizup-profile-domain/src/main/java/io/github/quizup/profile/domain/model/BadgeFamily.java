@@ -2,7 +2,7 @@ package io.github.quizup.profile.domain.model;
 
 /**
  * Famille d'un {@link Badge} : ce que le badge célèbre. Sert au regroupement dans la collection
- * (et à l'affichage par sections). **Une famille = une échelle** (12 échelles × 6 paliers + les
+ * (et à l'affichage par sections). **Une famille = une échelle** (12 échelles × 7 paliers + les
  * 4 exploits ponctuels) : aucune famille ne mélange deux compteurs.
  */
 public enum BadgeFamily {

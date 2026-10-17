@@ -37,6 +37,13 @@ class PlayerTitleTest {
     }
 
     @Test
+    void rank_isDerivedFromTheGrade() {
+        assertEquals(TitleRank.FER, new PlayerTitle("topic-1", MasteryGrade.NOVICE).rank());
+        assertEquals(TitleRank.OR, new PlayerTitle("topic-1", MasteryGrade.CONFIRME).rank());
+        assertEquals(TitleRank.DIAMANT, new PlayerTitle("topic-1", MasteryGrade.LEGENDE).rank());
+    }
+
+    @Test
     void label_appendsTheTopicNameAndFallsBackToTheGradeAlone() {
         PlayerTitle title = new PlayerTitle("topic-1", MasteryGrade.CONFIRME);
 

@@ -125,7 +125,10 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
 - **Maîtrise par sujet** (`MasteryGrade`) : échelle **distincte** du niveau de compte, portée par
   l'XP cumulée **dans le sujet**, en 7 grades à table de seuils explicite
   (`Novice 0 · Apprenti 300 · Pratiquant 1 000 · Confirmé 2 500 · Expert 6 000 · Maître 14 000 ·
-  Légende 30 000`). C'est le support des **titres thématiques**.
+  Légende 30 000`). C'est le support des **titres thématiques**. Chaque grade porte un
+  **`TitleRank`** (`FER → DIAMANT`) : le rang d'un titre est **dérivé du grade**
+  (`Novice → Fer · Apprenti → Bronze · Pratiquant → Argent · Confirmé → Or · Expert → Platine ·
+  Maître → Émeraude · Légende → Diamant`) et n'est **jamais persisté**.
 - **Titres portés** (`PlayerTitle`, clé stable `topicId:GRADE`) : le joueur choisit le titre
   affiché sur son profil, les cartes et les listes. On persiste la **clé**, jamais le libellé :
   celui-ci se compose à l'affichage (grade + nom du sujet, ex. « Confirmé · Histoire »), donc il
@@ -133,37 +136,43 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   (migration `V9`), commande `UpdateEquippedTitleCommand` (propriétaire uniquement, clé validée,
   `null` efface) ; l'**appartenance** du titre (sujet **joué** — l'entraînement bot, à 0 XP,
   n'ouvre rien — et grade réellement atteint) est vérifiée par l'appelant, qui prépare la commande.
+  Le **rang** (`PlayerTitle.rank()`) suit le grade : aucune migration quand la correspondance
+  évolue.
 - **Catalogue de badges** (`Badge`) organisé en **familles × paliers × métrique** : `BadgeFamily`
   (`VOLUME`, `VICTORY`, `MASTERY`, `EXPLOIT`, `COLLECTION`, puis `SERIES`, `ASSIDUITY`, `SOCIAL`,
   `CHALLENGES`, `VISION`, `EXPLORATION`, `PRECISION`, `SPEED`), `BadgeTier`
-  (`BRONZE → ARGENT → OR → PLATINE → EMERAUDE → DIAMANT`), `BadgeMetric` (`HUMAN_DUELS`, `HUMAN_WINS`, `TOPIC_MASTERY`,
+  (`FER → BRONZE → ARGENT → OR → PLATINE → EMERAUDE → DIAMANT`), `BadgeMetric` (`HUMAN_DUELS`, `HUMAN_WINS`, `TOPIC_MASTERY`,
   `DISTINCT_TOPICS`, `WIN_STREAK`, `PERFECT_DUELS`, `FAST_ANSWERS`, `DAILY_STREAK`,
   `FOLLOWERS_GAINED`, `CHALLENGES_SENT`, `IMAGE_CORRECT`, `EARNED_BADGES`, `ONE_SHOT`) et
   `target` — ce qui permet une **progression visible** (« 7/10
-  duels ») et laisse une raison de continuer après le bronze, jusqu'au diamant. Le catalogue
-  compte **12 échelles × 6 paliers = 76 badges** réparties en **13 familles** (`VICTORY` incluse :
-  **une famille = une échelle**, aucune ne mélange deux compteurs ; les quatre exploits
-  ponctuels partagent `EXPLOIT`) ; chaque échelle monte ses paliers
-  à cibles strictement croissantes (« Duelliste 10 · Bretteur 50 · Lame d'élite 100 · Légende des
-  duels 250 · Maître d'armes 500 · Mythe vivant 1000 »). **Un palier = une constante**
+  duels ») et laisse une raison de continuer après le fer, jusqu'au diamant. Le catalogue
+  compte **12 échelles × 7 paliers = 84 badges + 4 exploits = 88 badges** répartis en
+  **13 familles** (`VICTORY` incluse : **une famille = une échelle**, aucune ne mélange deux
+  compteurs ; les quatre exploits ponctuels partagent `EXPLOIT`) ; chaque échelle monte ses
+  paliers à cibles strictement croissantes (« Apprenti duelliste 1 · Duelliste 3 · Bretteur 10 ·
+  Lame d'élite 30 · Légende des duels 100 · Maître d'armes 300 · Mythe vivant 1000 »).
+  **Un palier = une constante**
   (`DUELIST_BRONZE`, … `DUELIST_OR`) : les badges acquis restent un simple ensemble de noms,
   **sans migration** ; les 4 codes historiques (`FIRST_WIN`, `PERFECT`, `LIGHTNING`,
   `STREAK_MASTER`) sont préservés (test dédié).
   Familles : **Volume** (duels entre joueurs **joués**), **Victoires** (`VICTORY` : duels entre
-  joueurs **gagnés** — famille distincte, aucune famille ne mélange deux compteurs), **Maîtrise** (XP du meilleur sujet),
+  joueurs **gagnés** — famille distincte, aucune famille ne mélange deux compteurs), **Maîtrise**
+  (XP du meilleur sujet, **alignée 1:1 sur les 7 grades** : Initié 1 · Spécialiste 300 · Érudit
+  1 000 · Autorité 2 500 · Sommité 6 000 · Oracle 14 000 · Panthéon 30 000),
   **Exploit** (faits ponctuels : première victoire, duel parfait, 5 réponses rapides, série de
-  victoires), **Collection** (nombre de badges acquis), **Série** (`WIN_STREAK` : victoires
-  consécutives — En série / Imbattable / Invincible), **Assiduité** (`DAILY_STREAK` : jours
-  joués d'affilée, même règle pure que la projection d'activité — Régulier 3 / Accro 7 /
-  Increvable 30), **Exploration** (`DISTINCT_TOPICS` :
-  sujets joués — Curieux / Touche-à-tout / Encyclopédie), **Précision** (`PERFECT_DUELS` : duels
-  parfaits cumulés — Métronome 10 / Machine à points 50 / Sans-faute absolu 100) et **Rapidité**
-  (`FAST_ANSWERS` : réponses rapides cumulées — Doigt sur la gâchette 50 / Rafale 200 / Réflexe
-  absolu 500), **Vision** (`IMAGE_CORRECT` : bonnes réponses sur les questions **illustrées**,
+  victoires), **Collection** (nombre de badges acquis — 1 / 10 / 20 / 35 / 50 / 65 / 85 sur
+  88), **Série** (`WIN_STREAK` : victoires
+  consécutives — Sur la lancée 2 / En série 4 / Imbattable 10), **Assiduité** (`DAILY_STREAK` :
+  jours joués d'affilée, même règle pure que la projection d'activité — Persévérant 2 / Régulier 5 /
+  Accro 10), **Exploration** (`DISTINCT_TOPICS` :
+  sujets joués — Explorateur 1 / Curieux 5 / Touche-à-tout 10), **Précision** (`PERFECT_DUELS` :
+  duels parfaits cumulés — Rigoureux 1 / Métronome 3 / Machine à points 10) et **Rapidité**
+  (`FAST_ANSWERS` : réponses rapides cumulées — Prompt 10 / Doigt sur la gâchette 25 / Rafale
+  75), **Vision** (`IMAGE_CORRECT` : bonnes réponses sur les questions **illustrées**,
   comptées par `quizup-game` (release ≥ 8.5.0, `GameEndedEvent.playerNImageCorrectAnswers`) —
-  Observateur 15 / Œil de lynx 100 / Vision absolue 300), **Social** (`FOLLOWERS_GAINED` : abonnés gagnés, cumulés — Populaire 5 /
-  Célébrité 50 / Icône 200) et **Défis** (`CHALLENGES_SENT` : défis nominatifs lancés —
-  Challenger 1 / Provocateur 10 / Maître du défi 50).
+  Attentif 5 / Observateur 15 / Œil de lynx 50), **Social** (`FOLLOWERS_GAINED` : abonnés
+  gagnés, cumulés — Sociable 1 / Populaire 5 / Célébrité 25) et **Défis** (`CHALLENGES_SENT` :
+  défis nominatifs lancés — Opposant 1 / Challenger 3 / Provocateur 10).
   > **Compteurs hors duel** (Social, Défis) : les sagas `SocialBadgesSaga` (sur
   > `UserFollowedEvent` de `quizup-social`) et `ChallengeBadgesSaga` (sur
   > **`ChallengeStartedEvent`** de `quizup-matchmaking`, propriétaire des défis — émis quand la
@@ -209,14 +218,16 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   `fast_answers_total`, migration `V10` ; `current_day_streak` / `best_day_streak` /
   `last_active_date`, migration `V11` ; `followers_gained` / `challenges_sent`, migration
   `V12` ; `image_correct_total`, migration `V13`).
-- **Exposition** : `MasteryGrade`, `Badge` (famille/palier/cible), les titres thématiques
-  (`equippedTitle`) et les badges sont exposés par le BFF (`/api/profiles/{id}/badges`,
-  `/titles`, `/title`) et affichés par le web (collection de badges par familles, sélecteur de
-  titre porté). Le titre de **compte** (`ProgressionRules.titleFor`) reste le libellé transitoire
-  affiché tant qu'aucun titre thématique n'est porté.
-  > ⚠️ **Ordre de déploiement obligatoire** : les nouveaux codes de badges (`DUELIST_*`,
+- **Exposition** : `MasteryGrade` (+ `TitleRank` dérivé), `Badge` (famille/palier/cible), les
+  titres thématiques (`equippedTitle`) et les badges sont exposés par le BFF
+  (`/api/profiles/{id}/badges`, `/titles`, `/title`) et affichés par le web (collection de badges
+  par familles, sélecteur de titre porté, ruban teinté par rang). `TitlesView.TitleView` porte
+  aussi `rank` (`FER`…`DIAMANT`). Le titre de **compte** (`ProgressionRules.titleFor`) reste le
+  libellé transitoire affiché tant qu'aucun titre thématique n'est porté.
+  > ⚠️ **Ordre de déploiement obligatoire** : les nouveaux codes de badges (`*_FER`, `DUELIST_*`,
   > `WINNER_*`, `MASTER_*`, `COLLECTOR_*`, `SERIES_*`, `ASSIDUITY_*`, `EXPLORER_*`,
-  > `PRECISION_*`, `SPEED_*`, `SOCIAL_*`, `CHALLENGES_*`, `VISION_*`) et les
+  > `PRECISION_*`, `SPEED_*`, `SOCIAL_*`, `CHALLENGES_*`, `VISION_*`), le palier `BadgeTier.FER`
+  > et les
   > familles/métriques ajoutées (`SERIES`, `ASSIDUITY`, `SOCIAL`, `CHALLENGES`, `VISION`,
   > `EXPLORATION`, `PRECISION`, `SPEED` ;
   > `DISTINCT_TOPICS`, `WIN_STREAK`, `PERFECT_DUELS`, `FAST_ANSWERS`, `DAILY_STREAK`,
@@ -224,8 +235,8 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   > d'énumération qui traversent le query bus. Le Jackson par défaut **échoue sur une constante
   > inconnue** (`READ_UNKNOWN_ENUM_VALUES_AS_NULL` désactivé) : un BFF encore épinglé sur
   > l'ancienne version casserait la lecture de `PlayerProgress`. Il faut donc **release profile →
-  > bump du pin dans le BFF → déployer le BFF, puis déployer `quizup-profile`** (le BFF à jour
-  > tolère les deux jeux de badges, l'ancien non).
+  > bump du pin dans le BFF → release BFF + web → déployer le web, puis le BFF, puis
+  > `quizup-profile`** (le BFF/web à jour tolère les deux jeux de badges, l'ancien non).
 - **Activité journalière** : `ActivityProjection` (règle pure `ActivityRules`, réutilisée par
   l'agrégat de badges pour la famille Assiduité) alimente `progression_activity` (série
   courante/record, dernier jour actif) et `progression_activity_day` (parties par jour) depuis

@@ -55,34 +55,47 @@ class BadgeCatalogueTest {
         });
     }
 
-    /** Chaque échelle (famille × métrique) porte ses **six** paliers, du bronze au diamant. */
+    /** Chaque échelle (famille × métrique) porte ses **sept** paliers, du fer au diamant. */
     @Test
-    void everyLadderHasTheSixTiers() {
+    void everyLadderHasTheSevenTiers() {
         Map<String, List<Badge>> ladders = java.util.Arrays.stream(Badge.values())
                 .filter(badge -> !badge.isOneShot())
                 .collect(Collectors.groupingBy(badge -> badge.family() + "/" + badge.metric()));
 
         assertEquals(12, ladders.size(), "12 échelles dans le catalogue");
         ladders.forEach((ladder, badges) -> {
-            assertEquals(6, badges.size(), ladder + " doit porter six paliers");
-            assertEquals(BadgeTier.DIAMANT, badges.stream()
-                    .max(Comparator.comparing(Badge::tier)).orElseThrow().tier());
+            assertEquals(7, badges.size(), ladder + " doit porter sept paliers");
+            List<Badge> sorted = badges.stream()
+                    .sorted(Comparator.comparing(Badge::tier))
+                    .toList();
+            assertEquals(BadgeTier.FER, sorted.getFirst().tier(), ladder + " commence au fer");
+            assertEquals(BadgeTier.DIAMANT, sorted.getLast().tier(), ladder + " finit au diamant");
         });
     }
 
     @Test
-    void masteryBadgesTargetTheGradeThresholds() {
-        assertEquals(MasteryGrade.CONFIRME.xpThreshold(), Badge.MASTER_BRONZE.target());
-        assertEquals(MasteryGrade.EXPERT.xpThreshold(), Badge.MASTER_ARGENT.target());
-        assertEquals(MasteryGrade.MAITRE.xpThreshold(), Badge.MASTER_OR.target());
-        assertEquals(MasteryGrade.LEGENDE.xpThreshold(), Badge.MASTER_PLATINE.target());
+    void catalogueHasEightyEightBadges() {
+        // 12 échelles × 7 paliers + 4 exploits ponctuels.
+        assertEquals(88, Badge.values().length);
+    }
+
+    @Test
+    void masteryBadgesFollowTheGradeLadder() {
+        // Fer = première XP (Novice) ; les six paliers suivants reprennent les seuils des grades.
+        assertEquals(1, Badge.MASTER_FER.target());
+        assertEquals(MasteryGrade.APPRENTI.xpThreshold(), Badge.MASTER_BRONZE.target());
+        assertEquals(MasteryGrade.PRATIQUANT.xpThreshold(), Badge.MASTER_ARGENT.target());
+        assertEquals(MasteryGrade.CONFIRME.xpThreshold(), Badge.MASTER_OR.target());
+        assertEquals(MasteryGrade.EXPERT.xpThreshold(), Badge.MASTER_PLATINE.target());
+        assertEquals(MasteryGrade.MAITRE.xpThreshold(), Badge.MASTER_EMERAUDE.target());
+        assertEquals(MasteryGrade.LEGENDE.xpThreshold(), Badge.MASTER_DIAMANT.target());
     }
 
     @Test
     void volumeBadgesMeasureHumanDuelsAndWins() {
-        assertEquals(6, Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_DUELS).size());
+        assertEquals(7, Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_DUELS).size());
         // Les victoires ont leur **propre** famille : aucune famille ne mélange deux compteurs.
-        assertEquals(6, Badge.ofLadder(BadgeFamily.VICTORY, BadgeMetric.HUMAN_WINS).size());
+        assertEquals(7, Badge.ofLadder(BadgeFamily.VICTORY, BadgeMetric.HUMAN_WINS).size());
         assertTrue(Badge.ofFamily(BadgeFamily.VOLUME).stream()
                 .allMatch(badge -> badge.metric() == BadgeMetric.HUMAN_DUELS));
         assertTrue(Badge.ofFamily(BadgeFamily.VICTORY).stream()
@@ -135,14 +148,15 @@ class BadgeCatalogueTest {
 
     @Test
     void tiers_haveAStableOrder() {
-        assertEquals(0, BadgeTier.BRONZE.ordinal());
-        assertEquals(1, BadgeTier.ARGENT.ordinal());
-        assertEquals(2, BadgeTier.OR.ordinal());
-        assertEquals(3, BadgeTier.PLATINE.ordinal());
-        assertEquals(4, BadgeTier.EMERAUDE.ordinal());
-        assertEquals(5, BadgeTier.DIAMANT.ordinal());
+        assertEquals(0, BadgeTier.FER.ordinal());
+        assertEquals(1, BadgeTier.BRONZE.ordinal());
+        assertEquals(2, BadgeTier.ARGENT.ordinal());
+        assertEquals(3, BadgeTier.OR.ordinal());
+        assertEquals(4, BadgeTier.PLATINE.ordinal());
+        assertEquals(5, BadgeTier.EMERAUDE.ordinal());
+        assertEquals(6, BadgeTier.DIAMANT.ordinal());
         assertTrue(BadgeTier.DIAMANT.isHighest());
-        assertFalse(BadgeTier.PLATINE.isHighest());
-        assertFalse(BadgeTier.BRONZE.isHighest());
+        assertFalse(BadgeTier.EMERAUDE.isHighest());
+        assertFalse(BadgeTier.FER.isHighest());
     }
 }

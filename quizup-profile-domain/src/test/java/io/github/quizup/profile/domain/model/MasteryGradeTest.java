@@ -36,6 +36,19 @@ class MasteryGradeTest {
     }
 
     @Test
+    void everyGradeCarriesItsTitleRank() {
+        assertEquals(TitleRank.FER, MasteryGrade.NOVICE.rank());
+        assertEquals(TitleRank.BRONZE, MasteryGrade.APPRENTI.rank());
+        assertEquals(TitleRank.ARGENT, MasteryGrade.PRATIQUANT.rank());
+        assertEquals(TitleRank.OR, MasteryGrade.CONFIRME.rank());
+        assertEquals(TitleRank.PLATINE, MasteryGrade.EXPERT.rank());
+        assertEquals(TitleRank.EMERAUDE, MasteryGrade.MAITRE.rank());
+        assertEquals(TitleRank.DIAMANT, MasteryGrade.LEGENDE.rank());
+        assertTrue(TitleRank.DIAMANT.isHighest());
+        assertFalse(TitleRank.EMERAUDE.isHighest());
+    }
+
+    @Test
     void next_isChainedAndEndsAtLegende() {
         assertEquals(MasteryGrade.APPRENTI, MasteryGrade.NOVICE.next());
         assertNull(MasteryGrade.LEGENDE.next());

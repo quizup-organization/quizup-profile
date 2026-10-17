@@ -12,6 +12,9 @@ import java.util.Optional;
  *
  * <p>L'appartenance du titre au joueur (grade réellement atteint dans ce sujet) est vérifiée par
  * l'appelant, qui prépare la commande (cf. `best-practices/.backend/command-preparation.md`).</p>
+ *
+ * <p>Le {@link #rank() rang} est **dérivé du grade** : il n'est jamais persisté et suit toute
+ * évolution de la correspondance grade → rang.</p>
  */
 public record PlayerTitle(String topicId, MasteryGrade grade) {
 
@@ -29,6 +32,11 @@ public record PlayerTitle(String topicId, MasteryGrade grade) {
     /** Clé persistée du titre ({@code topicId:GRADE}). */
     public String key() {
         return topicId + SEPARATOR + grade.name();
+    }
+
+    /** Rang de rareté du titre, dérivé de son grade (Fer → Diamant). */
+    public TitleRank rank() {
+        return grade.rank();
     }
 
     /**

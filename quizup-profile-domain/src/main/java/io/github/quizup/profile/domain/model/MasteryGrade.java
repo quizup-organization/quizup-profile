@@ -17,23 +17,28 @@ import java.util.Optional;
  *
  * <p>Référence à ~120 XP par duel : Confirmé ≈ 20 duels sur le sujet, Expert ≈ 50, Légende
  * ≈ 250.</p>
+ *
+ * <p>Chaque grade porte aussi un {@link TitleRank rang de rareté} (Fer → Diamant) : le rang d'un
+ * titre est **dérivé du grade** et n'est jamais persisté ({@link PlayerTitle}).</p>
  */
 public enum MasteryGrade {
 
-    NOVICE("Novice", 0),
-    APPRENTI("Apprenti", 300),
-    PRATIQUANT("Pratiquant", 1_000),
-    CONFIRME("Confirmé", 2_500),
-    EXPERT("Expert", 6_000),
-    MAITRE("Maître", 14_000),
-    LEGENDE("Légende", 30_000);
+    NOVICE("Novice", 0, TitleRank.FER),
+    APPRENTI("Apprenti", 300, TitleRank.BRONZE),
+    PRATIQUANT("Pratiquant", 1_000, TitleRank.ARGENT),
+    CONFIRME("Confirmé", 2_500, TitleRank.OR),
+    EXPERT("Expert", 6_000, TitleRank.PLATINE),
+    MAITRE("Maître", 14_000, TitleRank.EMERAUDE),
+    LEGENDE("Légende", 30_000, TitleRank.DIAMANT);
 
     private final String label;
     private final int xpThreshold;
+    private final TitleRank rank;
 
-    MasteryGrade(String label, int xpThreshold) {
+    MasteryGrade(String label, int xpThreshold, TitleRank rank) {
         this.label = label;
         this.xpThreshold = xpThreshold;
+        this.rank = rank;
     }
 
     /** Libellé affiché du grade (« Confirmé »). */
@@ -44,6 +49,11 @@ public enum MasteryGrade {
     /** XP cumulée dans le sujet nécessaire pour atteindre ce grade. */
     public int xpThreshold() {
         return xpThreshold;
+    }
+
+    /** Rang de rareté du titre porté à ce grade (Fer → Diamant). */
+    public TitleRank rank() {
+        return rank;
     }
 
     public boolean isLast() {
