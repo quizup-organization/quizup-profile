@@ -105,7 +105,7 @@ class BadgeAggregateTest {
 
     @Test
     void threeConsecutiveWins_earnSeriesFer() {
-        // Deux victoires consécutives sur le même sujet → la 3e fait tomber « Sur la lancée ».
+        // Deux victoires consécutives → la 3e fait tomber « Sur la lancée » (série globale).
         fixture.given(
                         new ProgressionEvent.BadgeFactsRecordedEvent(
                                 BADGE_ID, "user-1", "game-1", "topic-1", 20, 30, true, false, 0,
@@ -115,6 +115,17 @@ class BadgeAggregateTest {
                                 0, Instant.now(), null))
                 .when(duel("game-3", "topic-1", 20, 30, true, false, 0))
                 .expectEventsMatching(earned(Badge.SERIES_FER));
+    }
+
+    @Test
+    void winStreakIsGlobalAcrossTopics() {
+        // Trois victoires sur trois sujets différents, puis une quatrième : la série est globale.
+        fixture.given(
+                        humanWin("game-1", "topic-1"),
+                        humanWin("game-2", "topic-2"),
+                        humanWin("game-3", "topic-3"))
+                .when(duel("game-4", "topic-4", 10, 10, true, false, 0))
+                .expectEventsMatching(earned(Badge.SERIES_BRONZE));
     }
 
     @Test
@@ -250,6 +261,12 @@ class BadgeAggregateTest {
         return QuizUpAxonMatchers.hasPayloadMatching(
                 ProgressionEvent.BadgeEarnedEvent.class,
                 e -> ((ProgressionEvent.BadgeEarnedEvent) e).badge() == badge);
+    }
+
+    private static ProgressionEvent.BadgeFactsRecordedEvent humanWin(String gameId, String topicId) {
+        return new ProgressionEvent.BadgeFactsRecordedEvent(
+                BADGE_ID, "user-1", gameId, topicId, 10, 10, true, false, 0,
+                0, Instant.now(), null);
     }
 
     private static ProgressionEvent.BadgeFactsRecordedEvent[] humanDuels(int count) {

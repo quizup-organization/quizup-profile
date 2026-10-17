@@ -27,9 +27,10 @@ import java.util.Set;
  * titres). Identifiant {@code badges:<userId>} (namespacé, cf. {@code ProgressionRules}).
  *
  * <p>Il porte **tous** les compteurs nécessaires à l'évaluation des {@link Badge} : duels et
- * victoires **entre joueurs**, XP par sujet, séries par sujet — plus les badges déjà acquis et
- * les duels déjà évalués (idempotence). L'entraînement contre bot n'alimente aucun compteur de
- * volume/maîtrise, mais les faits d'exploit du duel restent évalués (score, réponses rapides).</p>
+ * victoires **entre joueurs**, XP par sujet, **série de victoires tous sujets confondus** — plus
+ * les badges déjà acquis et les duels déjà évalués (idempotence). L'entraînement contre bot
+ * n'alimente aucun compteur de volume/maîtrise, mais les faits d'exploit du duel restent évalués
+ * (score, réponses rapides).</p>
  *
  * <p>Créé à la volée au premier {@code EvaluateBadgesCommand}
  * ({@link AggregateCreationPolicy#CREATE_IF_MISSING}) ; un même {@code gameId} n'est évalué
@@ -46,8 +47,8 @@ public class BadgeAggregate {
 
     private final Set<String> evaluatedGameIds = new HashSet<>();
     private final Map<String, Integer> xpByTopic = new HashMap<>();
-    private final Map<String, Integer> winStreakByTopic = new HashMap<>();
     private final Set<Badge> badges = new HashSet<>();
+    private int currentWinStreak;
 
     /** Assiduité (jours joués consécutifs) — même règle pure que la projection d'activité. */
     private PlayerActivity activity = PlayerActivity.empty(null);
@@ -101,7 +102,7 @@ public class BadgeAggregate {
                 humanDuels,
                 humanWins,
                 xpByTopic.getOrDefault(command.topicId(), 0),
-                winStreakByTopic.getOrDefault(command.topicId(), 0),
+                currentWinStreak,
                 (int) xpByTopic.values().stream().filter(value -> value > 0).count(),
                 perfectDuels,
                 fastAnswersTotal,
@@ -186,9 +187,10 @@ public class BadgeAggregate {
         this.humanDuels++;
         if (event.won()) {
             this.humanWins++;
-            this.winStreakByTopic.merge(event.topicId(), 1, Integer::sum);
+            this.currentWinStreak++;
         } else {
-            this.winStreakByTopic.put(event.topicId(), 0);
+            // Série **globale** : une défaite ou un nul, quel que soit le sujet, la remet à zéro.
+            this.currentWinStreak = 0;
         }
     }
 

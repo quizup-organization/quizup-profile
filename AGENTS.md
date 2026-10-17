@@ -203,7 +203,8 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   `PlayerProgressAggregate` (qui ne porte plus que XP/niveau/titre). La saga
   **`AwardBadgesSaga`** consomme `XpAwardedEvent` (qui porte déjà tous les faits du duel) et
   envoie un `EvaluateBadgesCommand` ; `BadgeAggregate` maintient ses propres compteurs (duels et
-  victoires entre joueurs, XP et série de victoires par sujet, duels parfaits et réponses rapides
+  victoires entre joueurs, XP par sujet et **série de victoires globale** (tous sujets
+  confondus), duels parfaits et réponses rapides
   cumulés, sujets joués), les met à jour **au replay** depuis `BadgeFactsRecordedEvent`
   (idempotent par `gameId`), puis évalue les faits et émet un `BadgeEarnedEvent` par badge
   nouvellement acquis. L'évaluation est **générique par métrique** (tout badge dont la cible est

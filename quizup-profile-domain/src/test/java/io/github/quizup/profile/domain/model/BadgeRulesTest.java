@@ -23,50 +23,50 @@ class BadgeRulesTest {
 
     private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
                                               int humanDuels, int humanWins, int topicXp,
-                                              int winStreakInTopic) {
-        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic, 0);
+                                              int winStreak) {
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreak, 0);
     }
 
     private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
                                               int humanDuels, int humanWins, int topicXp,
-                                              int winStreakInTopic, int distinctTopics) {
-        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+                                              int winStreak, int distinctTopics) {
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreak,
                 distinctTopics, 0, 0);
     }
 
     private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
                                               int humanDuels, int humanWins, int topicXp,
-                                              int winStreakInTopic, int distinctTopics,
+                                              int winStreak, int distinctTopics,
                                               int perfectDuels, int fastAnswersTotal) {
-        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreak,
                 distinctTopics, perfectDuels, fastAnswersTotal, 0);
     }
 
     private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
                                               int humanDuels, int humanWins, int topicXp,
-                                              int winStreakInTopic, int distinctTopics,
+                                              int winStreak, int distinctTopics,
                                               int perfectDuels, int fastAnswersTotal,
                                               int dayStreak) {
-        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreak,
                 distinctTopics, perfectDuels, fastAnswersTotal, dayStreak, 0);
     }
 
     private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
                                               int humanDuels, int humanWins, int topicXp,
-                                              int winStreakInTopic, int distinctTopics,
+                                              int winStreak, int distinctTopics,
                                               int perfectDuels, int fastAnswersTotal,
                                               int dayStreak, int imageCorrect) {
-        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+        return facts(gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreak,
                 distinctTopics, perfectDuels, fastAnswersTotal, dayStreak, imageCorrect, false);
     }
 
     private static BadgeRules.DuelFacts facts(int gameScore, boolean won, int fastAnswers,
                                               int humanDuels, int humanWins, int topicXp,
-                                              int winStreakInTopic, int distinctTopics,
+                                              int winStreak, int distinctTopics,
                                               int perfectDuels, int fastAnswersTotal,
                                               int dayStreak, int imageCorrect, boolean botGame) {
         return new BadgeRules.DuelFacts(
-                gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreakInTopic,
+                gameScore, won, fastAnswers, humanDuels, humanWins, topicXp, winStreak,
                 distinctTopics, perfectDuels, fastAnswersTotal, dayStreak, imageCorrect, botGame);
     }
 

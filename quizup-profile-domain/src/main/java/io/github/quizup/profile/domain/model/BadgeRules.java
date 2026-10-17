@@ -26,7 +26,7 @@ public final class BadgeRules {
     /** Bonnes réponses rapides (< 3 s) dans un même duel pour « Éclair ». */
     public static final int LIGHTNING_FAST_ANSWERS = 5;
 
-    /** Victoires consécutives dans un même thème pour « Série de feu ». */
+    /** Victoires consécutives, tous sujets confondus, pour « Série de feu ». */
     public static final int STREAK_MASTER_WINS = 10;
 
     private BadgeRules() {
@@ -38,7 +38,7 @@ public final class BadgeRules {
      * @param humanDuels      duels entre joueurs joués (hors entraînement)
      * @param humanWins       duels entre joueurs gagnés (hors entraînement)
      * @param topicXp         XP cumulée dans le sujet du duel
-     * @param winStreakInTopic victoires consécutives courantes dans ce sujet
+     * @param winStreak victoires consécutives courantes, tous sujets confondus
      */
     public record DuelFacts(
             int gameScore,
@@ -47,7 +47,7 @@ public final class BadgeRules {
             int humanDuels,
             int humanWins,
             int topicXp,
-            int winStreakInTopic,
+            int winStreak,
             /** Nombre de sujets joués (XP > 0), entraînement exclu. */
             int distinctTopics,
             /** Duels parfaits cumulés (duels entre joueurs uniquement). */
@@ -118,7 +118,7 @@ public final class BadgeRules {
         collectReached(owned, BadgeMetric.HUMAN_WINS, facts.humanWins());
         collectReached(owned, BadgeMetric.TOPIC_MASTERY, facts.topicXp());
         collectReached(owned, BadgeMetric.DISTINCT_TOPICS, facts.distinctTopics());
-        collectReached(owned, BadgeMetric.WIN_STREAK, facts.winStreakInTopic());
+        collectReached(owned, BadgeMetric.WIN_STREAK, facts.winStreak());
         collectReached(owned, BadgeMetric.PERFECT_DUELS, facts.perfectDuels());
         collectReached(owned, BadgeMetric.FAST_ANSWERS, facts.fastAnswersTotal());
         collectReached(owned, BadgeMetric.DAILY_STREAK, facts.dayStreak());
@@ -148,7 +148,7 @@ public final class BadgeRules {
         if (facts.fastAnswers() >= LIGHTNING_FAST_ANSWERS) {
             owned.add(Badge.LIGHTNING);
         }
-        if (facts.winStreakInTopic() >= STREAK_MASTER_WINS) {
+        if (facts.winStreak() >= STREAK_MASTER_WINS) {
             owned.add(Badge.STREAK_MASTER);
         }
     }

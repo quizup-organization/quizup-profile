@@ -21,7 +21,7 @@ public enum BadgeMetric {
     /** Nombre de sujets joués (XP > 0) — l'entraînement (0 XP) ne compte pas. */
     DISTINCT_TOPICS,
 
-    /** Victoires consécutives ({@code winStreakInTopic} au moment du duel). */
+    /** Victoires consécutives, tous sujets confondus ({@code winStreak} au moment du duel). */
     WIN_STREAK,
 
     /** Duels parfaits cumulés (score maximal atteint). */
