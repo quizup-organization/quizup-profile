@@ -1,3 +1,9 @@
+## [4.8.1](https://github.com/quizup-organization/quizup-profile/compare/v4.8.0...v4.8.1) (2026-10-17)
+
+### Bug Fixes
+
+* **profile:** renomme le badge Triomphateur en Champion ([be52515](https://github.com/quizup-organization/quizup-profile/commit/be5251540651eb685a008c94d54bb05193dc65a1))
+
 ## [4.8.0](https://github.com/quizup-organization/quizup-profile/compare/v4.7.0...v4.8.0) (2026-10-17)
 
 ### Features
