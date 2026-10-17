@@ -134,8 +134,9 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   celui-ci se compose à l'affichage (grade + nom du sujet, ex. « Confirmé · Histoire »), donc il
   suit le renommage du sujet et la langue du lecteur. Champ `profile_entry.equipped_title`
   (migration `V9`), commande `UpdateEquippedTitleCommand` (propriétaire uniquement, clé validée,
-  `null` efface) ; l'**appartenance** du titre (sujet **joué** — l'entraînement bot, à 0 XP,
-  n'ouvre rien — et grade réellement atteint) est vérifiée par l'appelant, qui prépare la commande.
+  `null` efface) ; l'**appartenance** du titre (sujet avec **au moins une partie humaine
+  terminée** — abandon inclus, l'entraînement bot à 0 XP n'ouvre rien — et grade réellement
+  atteint) est vérifiée par l'appelant, qui prépare la commande.
   Le **rang** (`PlayerTitle.rank()`) suit le grade : aucune migration quand la correspondance
   évolue.
 - **Catalogue de badges** (`Badge`) organisé en **familles × paliers × métrique** : `BadgeFamily`
