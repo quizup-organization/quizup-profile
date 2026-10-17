@@ -1,3 +1,9 @@
+## [4.8.0](https://github.com/quizup-organization/quizup-profile/compare/v4.7.0...v4.8.0) (2026-10-17)
+
+### Features
+
+* **profile:** palier Fer et rang des titres ([43952e2](https://github.com/quizup-organization/quizup-profile/commit/43952e2865c2be31ce0c575aaefb6a2551a7432f))
+
 ## [4.7.0](https://github.com/quizup-organization/quizup-profile/compare/v4.6.0...v4.7.0) (2026-10-16)
 
 ### Features
