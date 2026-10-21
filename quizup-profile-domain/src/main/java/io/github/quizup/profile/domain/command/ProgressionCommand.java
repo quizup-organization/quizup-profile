@@ -29,7 +29,13 @@ public interface ProgressionCommand {
             int correctAnswers,
             int fastAnswers,
             /** Bonnes réponses sur les questions illustrées (badge « Œil de lynx »). */
-            int imageCorrectAnswers
+            int imageCorrectAnswers,
+            /** Adversaire humain du duel, `null` pour un entraînement bot. */
+            String opponentId,
+            /** Elo courant de l'adversaire au moment du duel, `null` si indisponible. */
+            Integer opponentRating,
+            /** Jour local du duel (fuseau d'activité), pour le plafond anti-farm. */
+            java.time.LocalDate ratedDay
     ) implements ProgressionCommand {
     }
 

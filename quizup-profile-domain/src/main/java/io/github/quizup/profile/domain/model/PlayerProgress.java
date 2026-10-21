@@ -35,11 +35,33 @@ public record PlayerProgress(
         int currentDayStreak,
         int bestDayStreak,
         LocalDate lastActiveDate,
-        Instant updatedAt
+        Instant updatedAt,
+        /** Elo global courant (profil, matchmaking, bordure). */
+        int rating,
+        /** Meilleur Elo atteint (trophée de carrière). */
+        int peakRating,
+        /** Nombre de duels classés (hors bot, hors plafond anti-farm). */
+        int ratedGames,
+        /** Elo encore provisoire (moins de {@link EloRules#PROVISIONAL_GAMES} duels classés). */
+        boolean provisional
 ) {
 
+    public PlayerProgress {
+        // Les constructions historiques (tests, snapshots) ne renseignent pas encore l'Elo :
+        // une progression sans aucun duel classé part de l'échelle de départ.
+        if (rating == 0 && peakRating == 0 && ratedGames == 0) {
+            rating = EloRules.INITIAL_RATING;
+            peakRating = EloRules.INITIAL_RATING;
+        }
+        rating = Math.max(0, rating);
+        peakRating = Math.max(peakRating, rating);
+        ratedGames = Math.max(0, ratedGames);
+        provisional = EloRules.isProvisional(ratedGames);
+    }
+
     /**
-     * Progression neutre (niveau 1, 0 XP) d'un joueur n'ayant encore joué aucun duel.
+     * Progression neutre (niveau 1, 0 XP, Elo de départ) d'un joueur n'ayant encore joué aucun
+     * duel.
      */
     public static PlayerProgress empty(String userId) {
         return PlayerProgress.builder()
@@ -66,6 +88,10 @@ public record PlayerProgress(
                 .bestDayStreak(0)
                 .lastActiveDate(null)
                 .updatedAt(Instant.now())
+                .rating(EloRules.INITIAL_RATING)
+                .peakRating(EloRules.INITIAL_RATING)
+                .ratedGames(0)
+                .provisional(true)
                 .build();
     }
 

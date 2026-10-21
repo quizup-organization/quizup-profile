@@ -91,6 +91,21 @@ public class ProgressEntity {
     @Column(name = "last_active_date")
     private LocalDate lastActiveDate;
 
+    /** Elo global courant (profil, matchmaking, bordure). */
+    @Column(name = "rating", nullable = false)
+    private int rating;
+
+    /** Meilleur Elo atteint. */
+    @Column(name = "peak_rating", nullable = false)
+    private int peakRating;
+
+    /** Nombre de duels classés (hors bot, hors plafond anti-farm). */
+    @Column(name = "rated_games", nullable = false)
+    private int ratedGames;
+
+    @Column(name = "provisional", nullable = false)
+    private boolean provisional;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "progression_topic_entry", joinColumns = @JoinColumn(name = "user_id"))
     @MapKeyColumn(name = "topic_id", length = 255)

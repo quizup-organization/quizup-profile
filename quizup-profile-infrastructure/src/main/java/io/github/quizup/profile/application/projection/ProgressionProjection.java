@@ -131,10 +131,14 @@ public class ProgressionProjection {
                 .bestDayStreak(bestDayStreak)
                 .lastActiveDate(lastActiveDate)
                 .updatedAt(event.awardedAt())
+                .rating(event.rating())
+                .peakRating(event.peakRating())
+                .ratedGames(event.ratedGames())
+                .provisional(event.provisional())
                 .build());
 
-        logger.info("Progression projetée: userId={}, +{} XP, total={}, niveau={}",
-                event.userId(), event.xp(), xpTotal, level);
+        logger.info("Progression projetée: userId={}, +{} XP, total={}, Elo={} (+{})",
+                event.userId(), event.xp(), xpTotal, event.rating(), event.ratingDelta());
     }
 
     @EventHandler

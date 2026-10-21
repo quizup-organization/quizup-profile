@@ -39,6 +39,10 @@ public final class ProgressEntityMapper {
                 .bestDayStreak(entity.getBestDayStreak())
                 .lastActiveDate(entity.getLastActiveDate())
                 .updatedAt(entity.getUpdatedAt())
+                .rating(entity.getRating())
+                .peakRating(entity.getPeakRating())
+                .ratedGames(entity.getRatedGames())
+                .provisional(entity.isProvisional())
                 .build();
     }
 
@@ -67,6 +71,10 @@ public final class ProgressEntityMapper {
         entity.setBestDayStreak(progress.bestDayStreak());
         entity.setLastActiveDate(progress.lastActiveDate());
         entity.setUpdatedAt(progress.updatedAt());
+        entity.setRating(progress.rating());
+        entity.setPeakRating(progress.peakRating());
+        entity.setRatedGames(progress.ratedGames());
+        entity.setProvisional(progress.provisional());
         return entity;
     }
 }

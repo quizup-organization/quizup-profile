@@ -117,6 +117,12 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
 
 - `ProgressionResponse` porte `duelStats` (joués, victoires, défaites, égalités, winrate, meilleur
   score, meilleure série) et `TopicProgressResponse` porte `title` (titre par thème).
+- **Elo global du profil** (`EloRules`) : départ **200**, provisoire sur **10 duels classés**,
+  `K=40` puis `20`, victoire `1` / nul `0.5` / défaite `0`. Tous les duels humains comptent, avec
+  un **plafond anti-farm de 2 duels par paire et par jour** ; les duels bot sont exclus. L'Elo est
+  porté par `progression_entry` (`rating`, `peak_rating`, `rated_games`, `provisional`) et mis à
+  jour par `AwardProgressSaga` + `PlayerProgressAggregate` ; il ne remplace pas l'XP de sujet, qui
+  reste la source des titres, badges et classements par thème.
 - **Courbe de niveaux explicite et à départ accéléré** (remplace l'ancien `1 + √(xp/100)`) :
   `ProgressionRules.xpThreshold(L) = (L−1)·(50L − 20)`, soit un palier de `100·L − 20` XP entre
   les niveaux `L` et `L+1` — N2 = 80 XP (≈1 duel), N5 = 920 (≈8), N10 = 4 320 (≈36),

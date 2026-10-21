@@ -29,7 +29,20 @@ public interface ProgressionEvent {
             int fastAnswers,
             /** Bonnes réponses sur les questions illustrées (badge « Œil de lynx »). */
             int imageCorrectAnswers,
-            Instant awardedAt
+            Instant awardedAt,
+            /** Elo courant après le duel (inchangé si le duel n'est pas classé). */
+            int rating,
+            /** Meilleur Elo atteint. */
+            int peakRating,
+            /** Nombre de duels classés cumulés. */
+            int ratedGames,
+            boolean provisional,
+            /** Variation d'Elo du duel (0 si non classé ou plafond anti-farm atteint). */
+            int ratingDelta,
+            /** Adversaire classé du duel, `null` si non classé. */
+            String ratedOpponentId,
+            /** Jour local du duel classé, `null` si non classé. */
+            java.time.LocalDate ratedDay
     ) implements ProgressionEvent {
     }
 
