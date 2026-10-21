@@ -1,3 +1,9 @@
+## [4.9.1](https://github.com/quizup-organization/quizup-profile/compare/v4.9.0...v4.9.1) (2026-10-21)
+
+### Bug Fixes
+
+* **profile:** aligne les contrats sur les dernières releases ([8557602](https://github.com/quizup-organization/quizup-profile/commit/8557602b486ea297384f99042a67394c661b355f))
+
 ## [4.9.0](https://github.com/quizup-organization/quizup-profile/compare/v4.8.2...v4.9.0) (2026-10-21)
 
 ### Features
