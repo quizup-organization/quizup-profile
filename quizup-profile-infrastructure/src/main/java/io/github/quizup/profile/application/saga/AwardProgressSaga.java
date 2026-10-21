@@ -2,40 +2,30 @@ package io.github.quizup.profile.application.saga;
 
 import io.github.quizup.game.domain.event.GameEvent;
 import io.github.quizup.microservice.core.domain.constant.QuizUpConstants;
-import io.github.quizup.microservice.core.infrastructure.axon.QueryResponseTypes;
 import io.github.quizup.profile.domain.command.ProgressionCommand;
-import io.github.quizup.profile.domain.model.PlayerProgress;
 import io.github.quizup.profile.domain.model.ProgressionRules;
-import io.github.quizup.profile.domain.query.ProgressionQuery;
 import io.github.quizup.profile.infrastructure.properties.AppProperties;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.ProcessingGroup;
-import org.axonframework.modelling.saga.SagaEventHandler;
-import org.axonframework.modelling.saga.SagaLifecycle;
-import org.axonframework.modelling.saga.StartSaga;
-import org.axonframework.queryhandling.QueryGateway;
-import org.axonframework.spring.stereotype.Saga;
+import org.axonframework.eventhandling.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
- * AwardProgressSaga — attribue l'XP et l'Elo aux joueurs à la fin d'un duel.
+ * AwardProgressHandler — attribue l'XP et l'Elo aux joueurs à la fin d'un duel.
  *
- * <p>Consomme {@link GameEvent.GameEndedEvent} et envoie un
+ * <p>Handler d'événement sans état (pas de saga) : consomme {@link GameEvent.GameEndedEvent} et envoie un
  * {@link ProgressionCommand.AwardXpCommand} par joueur humain. Les deux ratings courants sont
- * lus en **une seule query batch** avant l'envoi : l'agrégat de progression reste pur et calcule
+ * lus dans la projection locale avant l'envoi : l'agrégat de progression reste pur et calcule
  * lui-même le nouvel Elo (règles {@code EloRules}). L'idempotence (un duel = une attribution)
  * est portée par l'agrégat.</p>
  */
-@Saga
+@Component
 @ProcessingGroup("award-progress-saga")
 public class AwardProgressSaga {
 
@@ -45,13 +35,12 @@ public class AwardProgressSaga {
     private transient CommandGateway commandGateway;
 
     @Autowired
-    private transient QueryGateway queryGateway;
-
-    @Autowired
     private transient AppProperties appProperties;
 
-    @StartSaga
-    @SagaEventHandler(associationProperty = "gameId")
+    @Autowired
+    private transient io.github.quizup.profile.domain.port.out.ProgressionRepositoryPort progressionRepository;
+
+    @EventHandler
     public void on(GameEvent.GameEndedEvent event) {
         boolean player1Won = event.winnerId() != null && event.winnerId().equals(event.player1Id());
         boolean player2Won = event.winnerId() != null && event.winnerId().equals(event.player2Id());
@@ -69,45 +58,27 @@ public class AwardProgressSaga {
             award(event.player2Id(), event, player2Won, draw, true,
                     event.player2CorrectAnswers(), event.player2FastAnswers(),
                     event.player2ImageCorrectAnswers(), null, null, activeDay);
-            SagaLifecycle.end();
             return;
         }
 
-        // Les deux ratings sont lus ensemble : une seule query, aucun accès bloquant à un service.
-        queryGateway
-                .query(new ProgressionQuery.GetProgressionsByIdsQuery(
-                                List.of(event.player1Id(), event.player2Id())),
-                        QueryResponseTypes.multipleInstancesOf(PlayerProgress.class))
-                .whenComplete((progressions, error) -> {
-                    try {
-                        if (error != null) {
-                            logger.warn("Ratings indisponibles pour gameId={} : Elo non attribué",
-                                    event.gameId(), error);
-                        }
-                        Map<String, PlayerProgress> byId = progressions == null
-                                ? Map.of()
-                                : progressions.stream().collect(Collectors.toMap(
-                                        PlayerProgress::userId, Function.identity(), (a, _) -> a));
-                        PlayerProgress p1 = byId.get(event.player1Id());
-                        PlayerProgress p2 = byId.get(event.player2Id());
-                        Integer rating1 = p1 == null ? null : p1.rating();
-                        Integer rating2 = p2 == null ? null : p2.rating();
+        // Les ratings sont lus directement dans la projection locale (même base) : le handler
+        // reste synchrone, sans callback hors unité de travail ni perte d'événement au redémarrage.
+        var p1 = progressionRepository.findById(event.player1Id()).orElse(null);
+        var p2 = progressionRepository.findById(event.player2Id()).orElse(null);
+        Integer rating1 = p1 == null ? null : p1.rating();
+        Integer rating2 = p2 == null ? null : p2.rating();
 
-                        award(event.player1Id(), event, player1Won, draw, false,
-                                event.player1CorrectAnswers(), event.player1FastAnswers(),
-                                event.player1ImageCorrectAnswers(),
-                                event.player2Id(), rating2, activeDay);
-                        award(event.player2Id(), event, player2Won, draw, false,
-                                event.player2CorrectAnswers(), event.player2FastAnswers(),
-                                event.player2ImageCorrectAnswers(),
-                                event.player1Id(), rating1, activeDay);
+        award(event.player1Id(), event, player1Won, draw, false,
+                event.player1CorrectAnswers(), event.player1FastAnswers(),
+                event.player1ImageCorrectAnswers(),
+                event.player2Id(), rating2, activeDay);
+        award(event.player2Id(), event, player2Won, draw, false,
+                event.player2CorrectAnswers(), event.player2FastAnswers(),
+                event.player2ImageCorrectAnswers(),
+                event.player1Id(), rating1, activeDay);
 
-                        logger.info("Progression attribuée: gameId={}, topicId={}, winner={}",
-                                event.gameId(), event.topicId(), event.winnerId());
-                    } finally {
-                        SagaLifecycle.end();
-                    }
-                });
+        logger.info("Progression attribuée: gameId={}, topicId={}, winner={}",
+                event.gameId(), event.topicId(), event.winnerId());
     }
 
     private void award(String playerId, GameEvent.GameEndedEvent event, boolean won, boolean draw,
