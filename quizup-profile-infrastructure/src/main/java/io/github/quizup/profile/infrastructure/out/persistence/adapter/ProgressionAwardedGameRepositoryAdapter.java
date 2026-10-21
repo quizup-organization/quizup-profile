@@ -20,13 +20,13 @@ public class ProgressionAwardedGameRepositoryAdapter implements ProgressionAward
 
     @Override
     @Transactional
-    public boolean record(String userId, String gameId, int xp) {
+    public boolean record(String userId, String gameId, int xp, int ratingDelta, boolean rated) {
         ProgressionAwardedGameEntity.AwardedGameId id =
                 new ProgressionAwardedGameEntity.AwardedGameId(userId, gameId);
         if (repository.existsById(id)) {
             return false;
         }
-        repository.save(new ProgressionAwardedGameEntity(userId, gameId, xp));
+        repository.save(new ProgressionAwardedGameEntity(userId, gameId, xp, ratingDelta, rated));
         return true;
     }
 
@@ -37,7 +37,8 @@ public class ProgressionAwardedGameRepositoryAdapter implements ProgressionAward
             return List.of();
         }
         return repository.findByUserIdAndGameIdIn(userId, gameIds).stream()
-                .map(entity -> new GameXp(entity.getGameId(), entity.getXp()))
+                .map(entity -> new GameXp(entity.getGameId(), entity.getXp(),
+                        entity.getRatingDelta(), entity.isRated()))
                 .toList();
     }
 }

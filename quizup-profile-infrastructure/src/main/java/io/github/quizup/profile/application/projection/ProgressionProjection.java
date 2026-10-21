@@ -57,7 +57,8 @@ public class ProgressionProjection {
         }
 
         // Idempotence par clé métier (userId, gameId) : un rejeu ne recompte pas l'XP.
-        if (!awardedGameRepositoryPort.record(event.userId(), event.gameId(), event.xp())) {
+        if (!awardedGameRepositoryPort.record(event.userId(), event.gameId(), event.xp(),
+                event.ratingDelta(), event.ratedOpponentId() != null)) {
             return;
         }
 

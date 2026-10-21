@@ -29,12 +29,12 @@ class ProgressionQueryHandlerTest {
     @Test
     void games_xp_delegates_to_awarded_journal() {
         when(awardedGameRepository.findGameXp("me", List.of("game-1", "game-2")))
-                .thenReturn(List.of(new GameXp("game-1", 120)));
+                .thenReturn(List.of(new GameXp("game-1", 120, 18, true)));
 
         List<GameXp> result = handler.handle(
                 new ProgressionQuery.GetGamesXpQuery("me", List.of("game-1", "game-2")));
 
-        assertThat(result).containsExactly(new GameXp("game-1", 120));
+        assertThat(result).containsExactly(new GameXp("game-1", 120, 18, true));
         verify(awardedGameRepository).findGameXp("me", List.of("game-1", "game-2"));
     }
 

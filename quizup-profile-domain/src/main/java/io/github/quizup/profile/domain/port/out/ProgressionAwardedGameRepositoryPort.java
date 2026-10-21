@@ -17,7 +17,7 @@ public interface ProgressionAwardedGameRepositoryPort {
      *
      * @return {@code true} si c'est une nouvelle attribution (à appliquer), {@code false} sinon.
      */
-    boolean record(String userId, String gameId, int xp);
+    boolean record(String userId, String gameId, int xp, int ratingDelta, boolean rated);
 
     /**
      * XP attribuée pour une liste de parties (les parties inconnues sont absentes du résultat).

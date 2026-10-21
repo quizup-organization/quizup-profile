@@ -34,10 +34,21 @@ public class ProgressionAwardedGameEntity {
     @Column(name = "xp")
     private Integer xp;
 
-    public ProgressionAwardedGameEntity(String userId, String gameId, Integer xp) {
+    /** Variation d'Elo du duel (0 si non classé). */
+    @Column(name = "rating_delta", nullable = false)
+    private int ratingDelta;
+
+    /** Vrai si le duel a effectivement fait évoluer l'Elo. */
+    @Column(name = "rated", nullable = false)
+    private boolean rated;
+
+    public ProgressionAwardedGameEntity(String userId, String gameId, Integer xp,
+                                        int ratingDelta, boolean rated) {
         this.userId = userId;
         this.gameId = gameId;
         this.xp = xp;
+        this.ratingDelta = ratingDelta;
+        this.rated = rated;
     }
 
     /** Clé composite {@code (user_id, game_id)}. */

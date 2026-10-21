@@ -65,8 +65,12 @@ public class AwardProgressSaga {
         // reste synchrone, sans callback hors unité de travail ni perte d'événement au redémarrage.
         var p1 = progressionRepository.findById(event.player1Id()).orElse(null);
         var p2 = progressionRepository.findById(event.player2Id()).orElse(null);
-        Integer rating1 = p1 == null ? null : p1.rating();
-        Integer rating2 = p2 == null ? null : p2.rating();
+        Integer rating1 = p1 == null
+                ? io.github.quizup.profile.domain.model.EloRules.INITIAL_RATING
+                : p1.rating();
+        Integer rating2 = p2 == null
+                ? io.github.quizup.profile.domain.model.EloRules.INITIAL_RATING
+                : p2.rating();
 
         award(event.player1Id(), event, player1Won, draw, false,
                 event.player1CorrectAnswers(), event.player1FastAnswers(),
