@@ -1,3 +1,9 @@
+## [4.9.3](https://github.com/quizup-organization/quizup-profile/compare/v4.9.2...v4.9.3) (2026-10-21)
+
+### Bug Fixes
+
+* **profile:** journalise le gain Elo par partie ([374191a](https://github.com/quizup-organization/quizup-profile/commit/374191a63a9d0e46d5fa69248c2c9a9412b4b23d))
+
 ## [4.9.2](https://github.com/quizup-organization/quizup-profile/compare/v4.9.1...v4.9.2) (2026-10-21)
 
 ### Bug Fixes
