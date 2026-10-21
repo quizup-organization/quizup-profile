@@ -1,3 +1,9 @@
+## [4.9.2](https://github.com/quizup-organization/quizup-profile/compare/v4.9.1...v4.9.2) (2026-10-21)
+
+### Bug Fixes
+
+* **profile:** attribue l'Elo dans un handler synchrone ([9c174f2](https://github.com/quizup-organization/quizup-profile/commit/9c174f2fa04e32da25d242fa1eb7dc4b66a3ef06))
+
 ## [4.9.1](https://github.com/quizup-organization/quizup-profile/compare/v4.9.0...v4.9.1) (2026-10-21)
 
 ### Bug Fixes
