@@ -1,3 +1,9 @@
+## [4.9.0](https://github.com/quizup-organization/quizup-profile/compare/v4.8.2...v4.9.0) (2026-10-21)
+
+### Features
+
+* **profile:** ajoute l'Elo global du joueur ([25acc6d](https://github.com/quizup-organization/quizup-profile/commit/25acc6da0634b1d60dc2b0278262bd3e05fa00ab))
+
 ## [4.8.2](https://github.com/quizup-organization/quizup-profile/compare/v4.8.1...v4.8.2) (2026-10-17)
 
 ### Bug Fixes
