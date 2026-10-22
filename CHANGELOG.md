@@ -1,3 +1,9 @@
+## [4.10.0](https://github.com/quizup-organization/quizup-profile/compare/v4.9.4...v4.10.0) (2026-10-22)
+
+### Features
+
+* **account:** efface le profil, la progression et la présence à la suppression du compte ([e173235](https://github.com/quizup-organization/quizup-profile/commit/e17323575dfd053a31cb7eb80d4cdba7f39737be))
+
 ## [4.9.4](https://github.com/quizup-organization/quizup-profile/compare/v4.9.3...v4.9.4) (2026-10-22)
 
 ### Bug Fixes
