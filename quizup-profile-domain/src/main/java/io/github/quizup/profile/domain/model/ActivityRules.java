@@ -29,4 +29,19 @@ public final class ActivityRules {
                 .lastActiveDate(activeDate)
                 .build();
     }
+
+    /**
+     * Série **effective** à une date donnée : une série n'est vivante que si le dernier jour
+     * actif est aujourd'hui ou hier. Sans activité depuis avant-hier, elle est retombée à zéro
+     * même si le read model n'a pas encore reçu de nouvel événement.
+     */
+    public static int currentStreakAt(PlayerActivity activity, LocalDate today) {
+        if (activity == null || activity.lastActiveDate() == null) {
+            return 0;
+        }
+        if (activity.lastActiveDate().isBefore(today.minusDays(1))) {
+            return 0;
+        }
+        return activity.currentStreak();
+    }
 }

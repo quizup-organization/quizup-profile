@@ -48,4 +48,14 @@ class ActivityRulesTest {
         assertEquals(2, afterGap.longestStreak());
         assertEquals(DAY.plusDays(4), afterGap.lastActiveDate());
     }
+
+    @Test
+    void effectiveStreakIsAliveTodayAndYesterdayOnly() {
+        PlayerActivity played = ActivityRules.advance(PlayerActivity.empty("u1"), DAY);
+
+        assertEquals(1, ActivityRules.currentStreakAt(played, DAY));
+        assertEquals(1, ActivityRules.currentStreakAt(played, DAY.plusDays(1)));
+        assertEquals(0, ActivityRules.currentStreakAt(played, DAY.plusDays(2)));
+        assertEquals(0, ActivityRules.currentStreakAt(PlayerActivity.empty("u1"), DAY));
+    }
 }

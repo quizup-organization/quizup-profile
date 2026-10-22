@@ -42,6 +42,12 @@ public class ActivityProjection {
     @EventHandler
     @Transactional
     public void on(GameEvent.GameEndedEvent event) {
+        // Un entraînement contre le bot ne prolonge pas la série : la règle de badge est
+        // « duels entre humains uniquement », le calendrier doit refléter la même vérité.
+        if (QuizUpConstants.SYSTEM_USER_ID.equals(event.player1Id())
+                || QuizUpConstants.SYSTEM_USER_ID.equals(event.player2Id())) {
+            return;
+        }
         LocalDate activeDate = event.endedAt().atZone(activityZone).toLocalDate();
         record(event.player1Id(), activeDate, event.gameId());
         record(event.player2Id(), activeDate, event.gameId());

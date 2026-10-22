@@ -1,13 +1,16 @@
 package io.github.quizup.profile.application.service;
 
 import io.github.quizup.profile.domain.model.ActivityDay;
+import io.github.quizup.profile.domain.model.ActivityRules;
 import io.github.quizup.profile.domain.model.ActivityView;
 import io.github.quizup.profile.domain.model.PlayerActivity;
 import io.github.quizup.profile.domain.port.in.GetActivityUseCase;
 import io.github.quizup.profile.domain.port.out.ActivityRepositoryPort;
+import io.github.quizup.profile.infrastructure.properties.AppProperties;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -17,9 +20,12 @@ import java.util.List;
 public class ActivityService implements GetActivityUseCase {
 
     private final ActivityRepositoryPort activityRepositoryPort;
+    private final ZoneId activityZone;
 
-    public ActivityService(ActivityRepositoryPort activityRepositoryPort) {
+    public ActivityService(ActivityRepositoryPort activityRepositoryPort,
+                           AppProperties properties) {
         this.activityRepositoryPort = activityRepositoryPort;
+        this.activityZone = ZoneId.of(properties.activity().zone());
     }
 
     @Override
@@ -30,7 +36,9 @@ public class ActivityService implements GetActivityUseCase {
 
         return new ActivityView(
                 userId,
-                activity.currentStreak(),
+                // Le read model n'est écrit qu'à la fin d'un duel : sans nouvelle partie, une
+                // série interrompue doit tout de même apparaître à zéro.
+                ActivityRules.currentStreakAt(activity, LocalDate.now(activityZone)),
                 activity.longestStreak(),
                 activity.lastActiveDate(),
                 days.size(),
