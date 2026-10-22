@@ -1,3 +1,9 @@
+## [4.9.4](https://github.com/quizup-organization/quizup-profile/compare/v4.9.3...v4.9.4) (2026-10-22)
+
+### Bug Fixes
+
+* **profile:** série de jours effective et entraînements exclus ([b63eebd](https://github.com/quizup-organization/quizup-profile/commit/b63eebd70651de4419feafa7318c91a1c2f6599c))
+
 ## [4.9.3](https://github.com/quizup-organization/quizup-profile/compare/v4.9.2...v4.9.3) (2026-10-21)
 
 ### Bug Fixes
