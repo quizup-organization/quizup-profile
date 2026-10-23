@@ -27,6 +27,7 @@ public final class ProfileEntityMapper {
                 .language(toLanguage(entity.getLanguage()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .onboardingCompletedAt(entity.getOnboardingCompletedAt())
                 .build();
     }
 
@@ -48,6 +49,7 @@ public final class ProfileEntityMapper {
                 : profile.language().code());
         entity.setCreatedAt(profile.createdAt());
         entity.setUpdatedAt(profile.updatedAt());
+        entity.setOnboardingCompletedAt(profile.onboardingCompletedAt());
         return entity;
     }
 

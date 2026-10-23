@@ -23,6 +23,12 @@ public interface ProfileEvent {
     ) implements ProfileEvent {
     }
 
+    record ProfileOnboardingCompletedEvent(
+            String userId,
+            Instant completedAt
+    ) implements ProfileEvent {
+    }
+
     record ProfilePseudonymUpdatedEvent(
             String userId,
             String requestedBy,

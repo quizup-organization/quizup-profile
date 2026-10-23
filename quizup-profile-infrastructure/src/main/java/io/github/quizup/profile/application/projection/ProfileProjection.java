@@ -54,6 +54,15 @@ public class ProfileProjection {
 
     @EventHandler
     @Transactional
+    public void on(ProfileEvent.ProfileOnboardingCompletedEvent event) {
+        update(event.userId(), event.completedAt(),
+                profile -> profile.toBuilder()
+                        .onboardingCompletedAt(event.completedAt())
+                        .build());
+    }
+
+    @EventHandler
+    @Transactional
     public void on(ProfileEvent.ProfilePseudonymUpdatedEvent event) {
         update(event.userId(), event.updatedAt(),
                 profile -> profile.toBuilder().pseudonym(event.pseudonym()).build());

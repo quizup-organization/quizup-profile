@@ -65,4 +65,7 @@ public class ProfileEntity {
     @Column(name = "updated_at", nullable = false)
     @Searchable(type = FieldType.DATE)
     private Instant updatedAt;
+
+    @Column(name = "onboarding_completed_at")
+    private Instant onboardingCompletedAt;
 }

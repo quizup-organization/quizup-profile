@@ -36,6 +36,7 @@ public class ProfileAggregate {
     private String bannerUrl;
     private String equippedTitle;
     private Language language;
+    private Instant onboardingCompletedAt;
 
     // Constructeur par défaut requis par Axon
     protected ProfileAggregate() {
@@ -62,6 +63,16 @@ public class ProfileAggregate {
                         Instant.now()
                 )
         );
+    }
+
+    @CommandHandler
+    public void handle(ProfileCommand.CompleteOnboardingCommand command) {
+        if (onboardingCompletedAt != null) {
+            return;
+        }
+        Instant completedAt = command.completedAt() == null ? Instant.now() : command.completedAt();
+        AggregateLifecycle.apply(new ProfileEvent.ProfileOnboardingCompletedEvent(
+                command.userId(), completedAt));
     }
 
     @CommandHandler
@@ -202,6 +213,11 @@ public class ProfileAggregate {
         this.userId = event.userId();
         this.email = event.email();
         this.pseudonym = event.pseudonym();
+    }
+
+    @EventSourcingHandler
+    public void on(ProfileEvent.ProfileOnboardingCompletedEvent event) {
+        this.onboardingCompletedAt = event.completedAt();
     }
 
     @EventSourcingHandler

@@ -18,6 +18,13 @@ public interface ProfileCommand {
     ) implements ProfileCommand {
     }
 
+    /** Fin explicite ou skip de l'onboarding (idempotent). */
+    record CompleteOnboardingCommand(
+            @TargetAggregateIdentifier String userId,
+            java.time.Instant completedAt
+    ) implements ProfileCommand {
+    }
+
     record UpdateProfilePseudonymCommand(
             @TargetAggregateIdentifier String userId,
             String requestedBy,

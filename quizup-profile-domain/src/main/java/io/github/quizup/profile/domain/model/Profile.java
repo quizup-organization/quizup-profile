@@ -23,6 +23,16 @@ public record Profile(
         String equippedTitle,
         Language language,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        /** Date de fin (ou skip) de l'onboarding ; {@code null} = parcours encore requis. */
+        Instant onboardingCompletedAt
 ) {
+
+    /** Constructeur de compatibilité pour les anciens snapshots/tests sans flag onboarding. */
+    public Profile(String userId, String email, String pseudonym, String bio, String country,
+                   String avatarOptions, String bannerUrl, String equippedTitle, Language language,
+                   Instant createdAt, Instant updatedAt) {
+        this(userId, email, pseudonym, bio, country, avatarOptions, bannerUrl, equippedTitle,
+                language, createdAt, updatedAt, null);
+    }
 }
