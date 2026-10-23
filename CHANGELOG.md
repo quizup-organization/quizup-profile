@@ -1,3 +1,9 @@
+## [4.12.0](https://github.com/quizup-organization/quizup-profile/compare/v4.11.1...v4.12.0) (2026-10-23)
+
+### Features
+
+* **profile:** durcit l'obtention des badges et des titres ([748bf09](https://github.com/quizup-organization/quizup-profile/commit/748bf09198b475e6d3ba52214c1f8524b289b403))
+
 ## [4.11.1](https://github.com/quizup-organization/quizup-profile/compare/v4.11.0...v4.11.1) (2026-10-23)
 
 ### Bug Fixes
