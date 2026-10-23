@@ -1,3 +1,9 @@
+## [4.11.1](https://github.com/quizup-organization/quizup-profile/compare/v4.11.0...v4.11.1) (2026-10-23)
+
+### Bug Fixes
+
+* **profile:** évite le rejeu historique du marquage onboarding ([8a1ceba](https://github.com/quizup-organization/quizup-profile/commit/8a1ceba5bb755a4a69fe5c33a9346c11f65e374b))
+
 ## [4.11.0](https://github.com/quizup-organization/quizup-profile/compare/v4.10.0...v4.11.0) (2026-10-23)
 
 ### Features
