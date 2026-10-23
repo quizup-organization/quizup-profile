@@ -301,6 +301,26 @@ class ProfileAggregateTest {
                 .expectException(ProfileProblems.ProfileNotOwnerProblem.class);
     }
 
+    @Test
+    void completeOnboarding_appliesOnboardingCompletedEvent() {
+        fixture
+                .given(createdProfile())
+                .when(new ProfileCommand.CompleteOnboardingCommand("user-1", NOW))
+                .expectEventsMatching(QuizUpAxonMatchers.singlePayloadMatching(
+                        ProfileEvent.ProfileOnboardingCompletedEvent.class,
+                        e -> "user-1".equals(((ProfileEvent.ProfileOnboardingCompletedEvent) e).userId())
+                                && NOW.equals(((ProfileEvent.ProfileOnboardingCompletedEvent) e).completedAt())));
+    }
+
+    @Test
+    void completeOnboarding_whenAlreadyCompleted_emitsNoEvent() {
+        fixture
+                .given(createdProfile(),
+                        new ProfileEvent.ProfileOnboardingCompletedEvent("user-1", NOW))
+                .when(new ProfileCommand.CompleteOnboardingCommand("user-1", NOW.plusSeconds(60)))
+                .expectNoEvents();
+    }
+
     private ProfileEvent.ProfileCreatedEvent createdProfile() {
         return new ProfileEvent.ProfileCreatedEvent("user-1", "user@quizup.dev", "Alice", NOW);
     }

@@ -54,6 +54,15 @@ absorbe les bascules rapides.
 le propriétaire. **Aucun stockage d'image** : l'avatar est régénéré côté client de façon déterministe
 à partir de ces options (repli sur `userId` si `null`).
 
+**Onboarding** : `profile_entry.onboarding_completed_at` (migration `V17`, nullable, **sans
+backfill**) porte la fin ou le skip explicite du parcours ; commande
+`CompleteOnboardingCommand` idempotente et événement `ProfileOnboardingCompletedEvent`. Le
+`OnboardingCompletionHandler` écoute `XpAwardedEvent` dans le groupe existant
+`progression-projection` : une première partie **humaine** terminée vaut onboarding acquis
+(entraînement bot exclu), sans rejeu historique au déploiement. Le flag est exposé au BFF via
+`Profile.onboardingCompletedAt` ; `MeView.onboardingCompleted` le complète par
+`PlayerProgress.gamesPlayed() > 0` (parties humaines déjà jouées avant le flag).
+
 **Bannière** : le profil porte `bannerUrl` (URL http(s) ≤1024, `null` = aucune), uploadée via
 `POST /api/media` (BFF → MinIO) puis attachée par `PUT /api/profiles/{userId}/banner` ; l'image est
 affichée derrière l'avatar des fiches joueur (web). Migration `V7__add_banner_url_to_profile_entry.sql`.
