@@ -60,10 +60,11 @@ class PlayerProgressAggregateTest {
 
     @Test
     void crossingAMasteryGrade_announcesTheThematicTitle() {
-        // 2 500 XP dans le sujet = grade Confirmé (titre thématique débloqué).
+        // Seuil de Confirmé - 100 XP, puis +160 XP : le grade thématique est franchi.
         fixture
                 .given(new ProgressionEvent.XpAwardedEvent(
-                        "user-1", "game-0", "topic-1", 2_400, 160, true, false, false, 4, 2, 0,
+                        "user-1", "game-0", "topic-1",
+                        MasteryGrade.CONFIRME.xpThreshold() - 100, 160, true, false, false, 4, 2, 0,
                         Instant.now(), 200, 200, 0, true, 0, null, null))
                 .when(new ProgressionCommand.AwardXpCommand(
                         ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1",

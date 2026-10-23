@@ -139,8 +139,8 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   niveau est recalculé à la lecture, la nouvelle courbe se répercute donc sans migration.
 - **Maîtrise par sujet** (`MasteryGrade`) : échelle **distincte** du niveau de compte, portée par
   l'XP cumulée **dans le sujet**, en 7 grades à table de seuils explicite
-  (`Novice 0 · Apprenti 300 · Pratiquant 1 000 · Confirmé 2 500 · Expert 6 000 · Maître 14 000 ·
-  Légende 30 000`). C'est le support des **titres thématiques**. Chaque grade porte un
+  (`Novice 0 · Apprenti 500 · Pratiquant 1 500 · Confirmé 4 000 · Expert 9 000 · Maître 21 000 ·
+  Légende 45 000`). C'est le support des **titres thématiques**. Chaque grade porte un
   **`TitleRank`** (`FER → DIAMANT`) : le rang d'un titre est **dérivé du grade**
   (`Novice → Fer · Apprenti → Bronze · Pratiquant → Argent · Confirmé → Or · Expert → Platine ·
   Maître → Émeraude · Légende → Diamant`) et n'est **jamais persisté**.
@@ -165,30 +165,33 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   compte **12 échelles × 7 paliers = 84 badges + 4 exploits = 88 badges** répartis en
   **13 familles** (`VICTORY` incluse : **une famille = une échelle**, aucune ne mélange deux
   compteurs ; les quatre exploits ponctuels partagent `EXPLOIT`) ; chaque échelle monte ses
-  paliers à cibles strictement croissantes (« Apprenti duelliste 1 · Duelliste 3 · Bretteur 10 ·
-  Lame d'élite 30 · Légende des duels 100 · Maître d'armes 300 · Mythe vivant 1000 »).
+  paliers à cibles strictement croissantes (« Apprenti duelliste 1 · Duelliste 5 · Bretteur 15 ·
+  Lame d'élite 40 · Légende des duels 100 · Maître d'armes 300 · Mythe vivant 1000 »).
   **Un palier = une constante**
   (`DUELIST_BRONZE`, … `DUELIST_OR`) : les badges acquis restent un simple ensemble de noms,
   **sans migration** ; les 4 codes historiques (`FIRST_WIN`, `PERFECT`, `LIGHTNING`,
   `STREAK_MASTER`) sont préservés (test dédié).
   Familles : **Volume** (duels entre joueurs **joués**), **Victoires** (`VICTORY` : duels entre
   joueurs **gagnés** — famille distincte, aucune famille ne mélange deux compteurs), **Maîtrise**
-  (XP du meilleur sujet, **alignée 1:1 sur les 7 grades** : Initié 1 · Spécialiste 300 · Érudit
-  1 000 · Autorité 2 500 · Sommité 6 000 · Oracle 14 000 · Panthéon 30 000),
+  (XP du meilleur sujet, **alignée 1:1 sur les 7 grades** : Initié 1 · Spécialiste 500 · Érudit
+  1 500 · Autorité 4 000 · Sommité 9 000 · Oracle 21 000 · Panthéon 45 000),
   **Exploit** (faits ponctuels : première victoire, duel parfait, 5 réponses rapides, série de
-  victoires), **Collection** (nombre de badges acquis — 1 / 10 / 20 / 35 / 50 / 65 / 85 sur
+  victoires), **Collection** (nombre de badges acquis — 8 / 20 / 35 / 50 / 65 / 78 / 85 sur
   88), **Série** (`WIN_STREAK` : victoires
-  consécutives — Sur la lancée 2 / En série 4 / Imbattable 10), **Assiduité** (`DAILY_STREAK` :
-  jours joués d'affilée, même règle pure que la projection d'activité — Persévérant 2 / Régulier 5 /
-  Accro 10), **Exploration** (`DISTINCT_TOPICS` :
-  sujets joués — Explorateur 1 / Curieux 5 / Touche-à-tout 10), **Précision** (`PERFECT_DUELS` :
-  duels parfaits cumulés — Rigoureux 1 / Métronome 3 / Machine à points 10) et **Rapidité**
-  (`FAST_ANSWERS` : réponses rapides cumulées — Prompt 10 / Doigt sur la gâchette 25 / Rafale
-  75), **Vision** (`IMAGE_CORRECT` : bonnes réponses sur les questions **illustrées**,
+  consécutives — Sur la lancée 3 / En série 6 / Imbattable 15), **Assiduité** (`DAILY_STREAK` :
+  jours joués d'affilée, même règle pure que la projection d'activité — Persévérant 3 / Régulier 7 /
+  Accro 14), **Exploration** (`DISTINCT_TOPICS` :
+  sujets joués — Explorateur 3 / Curieux 8 / Touche-à-tout 15), **Précision** (`PERFECT_DUELS` :
+  duels parfaits cumulés — Rigoureux 3 / Métronome 8 / Machine à points 20) et **Rapidité**
+  (`FAST_ANSWERS` : réponses rapides cumulées — Prompt 15 / Doigt sur la gâchette 40 / Rafale
+  100), **Vision** (`IMAGE_CORRECT` : bonnes réponses sur les questions **illustrées**,
   comptées par `quizup-game` (release ≥ 8.5.0, `GameEndedEvent.playerNImageCorrectAnswers`) —
-  Attentif 5 / Observateur 15 / Œil de lynx 50), **Social** (`FOLLOWERS_GAINED` : abonnés
-  gagnés, cumulés — Sociable 1 / Populaire 5 / Célébrité 25) et **Défis** (`CHALLENGES_SENT` :
-  défis nominatifs lancés — Opposant 1 / Challenger 3 / Provocateur 10).
+  Attentif 10 / Observateur 25 / Œil de lynx 60), **Social** (`FOLLOWERS_GAINED` : abonnés
+  gagnés, cumulés — Sociable 3 / Populaire 10 / Célébrité 30) et **Défis** (`CHALLENGES_SENT` :
+  défis nominatifs lancés — Opposant 2 / Challenger 5 / Provocateur 15).
+  > **Première victoire** : elle ne débloque que **3 badges** (`FIRST_WIN`, `DUELIST_FER`,
+  > `MASTER_FER`) ; `PERFECT` / `LIGHTNING` peuvent en ajouter deux au maximum, et la famille
+  > Collection ne démarre qu'à **8 badges** — aucune cascade `COLLECTOR_FER` au premier duel.
   > **Compteurs hors duel** (Social, Défis) : les sagas `SocialBadgesSaga` (sur
   > `UserFollowedEvent` de `quizup-social`) et `ChallengeBadgesSaga` (sur
   > **`ChallengeStartedEvent`** de `quizup-matchmaking`, propriétaire des défis — émis quand la

@@ -67,9 +67,9 @@ class BadgeAggregateTest {
     }
 
     @Test
-    void tenthHumanDuel_earnsDuelistBronze() {
-        fixture.given((Object[]) humanDuels(9))
-                .when(duel("game-10", "topic-1", 30, 30, false, false, 0))
+    void fifthHumanDuel_earnsDuelistBronze() {
+        fixture.given((Object[]) humanDuels(Badge.DUELIST_BRONZE.target() - 1))
+                .when(duel("game-5", "topic-1", 30, 30, false, false, 0))
                 .expectEventsMatching(earned(Badge.DUELIST_BRONZE));
     }
 
@@ -85,7 +85,8 @@ class BadgeAggregateTest {
     @Test
     void masteryThreshold_earnsMasterBronze() {
         fixture.given(new ProgressionEvent.BadgeFactsRecordedEvent(
-                        BADGE_ID, "user-1", "game-1", "topic-1", 2_400, 160, true, false, 2,
+                        BADGE_ID, "user-1", "game-1", "topic-1",
+                        Badge.MASTER_BRONZE.target() - 100, 160, true, false, 2,
                         0, Instant.now(), null))
                 .when(duel("game-2", "topic-1", 150, 40, true, false, 2))
                 .expectEventsMatching(earned(Badge.MASTER_BRONZE));
@@ -93,13 +94,17 @@ class BadgeAggregateTest {
 
     @Test
     void collectionCascade_awardsTheNextCollectorTier() {
-        // Neuf badges déjà acquis (dont Fer de collection) : le 10e duel humain ajoute
-        // « Bretteur » et porte le total à 10, ce qui franchit « Collectionneur ».
-        fixture.given(withBadges(humanDuels(9),
+        // Dix-neuf badges déjà acquis (aucun de collection) : le 3e sujet joué ajoute
+        // « Explorateur » et porte le total à 20, ce qui franchit « Première pièce » puis
+        // « Collectionneur ».
+        fixture.given(withBadges(distinctTopics(2),
                         Badge.FIRST_WIN, Badge.PERFECT, Badge.LIGHTNING, Badge.STREAK_MASTER,
-                        Badge.DUELIST_FER, Badge.DUELIST_BRONZE, Badge.MASTER_FER,
-                        Badge.COLLECTOR_FER, Badge.EXPLORER_FER))
-                .when(duel("game-10", "topic-1", 30, 30, false, false, 0))
+                        Badge.DUELIST_FER, Badge.DUELIST_BRONZE, Badge.DUELIST_ARGENT,
+                        Badge.DUELIST_OR, Badge.DUELIST_PLATINE, Badge.DUELIST_EMERAUDE,
+                        Badge.WINNER_FER, Badge.WINNER_BRONZE, Badge.WINNER_ARGENT,
+                        Badge.MASTER_FER, Badge.MASTER_BRONZE, Badge.MASTER_ARGENT,
+                        Badge.SERIES_FER, Badge.ASSIDUITY_FER, Badge.PRECISION_FER))
+                .when(duel("game-3", "topic-3", 30, 30, false, false, 0))
                 .expectEventsMatching(earned(Badge.COLLECTOR_BRONZE));
     }
 
@@ -119,27 +124,30 @@ class BadgeAggregateTest {
 
     @Test
     void winStreakIsGlobalAcrossTopics() {
-        // Trois victoires sur trois sujets différents, puis une quatrième : la série est globale.
+        // Cinq victoires sur cinq sujets différents, puis une sixième : la série est globale et
+        // franchit « En série » (6).
         fixture.given(
                         humanWin("game-1", "topic-1"),
                         humanWin("game-2", "topic-2"),
-                        humanWin("game-3", "topic-3"))
-                .when(duel("game-4", "topic-4", 10, 10, true, false, 0))
+                        humanWin("game-3", "topic-3"),
+                        humanWin("game-4", "topic-4"),
+                        humanWin("game-5", "topic-5"))
+                .when(duel("game-6", "topic-6", 10, 10, true, false, 0))
                 .expectEventsMatching(earned(Badge.SERIES_BRONZE));
     }
 
     @Test
-    void tenthPerfectDuel_earnsPrecisionBronze() {
-        fixture.given((Object[]) perfectDuels(9))
-                .when(duel("game-10", "topic-1", 160, 160, false, false, 0))
+    void eighthPerfectDuel_earnsPrecisionBronze() {
+        fixture.given((Object[]) perfectDuels(Badge.PRECISION_BRONZE.target() - 1))
+                .when(duel("game-8", "topic-1", 160, 160, false, false, 0))
                 .expectEventsMatching(earned(Badge.PRECISION_BRONZE));
     }
 
     @Test
-    void fiftyFastAnswers_earnsSpeedBronze() {
+    void fortyFastAnswers_earnSpeedBronze() {
         fixture.given(new ProgressionEvent.BadgeFactsRecordedEvent(
-                        BADGE_ID, "user-1", "game-1", "topic-1", 30, 30, false, false, 45,
-                        0, Instant.now(), null))
+                        BADGE_ID, "user-1", "game-1", "topic-1", 30, 30, false, false,
+                        Badge.SPEED_BRONZE.target() - 5, 0, Instant.now(), null))
                 .when(duel("game-2", "topic-1", 30, 30, false, false, 5))
                 .expectEventsMatching(earned(Badge.SPEED_BRONZE));
     }
@@ -161,8 +169,8 @@ class BadgeAggregateTest {
 
     @Test
     void aDayGap_restartsTheCurrentStreakButKeepsTheBest() {
-        // Série rompue (veille + 2 jours) : la série courante repart à 1, mais le meilleur record
-        // (2 jours) reste acquis — le palier Fer d'assiduité est donc toujours mérité.
+        // Série rompue (3 jours puis trou) : la série courante repart à 1, mais le meilleur record
+        // (3 jours) reste acquis — le palier Fer d'assiduité est donc toujours mérité.
         LocalDate day = LocalDate.of(2026, 3, 1);
         fixture.given(
                         new ProgressionEvent.BadgeFactsRecordedEvent(
@@ -170,38 +178,43 @@ class BadgeAggregateTest {
                                 0, Instant.now(), day),
                         new ProgressionEvent.BadgeFactsRecordedEvent(
                                 BADGE_ID, "user-1", "game-2", "topic-1", 10, 10, true, false, 0,
-                                0, Instant.now(), day.plusDays(1)))
-                .when(duelOnDay(day.plusDays(5), "game-3", "topic-1", 10, 10, false, false, 0))
+                                0, Instant.now(), day.plusDays(1)),
+                        new ProgressionEvent.BadgeFactsRecordedEvent(
+                                BADGE_ID, "user-1", "game-3", "topic-1", 10, 10, true, false, 0,
+                                0, Instant.now(), day.plusDays(2)))
+                .when(duelOnDay(day.plusDays(5), "game-4", "topic-1", 10, 10, false, false, 0))
                 .expectEventsMatching(earned(Badge.ASSIDUITY_FER));
     }
 
     @Test
-    void fifteenthImageAnswer_earnsVisionBronze() {
-        fixture.given((Object[]) imageAnswers(14))
-                .when(duelWith("game-15", "topic-1", 10, 10, false, false, 0, 1, null))
+    void twentyFifthImageAnswer_earnsVisionBronze() {
+        fixture.given((Object[]) imageAnswers(Badge.VISION_BRONZE.target() - 1))
+                .when(duelWith("game-25", "topic-1", 10, 10, false, false, 0, 1, null))
                 .expectEventsMatching(earned(Badge.VISION_BRONZE));
     }
 
     @Test
-    void fiveFollowers_earnSocialBronze() {
-        fixture.given((Object[]) followers(4))
-                .when(follower("follow-5"))
+    void tenthFollower_earnsSocialBronze() {
+        fixture.given((Object[]) followers(Badge.SOCIAL_BRONZE.target() - 1))
+                .when(follower("follow-10"))
                 .expectEventsMatching(earned(Badge.SOCIAL_BRONZE));
     }
 
     @Test
-    void firstChallenge_earnsChallengesFer() {
-        fixture.givenNoPriorActivity()
-                .when(new ProgressionCommand.RecordBadgeCounterCommand(
+    void secondChallenge_earnsChallengesFer() {
+        fixture.given(new ProgressionEvent.BadgeCounterRecordedEvent(
                         BADGE_ID, "user-1", BadgeMetric.CHALLENGES_SENT, "challenge-1",
+                        Instant.now()))
+                .when(new ProgressionCommand.RecordBadgeCounterCommand(
+                        BADGE_ID, "user-1", BadgeMetric.CHALLENGES_SENT, "challenge-2",
                         Instant.now()))
                 .expectEventsMatching(earned(Badge.CHALLENGES_FER));
     }
 
     @Test
-    void exploringTopics_earnsExplorerBronze() {
-        fixture.given((Object[]) distinctTopics(4))
-                .when(duel("game-5", "topic-5", 30, 30, false, false, 0))
+    void eighthTopic_earnsExplorerBronze() {
+        fixture.given((Object[]) distinctTopics(Badge.EXPLORER_BRONZE.target() - 1))
+                .when(duel("game-8", "topic-8", 30, 30, false, false, 0))
                 .expectEventsMatching(earned(Badge.EXPLORER_BRONZE));
     }
 

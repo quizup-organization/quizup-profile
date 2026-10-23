@@ -3,6 +3,7 @@ package io.github.quizup.profile.domain.model;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,49 +72,68 @@ class BadgeRulesTest {
     }
 
     @Test
-    void exploringTopicsEarnsExplorerTiers() {
-        // Sujets joués : Fer 1, bronze 5, argent 10, or 20, platine 40, émeraude 70, diamant 103.
-        Set<Badge> first = BadgeRules.evaluate(
-                facts(0, false, 0, 0, 0, 0, 0, 5), Set.of());
-        assertEquals(Set.of(Badge.EXPLORER_FER, Badge.EXPLORER_BRONZE, Badge.COLLECTOR_FER), first);
-
-        Set<Badge> half = BadgeRules.evaluate(facts(0, false, 0, 0, 0, 0, 0, 50), Set.of());
-        assertEquals(Set.of(Badge.EXPLORER_FER, Badge.EXPLORER_BRONZE, Badge.EXPLORER_ARGENT,
-                Badge.EXPLORER_OR, Badge.EXPLORER_PLATINE, Badge.COLLECTOR_FER), half);
-
-        Set<Badge> all = BadgeRules.evaluate(facts(0, false, 0, 0, 0, 0, 0, 103), Set.of());
-        assertTrue(all.containsAll(
-                Badge.ofLadder(BadgeFamily.EXPLORATION, BadgeMetric.DISTINCT_TOPICS)));
+    void aFirstHumanDuelEarnsOnlyTheVolumeAndMasteryEntryBadges() {
+        // Un premier duel humain (même perdu) débloque le volume Fer et la maîtrise Fer.
+        // Exploration, précision, vision, série et collection restent hors d'atteinte.
+        Set<Badge> expected = Set.of(Badge.DUELIST_FER, Badge.MASTER_FER);
+        assertEquals(expected, BadgeRules.evaluate(quiet(), Set.of()));
+        assertEquals(expected, BadgeRules.evaluate(
+                facts(30, false, 0, 1, 0, 30, 0, 1), Set.of()));
     }
 
     @Test
-    void aQuietDuelEarnsOnlyTheEntryBadges() {
-        // Un premier duel humain gagne les deux paliers d'entrée (volume + maîtrise) et, en
-        // cascade, la première pièce de collection. Rien d'autre.
-        assertEquals(Set.of(Badge.DUELIST_FER, Badge.MASTER_FER, Badge.COLLECTOR_FER),
-                BadgeRules.evaluate(quiet(), Set.of()));
+    void aFirstWinEarnsExactlyThreeEntryBadges() {
+        // Première victoire « normale » : volume + victoire + maîtrise. Pas de collection,
+        // pas d'exploration (3 sujets), pas de précision (3 duels parfaits), pas de vision.
+        assertEquals(Set.of(Badge.FIRST_WIN, Badge.DUELIST_FER, Badge.MASTER_FER),
+                BadgeRules.evaluate(facts(30, true, 0, 1, 1, 30, 1, 1), Set.of()));
     }
 
     @Test
-    void firstWin_earnsFirstWinBadge() {
-        Set<Badge> earned = BadgeRules.evaluate(facts(30, true, 0, 1, 1, 30, 1), Set.of());
-
-        assertEquals(Set.of(Badge.FIRST_WIN, Badge.DUELIST_FER, Badge.WINNER_FER,
-                Badge.MASTER_FER, Badge.COLLECTOR_FER), earned);
-    }
-
-    @Test
-    void perfectScore_earnsPerfectBadge() {
+    void aPerfectAndLightningFirstWinEarnsAtMostFiveBadges() {
         Set<Badge> earned = BadgeRules.evaluate(
-                facts(ProgressionRules.PERFECT_SCORE, false, 0, 1, 0, 160, 0), Set.of());
+                facts(ProgressionRules.PERFECT_SCORE, true, 5, 1, 1, 210, 1, 1, 1, 5),
+                Set.of());
 
-        assertEquals(Set.of(Badge.PERFECT, Badge.DUELIST_FER, Badge.MASTER_FER,
-                Badge.COLLECTOR_FER), earned);
+        assertEquals(Set.of(Badge.FIRST_WIN, Badge.DUELIST_FER, Badge.MASTER_FER,
+                Badge.PERFECT, Badge.LIGHTNING), earned);
+        assertFalse(earned.contains(Badge.WINNER_FER));
+        assertFalse(earned.contains(Badge.EXPLORER_FER));
+        assertFalse(earned.contains(Badge.PRECISION_FER));
+        assertFalse(earned.contains(Badge.VISION_FER));
+        assertFalse(earned.contains(Badge.COLLECTOR_FER));
+    }
+
+    @Test
+    void exploringTopicsEarnsExplorerTiers() {
+        List<Badge> ladder = Badge.ofLadder(BadgeFamily.EXPLORATION, BadgeMetric.DISTINCT_TOPICS);
+        int fer = Badge.EXPLORER_FER.target();
+        int bronze = Badge.EXPLORER_BRONZE.target();
+
+        assertFalse(BadgeRules.evaluate(
+                facts(0, false, 0, 0, 0, 0, 0, fer - 1), Set.of())
+                .contains(Badge.EXPLORER_FER));
+        assertTrue(BadgeRules.evaluate(
+                facts(0, false, 0, 0, 0, 0, 0, fer), Set.of())
+                .contains(Badge.EXPLORER_FER));
+
+        Set<Badge> atBronze = BadgeRules.evaluate(
+                facts(0, false, 0, 0, 0, 0, 0, bronze), Set.of());
+        assertTrue(atBronze.containsAll(ladder.subList(0, 2)));
+        assertFalse(atBronze.contains(Badge.EXPLORER_ARGENT));
+    }
+
+    @Test
+    void perfectScoreEarnsPerfectBadge() {
+        assertEquals(Set.of(Badge.PERFECT, Badge.DUELIST_FER, Badge.MASTER_FER),
+                BadgeRules.evaluate(
+                        facts(ProgressionRules.PERFECT_SCORE, false, 0, 1, 0, 160, 0),
+                        Set.of()));
     }
 
     @Test
     void lightningNeedsFiveFastAnswersInTheSameDuel() {
-        assertEquals(Set.of(Badge.DUELIST_FER, Badge.MASTER_FER, Badge.COLLECTOR_FER),
+        assertEquals(Set.of(Badge.DUELIST_FER, Badge.MASTER_FER),
                 BadgeRules.evaluate(facts(30, false, 4, 1, 0, 30, 0), Set.of()));
         assertTrue(BadgeRules.evaluate(facts(30, false, 5, 1, 0, 30, 0), Set.of())
                 .contains(Badge.LIGHTNING));
@@ -128,79 +148,66 @@ class BadgeRulesTest {
     }
 
     @Test
-    void volumeThresholds_unlockTierByTier() {
-        Set<Badge> first = BadgeRules.evaluate(facts(30, false, 0, 1, 0, 30, 0), Set.of());
-        assertTrue(first.contains(Badge.DUELIST_FER));
-        assertFalse(first.contains(Badge.DUELIST_BRONZE));
-
-        Set<Badge> bronze = BadgeRules.evaluate(facts(30, false, 0, 3, 0, 30, 0), Set.of());
-        assertTrue(bronze.contains(Badge.DUELIST_BRONZE));
-        assertFalse(bronze.contains(Badge.DUELIST_ARGENT));
-
-        Set<Badge> silver = BadgeRules.evaluate(facts(30, false, 0, 10, 0, 30, 0), Set.of());
-        assertTrue(silver.contains(Badge.DUELIST_ARGENT));
-        assertFalse(silver.contains(Badge.DUELIST_OR));
-
-        Set<Badge> gold = BadgeRules.evaluate(facts(30, false, 0, 30, 0, 30, 0), Set.of());
-        assertTrue(gold.contains(Badge.DUELIST_OR));
-        assertFalse(gold.contains(Badge.DUELIST_PLATINE));
-
-        Set<Badge> platinum = BadgeRules.evaluate(facts(30, false, 0, 100, 0, 30, 0), Set.of());
-        assertTrue(platinum.contains(Badge.DUELIST_PLATINE));
-        assertFalse(platinum.contains(Badge.DUELIST_EMERAUDE));
-
-        Set<Badge> emerald = BadgeRules.evaluate(facts(30, false, 0, 300, 0, 30, 0), Set.of());
-        assertTrue(emerald.contains(Badge.DUELIST_EMERAUDE));
-        assertFalse(emerald.contains(Badge.DUELIST_DIAMANT));
-
-        Set<Badge> diamond = BadgeRules.evaluate(facts(30, false, 0, 1_000, 0, 30, 0), Set.of());
-        assertTrue(diamond.containsAll(Set.copyOf(
-                Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_DUELS))));
+    void volumeThresholdsUnlockTierByTier() {
+        for (Badge badge : Badge.ofLadder(BadgeFamily.VOLUME, BadgeMetric.HUMAN_DUELS)) {
+            int target = badge.target();
+            assertFalse(BadgeRules.evaluate(
+                    facts(30, false, 0, target - 1, 0, 30, 0), Set.of())
+                    .contains(badge), "avant " + badge);
+            assertTrue(BadgeRules.evaluate(
+                    facts(30, false, 0, target, 0, 30, 0), Set.of())
+                    .contains(badge), "à " + badge);
+        }
     }
 
     @Test
-    void winnerThresholds_areCountedSeparatelyFromDuels() {
-        Set<Badge> earned = BadgeRules.evaluate(facts(30, true, 0, 100, 10, 300, 1), Set.of());
-
-        assertTrue(earned.contains(Badge.WINNER_FER));
-        assertTrue(earned.contains(Badge.WINNER_BRONZE));
-        assertTrue(earned.contains(Badge.WINNER_ARGENT));
-        assertFalse(earned.contains(Badge.WINNER_OR));
-        assertTrue(earned.contains(Badge.DUELIST_OR));
-        assertTrue(earned.contains(Badge.DUELIST_PLATINE));
-        assertFalse(earned.contains(Badge.DUELIST_EMERAUDE));
+    void winnerThresholdsAreCountedSeparatelyFromDuels() {
+        for (Badge badge : Badge.ofLadder(BadgeFamily.VICTORY, BadgeMetric.HUMAN_WINS)) {
+            int target = badge.target();
+            assertFalse(BadgeRules.evaluate(
+                    facts(30, true, 0, 1_000, target - 1, 30, 1), Set.of())
+                    .contains(badge), "avant " + badge);
+            assertTrue(BadgeRules.evaluate(
+                    facts(30, true, 0, 1_000, target, 30, 1), Set.of())
+                    .contains(badge), "à " + badge);
+        }
     }
 
     @Test
-    void masteryThresholds_followTheTopicXp() {
-        Set<Badge> apprentice = BadgeRules.evaluate(
-                facts(30, false, 0, 20, 0, 2_499, 0), Set.of());
-        assertTrue(apprentice.contains(Badge.MASTER_FER));
-        assertTrue(apprentice.contains(Badge.MASTER_BRONZE));
-        assertTrue(apprentice.contains(Badge.MASTER_ARGENT));
-        assertFalse(apprentice.contains(Badge.MASTER_OR));
+    void masteryThresholdsFollowTheTopicXp() {
+        List<Badge> ladder = Badge.ofLadder(BadgeFamily.MASTERY, BadgeMetric.TOPIC_MASTERY);
+        assertEquals(1, Badge.MASTER_FER.target());
 
-        assertTrue(BadgeRules.evaluate(facts(30, false, 0, 20, 0, 2_500, 0), Set.of())
-                .contains(Badge.MASTER_OR));
-        assertTrue(BadgeRules.evaluate(facts(30, false, 0, 50, 0, 6_000, 0), Set.of())
-                .contains(Badge.MASTER_PLATINE));
-        assertTrue(BadgeRules.evaluate(facts(30, false, 0, 250, 0, 30_000, 0), Set.of())
-                .contains(Badge.MASTER_DIAMANT));
+        for (int index = 1; index < MasteryGrade.values().length; index++) {
+            MasteryGrade grade = MasteryGrade.values()[index];
+            Badge badge = ladder.get(index);
+            assertEquals(grade.xpThreshold(), badge.target(), "alignement " + grade);
+
+            assertFalse(BadgeRules.evaluate(
+                    facts(30, false, 0, 0, 0, grade.xpThreshold() - 1, 0), Set.of())
+                    .contains(badge), "avant " + badge);
+            assertTrue(BadgeRules.evaluate(
+                    facts(30, false, 0, 0, 0, grade.xpThreshold(), 0), Set.of())
+                    .contains(badge), "à " + badge);
+        }
     }
 
     @Test
-    void alreadyEarnedBadges_areNeverReAwarded() {
+    void alreadyEarnedBadgesAreNeverReAwarded() {
         Set<Badge> owned = EnumSet.of(Badge.FIRST_WIN, Badge.DUELIST_BRONZE);
 
-        Set<Badge> earned = BadgeRules.evaluate(facts(30, true, 0, 10, 1, 30, 1), owned);
+        Set<Badge> earned = BadgeRules.evaluate(facts(
+                30, true, 0, Badge.DUELIST_ARGENT.target(),
+                Badge.WINNER_FER.target(), 30, 1), owned);
 
         assertFalse(earned.contains(Badge.FIRST_WIN));
         assertFalse(earned.contains(Badge.DUELIST_BRONZE));
         assertTrue(earned.contains(Badge.DUELIST_ARGENT));
+        assertTrue(earned.contains(Badge.WINNER_FER));
     }
 
     @Test
-    void collectionCascade_unlocksEveryCrossedTierInOneAward() {
+    void collectionCascadeUnlocksEveryCrossedTierInOneAward() {
         Set<Badge> owned = EnumSet.of(Badge.FIRST_WIN, Badge.PERFECT, Badge.LIGHTNING,
                 Badge.STREAK_MASTER);
 
@@ -232,15 +239,22 @@ class BadgeRulesTest {
 
     @Test
     void collectionCountsItsOwnTiersAndCascadesAtTheNextThreshold() {
-        // Neuf badges possédés, dont le palier Fer de collection : le 30e duel humain ajoute
-        // « Lame d'élite » et porte le total à 10, ce qui franchit « Collectionneur ».
-        Set<Badge> owned = EnumSet.of(Badge.FIRST_WIN, Badge.PERFECT, Badge.LIGHTNING,
-                Badge.STREAK_MASTER, Badge.DUELIST_FER, Badge.DUELIST_BRONZE,
-                Badge.DUELIST_ARGENT, Badge.MASTER_FER, Badge.COLLECTOR_FER);
+        // Dix-neuf badges déjà acquis (dont aucun de collection) : le 3e sujet joué ajoute
+        // « Explorateur » et porte le total à 20, ce qui franchit « Première pièce » (8) puis
+        // « Collectionneur » (20) dans la même évaluation.
+        Set<Badge> owned = EnumSet.of(
+                Badge.FIRST_WIN, Badge.PERFECT, Badge.LIGHTNING, Badge.STREAK_MASTER,
+                Badge.DUELIST_FER, Badge.DUELIST_BRONZE, Badge.DUELIST_ARGENT, Badge.DUELIST_OR,
+                Badge.DUELIST_PLATINE, Badge.DUELIST_EMERAUDE,
+                Badge.WINNER_FER, Badge.WINNER_BRONZE, Badge.WINNER_ARGENT,
+                Badge.MASTER_FER, Badge.MASTER_BRONZE, Badge.MASTER_ARGENT,
+                Badge.SERIES_FER, Badge.ASSIDUITY_FER, Badge.PRECISION_FER);
 
-        Set<Badge> earned = BadgeRules.evaluate(facts(30, false, 0, 30, 0, 30, 0), owned);
+        Set<Badge> earned = BadgeRules.evaluate(
+                facts(30, false, 0, 0, 0, 0, 0, Badge.EXPLORER_FER.target()), owned);
 
-        assertEquals(Set.of(Badge.DUELIST_OR, Badge.COLLECTOR_BRONZE), earned);
+        assertEquals(Set.of(Badge.EXPLORER_FER, Badge.COLLECTOR_FER, Badge.COLLECTOR_BRONZE),
+                earned);
     }
 
     @Test

@@ -29,8 +29,8 @@ import java.util.Set;
  * <p>Il porte **tous** les compteurs nécessaires à l'évaluation des {@link Badge} : duels et
  * victoires **entre joueurs**, XP par sujet, **série de victoires tous sujets confondus** — plus
  * les badges déjà acquis et les duels déjà évalués (idempotence). L'entraînement contre bot
- * n'alimente aucun compteur de volume/maîtrise, mais les faits d'exploit du duel restent évalués
- * (score, réponses rapides).</p>
+ * n'alimente **aucun** compteur et n'acquiert **aucun** badge, exploits compris (score, réponses
+ * rapides).</p>
  *
  * <p>Créé à la volée au premier {@code EvaluateBadgesCommand}
  * ({@link AggregateCreationPolicy#CREATE_IF_MISSING}) ; un même {@code gameId} n'est évalué

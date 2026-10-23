@@ -11,12 +11,12 @@ import java.util.Optional;
  * courbe de compte : une maîtrise s'entretient sur un domaine, elle ne se dilue pas.</p>
  *
  * <pre>
- * Novice 0 · Apprenti 300 · Pratiquant 1 000 · Confirmé 2 500
- * Expert 6 000 · Maître 14 000 · Légende 30 000
+ * Novice 0 · Apprenti 500 · Pratiquant 1 500 · Confirmé 4 000
+ * Expert 9 000 · Maître 21 000 · Légende 45 000
  * </pre>
  *
- * <p>Référence à ~120 XP par duel : Confirmé ≈ 20 duels sur le sujet, Expert ≈ 50, Légende
- * ≈ 250.</p>
+ * <p>Référence à ~120 XP par duel : Confirmé ≈ 33 duels sur le sujet, Expert ≈ 75, Légende
+ * ≈ 375.</p>
  *
  * <p>Chaque grade porte aussi un {@link TitleRank rang de rareté} (Fer → Diamant) : le rang d'un
  * titre est **dérivé du grade** et n'est jamais persisté ({@link PlayerTitle}).</p>
@@ -24,12 +24,12 @@ import java.util.Optional;
 public enum MasteryGrade {
 
     NOVICE("Novice", 0, TitleRank.FER),
-    APPRENTI("Apprenti", 300, TitleRank.BRONZE),
-    PRATIQUANT("Pratiquant", 1_000, TitleRank.ARGENT),
-    CONFIRME("Confirmé", 2_500, TitleRank.OR),
-    EXPERT("Expert", 6_000, TitleRank.PLATINE),
-    MAITRE("Maître", 14_000, TitleRank.EMERAUDE),
-    LEGENDE("Légende", 30_000, TitleRank.DIAMANT);
+    APPRENTI("Apprenti", 500, TitleRank.BRONZE),
+    PRATIQUANT("Pratiquant", 1_500, TitleRank.ARGENT),
+    CONFIRME("Confirmé", 4_000, TitleRank.OR),
+    EXPERT("Expert", 9_000, TitleRank.PLATINE),
+    MAITRE("Maître", 21_000, TitleRank.EMERAUDE),
+    LEGENDE("Légende", 45_000, TitleRank.DIAMANT);
 
     private final String label;
     private final int xpThreshold;
