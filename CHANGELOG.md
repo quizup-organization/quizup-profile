@@ -1,3 +1,9 @@
+## [4.11.0](https://github.com/quizup-organization/quizup-profile/compare/v4.10.0...v4.11.0) (2026-10-23)
+
+### Features
+
+* **profile:** ajoute le flag serveur de fin d'onboarding ([7d1dc2d](https://github.com/quizup-organization/quizup-profile/commit/7d1dc2d7fba4e68537276f9ce83dc60f878b9673))
+
 ## [4.10.0](https://github.com/quizup-organization/quizup-profile/compare/v4.9.4...v4.10.0) (2026-10-22)
 
 ### Features
