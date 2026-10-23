@@ -1,3 +1,9 @@
+## [5.1.0](https://github.com/quizup-organization/quizup-profile/compare/v5.0.0...v5.1.0) (2026-10-23)
+
+### Features
+
+* **profile:** expose le détail et le catalogue des récompenses ([64d54be](https://github.com/quizup-organization/quizup-profile/commit/64d54bea7fa7cd51d191394547ead9e42ad6de1f))
+
 ## [5.0.0](https://github.com/quizup-organization/quizup-profile/compare/v4.12.0...v5.0.0) (2026-10-23)
 
 ### ⚠ BREAKING CHANGES
