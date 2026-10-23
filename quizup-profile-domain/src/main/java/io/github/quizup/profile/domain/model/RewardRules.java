@@ -1,5 +1,7 @@
 package io.github.quizup.profile.domain.model;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,5 +24,14 @@ public final class RewardRules {
             return Optional.of(RewardCode.MICAH_AVATAR);
         }
         return Optional.empty();
+    }
+
+    /** Catalogue complet, y compris les récompenses non encore débloquées. */
+    public static List<RewardDefinition> catalog() {
+        return Arrays.stream(Badge.values())
+                .flatMap(badge -> forBadge(badge)
+                        .map(code -> new RewardDefinition(code, badge))
+                        .stream())
+                .toList();
     }
 }

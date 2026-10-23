@@ -1,6 +1,7 @@
 package io.github.quizup.profile.infrastructure.out.persistence.adapter;
 
 import io.github.quizup.profile.domain.model.RewardCode;
+import io.github.quizup.profile.domain.model.RewardGrant;
 import io.github.quizup.profile.domain.model.RewardSource;
 import io.github.quizup.profile.domain.port.out.PlayerRewardRepositoryPort;
 import io.github.quizup.profile.infrastructure.out.persistence.entity.PlayerRewardEntity;
@@ -9,8 +10,8 @@ import io.github.quizup.profile.infrastructure.out.persistence.repository.Player
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Comparator;
+import java.util.List;
 
 @Component
 public class PlayerRewardRepositoryAdapter implements PlayerRewardRepositoryPort {
@@ -36,11 +37,11 @@ public class PlayerRewardRepositoryAdapter implements PlayerRewardRepositoryPort
     }
 
     @Override
-    public Set<RewardCode> findRewards(String userId) {
-        Set<RewardCode> rewards = EnumSet.noneOf(RewardCode.class);
-        repository.findByUserId(userId).stream()
-                .map(PlayerRewardEntity::getRewardCode)
-                .forEach(rewards::add);
-        return rewards;
+    public List<RewardGrant> findRewards(String userId) {
+        return repository.findByUserId(userId).stream()
+                .map(entity -> new RewardGrant(
+                        entity.getRewardCode(), entity.getSource(), entity.getUnlockedAt()))
+                .sorted(Comparator.comparing(RewardGrant::unlockedAt).reversed())
+                .toList();
     }
 }

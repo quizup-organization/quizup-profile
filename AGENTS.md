@@ -73,7 +73,9 @@ backfill**) porte la fin ou le skip explicite du parcours ; commande
 (`user_id`, `reward_code`, `source`, `unlocked_at`). `PlayerRewardAggregate` (`rewards:<userId>`)
 est idempotent et définitif. Un handler de `BadgeEarnedEvent` traduit `ASSIDUITY_BRONZE` en
 `MICAH_AVATAR` (7 jours d'activité consécutive) via `RewardRules` ; le badge reste une réussite
-autonome et ne connaît pas l'avatar. Query `GetPlayerRewardsQuery` pour le BFF.
+autonome et ne connaît pas l'avatar. `GetPlayerRewardsQuery` expose les `RewardGrant` (code,
+source, date) et `RewardRules.catalog()` fournit le catalogue complet, verrouillées comprises,
+pour le BFF.
 
 **Bannière** : le profil porte `bannerUrl` (URL http(s) ≤1024, `null` = aucune), uploadée via
 `POST /api/media` (BFF → MinIO) puis attachée par `PUT /api/profiles/{userId}/banner` ; l'image est
@@ -101,6 +103,7 @@ exposée par le service.
 social/matchmaking pour le pseudonyme), `ProfileExistsByIdQuery` (consommée par social),
 `ProfileSearchQuery`.
 **Queries progression** (`ProgressionQuery.java`) : `GetProgressionQuery`, `GetTopicProgressionQuery`.
+**Queries récompenses** (`RewardQuery.java`) : `GetPlayerRewardsQuery` → `RewardGrant` (code, source, date).
 
 **Ports sortants locaux** : `ProfileRepositoryPort` (persistance de la projection, dont
 `existsById`), `ProgressionRepositoryPort` (projection de progression).
