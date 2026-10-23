@@ -1,3 +1,13 @@
+## [5.0.0](https://github.com/quizup-organization/quizup-profile/compare/v4.12.0...v5.0.0) (2026-10-23)
+
+### ⚠ BREAKING CHANGES
+
+* **profile:** débloque Micah par récompense et supprime l'XP globale
+
+### Features
+
+* **profile:** débloque Micah par récompense et supprime l'XP globale ([01f1c50](https://github.com/quizup-organization/quizup-profile/commit/01f1c500dc151aebcbe218733488fa824d7cdc3c))
+
 ## [4.12.0](https://github.com/quizup-organization/quizup-profile/compare/v4.11.1...v4.12.0) (2026-10-23)
 
 ### Features
