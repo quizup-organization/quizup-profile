@@ -17,9 +17,6 @@ public final class ProgressEntityMapper {
     public static PlayerProgress toDomain(ProgressEntity entity) {
         return PlayerProgress.builder()
                 .userId(entity.getUserId())
-                .xpTotal(entity.getXpTotal())
-                .level(entity.getLevel())
-                .title(entity.getTitle())
                 .xpByTopic(new HashMap<>(entity.getXpByTopic()))
                 .gamesByTopic(new HashMap<>(entity.getGamesByTopic()))
                 .badges(new HashSet<>(entity.getBadges()))
@@ -49,9 +46,6 @@ public final class ProgressEntityMapper {
     public static ProgressEntity toEntity(PlayerProgress progress) {
         ProgressEntity entity = new ProgressEntity();
         entity.setUserId(progress.userId());
-        entity.setXpTotal(progress.xpTotal());
-        entity.setLevel(progress.level());
-        entity.setTitle(progress.title());
         entity.setXpByTopic(new HashMap<>(progress.xpByTopic()));
         entity.setGamesByTopic(new HashMap<>(progress.gamesByTopic()));
         entity.setBadges(new HashSet<>(progress.badges()));

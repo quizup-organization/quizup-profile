@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * BadgeAggregate — **succès** (badges) d'un joueur, séparé de la progression (XP, niveau,
- * titres). Identifiant {@code badges:<userId>} (namespacé, cf. {@code ProgressionRules}).
+ * BadgeAggregate — **succès** (badges) d'un joueur, séparé de la progression (XP par thème,
+ * Elo, titres). Identifiant {@code badges:<userId>} (namespacé, cf. {@code ProgressionRules}).
  *
  * <p>Il porte **tous** les compteurs nécessaires à l'évaluation des {@link Badge} : duels et
  * victoires **entre joueurs**, XP par sujet, **série de victoires tous sujets confondus** — plus

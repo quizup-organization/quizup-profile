@@ -48,24 +48,13 @@ public interface ProgressionEvent {
     }
 
     /**
-     * Palier de niveau franchi.
-     */
-    /**
      * Grade de **maîtrise d'un sujet** franchi (titre thématique débloqué) : permet de célébrer
-     * l'acquisition côté joueur, comme {@link BadgeEarnedEvent} et {@link LevelReachedEvent}.
+     * l'acquisition côté joueur, comme {@link BadgeEarnedEvent}.
      */
     record MasteryGradeReachedEvent(
             String userId,
             String topicId,
             MasteryGrade grade,
-            Instant reachedAt
-    ) implements ProgressionEvent {
-    }
-
-    record LevelReachedEvent(
-            String userId,
-            int level,
-            String title,
             Instant reachedAt
     ) implements ProgressionEvent {
     }

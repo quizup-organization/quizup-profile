@@ -1,28 +1,17 @@
 package io.github.quizup.profile.domain.model;
 
 /**
- * Règles de progression (pures, sans dépendance framework) : XP gagnée, niveau de compte et
- * **grade de maîtrise d'un sujet**.
+ * Règles de progression **purement thématiques** : XP gagnée et identifiants namespacés des
+ * agrégats.
  *
  * <p><b>XP</b> : {@code score du match + bonus de victoire} — un duel contre bot est un
- * <b>entraînement</b> et n'attribue aucune XP ({@link #xpFor(int, boolean, boolean)}).</p>
+ * <b>entraînement</b> et n'attribue aucune XP ({@link #xpFor(int, boolean, boolean)}). L'XP est
+ * une métrique <b>par sujet</b> ; elle alimente les grades de maîtrise et les titres thématiques.
+ * Il n'existe plus d'XP globale ni de niveau de compte : l'Elo est la seule métrique au niveau
+ * du joueur.</p>
  *
- * <p><b>Courbe de niveaux</b> (compte) : explicite et **à départ accéléré**. Le palier qui mène
- * du niveau {@code L} au niveau {@code L+1} coûte {@code 100·L − 20} XP de plus que le
- * précédent, soit une XP cumulée de {@code seuil(L) = (L−1)·(50L − 20)} pour atteindre le
- * niveau {@code L}. Jalon (à ~120 XP par duel) :</p>
- *
- * <pre>
- * N2  =    80 XP (≈1 duel)      N10 =  4 320 XP (≈36 duels)
- * N5  =   920 XP (≈8 duels)     N20 = 18 620 XP (≈155 duels)
- * </pre>
- *
- * <p>Les premiers paliers tombent vite — la rétention se joue là — puis la courbe se ralentit
- * (croissance quadratique).</p>
- *
- * <p><b>Maîtrise par sujet</b> : échelle distincte, en {@link MasteryGrade grades}, sur l'XP
- * cumulée <i>dans le sujet</i> (cf. {@link MasteryGrade#gradeFor(int)}) — c'est elle qui porte
- * les titres thématiques.</p>
+ * <p><b>Maîtrise par sujet</b> : échelle en {@link MasteryGrade grades}, sur l'XP cumulée
+ * <i>dans le sujet</i> (cf. {@link MasteryGrade#gradeFor(int)}).</p>
  */
 public final class ProgressionRules {
 
@@ -31,14 +20,6 @@ public final class ProgressionRules {
 
     /** Bonus d'XP accordé pour une victoire. */
     public static final int WIN_BONUS = 50;
-
-    /**
-     * Facteur du seuil de niveau : {@code seuil(L) = (L−1)·(LEVEL_STEP_FACTOR·L − LEVEL_STEP_OFFSET)},
-     * soit un palier de {@code 100·L − 20} XP entre les niveaux {@code L} et {@code L+1}.
-     */
-    private static final int LEVEL_STEP_FACTOR = 50;
-
-    private static final int LEVEL_STEP_OFFSET = 20;
 
     private ProgressionRules() {
     }
@@ -81,63 +62,5 @@ public final class ProgressionRules {
         }
 
         return Math.max(0, matchScore) + (won ? WIN_BONUS : 0);
-    }
-
-    /**
-     * XP totale cumulée nécessaire pour atteindre un niveau ({@code 0} pour le niveau 1).
-     */
-    public static int xpThreshold(int level) {
-        int current = Math.max(1, level);
-
-        return (current - 1) * (LEVEL_STEP_FACTOR * current - LEVEL_STEP_OFFSET);
-    }
-
-    /**
-     * Niveau de compte atteint pour une XP totale cumulée. Démarre à 1.
-     */
-    public static int levelFor(int xpTotal) {
-        if (xpTotal <= 0) {
-            return 1;
-        }
-
-        int level = 1;
-        while (xpThreshold(level + 1) <= xpTotal) {
-            level++;
-        }
-
-        return level;
-    }
-
-    /**
-     * XP totale cumulée à atteindre pour passer au niveau suivant (contrat inchangé : c'est bien
-     * une XP <b>totale</b>, pas un palier relatif).
-     */
-    public static int xpForNextLevel(int level) {
-        return xpThreshold(Math.max(1, level) + 1);
-    }
-
-    /**
-     * Titre de <b>compte</b> associé à un niveau.
-     *
-     * <p>Transitoire : les titres sont désormais **thématiques** — un titre est un
-     * {@link MasteryGrade} de maîtrise d'un sujet ({@link PlayerTitle}), jamais un titre de
-     * compte. Cette échelle générique reste le temps de la bascule de l'affichage (elle n'est
-     * plus qu'un libellé, sans effet sur la progression).</p>
-     */
-    public static String titleFor(int level) {
-        if (level >= 20) {
-            return "Maître du savoir";
-        }
-        if (level >= 10) {
-            return "Expert";
-        }
-        if (level >= 5) {
-            return "Confirmé";
-        }
-        if (level >= 2) {
-            return "Apprenti";
-        }
-
-        return "Novice";
     }
 }

@@ -21,11 +21,14 @@ autres services : social et matchmaking n'interrogent plus identity mais **profi
 `ProfileQuery.ProfileExistsByIdQuery` / `ProfileQuery.GetProfileQuery` sur le bus partagé).
 Le `PseudonymGenerator` (pseudonyme déterministe généré à la création) vit dans ce domaine.
 
-Il porte enfin la **progression du joueur** (RPG) : XP totale + XP **par thème**, niveau et titre
-honorifique (`PlayerProgressAggregate`, `progress:<userId>`) et **badges**
-(`BadgeAggregate`, `badges:<userId>` — namespacés pour ne pas entrer en collision avec le
-`ProfileAggregate`). Les deux sont attribués de façon idempotente à la fin de chaque duel (sagas
-sur `GameEndedEvent` de `quizup-game`).
+Il porte enfin la **progression du joueur** : XP **par thème**, Elo global
+(`PlayerProgressAggregate`, `progress:<userId>`), **badges** (`BadgeAggregate`, `badges:<userId>`)
+et **récompenses persistées** (`PlayerRewardAggregate`, `rewards:<userId>`). Les agrégats sont
+namespacés pour ne pas entrer en collision avec le `ProfileAggregate`. L'XP et les badges sont
+attribués de façon idempotente à la fin de chaque duel (sagas sur `GameEndedEvent` de
+`quizup-game`) ; les récompenses sont débloquées par les badges. **L'XP n'existe qu'au niveau
+d'un thème** ; l'Elo est la seule métrique au niveau du joueur. Il n'y a plus de niveau ni de
+titre de compte.
 
 Il expose aussi la **présence joueur** (`/api/presence`) : read-model éphémère piloté par le cycle
 de vie des **sessions temps réel STOMP** (connexion/déconnexion) et les **heartbeats** du broker
@@ -51,7 +54,10 @@ absorbe les bascules rapides.
 
 **Avatar** : le profil porte `avatarOptions` (JSON des options DiceBear, styles `micah`, `lorelei` ou
 `notionists`, cf. `web-applications/quizup-web/src/shared/avatar/styles/`) choisi par
-le propriétaire. **Aucun stockage d'image** : l'avatar est régénéré côté client de façon déterministe
+le propriétaire. L'avatar de base (`base`) est gratuit ; **Micah** est débloqué par la récompense
+`MICAH_AVATAR` (badge d'assiduité Bronze, 7 jours) ou Premium/admin ; **Lorelei** et
+**Notionists** restent réservés Premium/admin. L'avatar de base utilise la silhouette Lucide et
+un fond de la palette Micah. **Aucun stockage d'image** : l'avatar est régénéré côté client de façon déterministe
 à partir de ces options (repli sur `userId` si `null`).
 
 **Onboarding** : `profile_entry.onboarding_completed_at` (migration `V17`, nullable, **sans
@@ -62,6 +68,12 @@ backfill**) porte la fin ou le skip explicite du parcours ; commande
 (entraînement bot exclu), sans rejeu historique au déploiement. Le flag est exposé au BFF via
 `Profile.onboardingCompletedAt` ; `MeView.onboardingCompleted` le complète par
 `PlayerProgress.gamesPlayed() > 0` (parties humaines déjà jouées avant le flag).
+
+**Récompenses** : la table `player_reward` (migration `V18`) persiste les droits débloqués
+(`user_id`, `reward_code`, `source`, `unlocked_at`). `PlayerRewardAggregate` (`rewards:<userId>`)
+est idempotent et définitif. Un handler de `BadgeEarnedEvent` traduit `ASSIDUITY_BRONZE` en
+`MICAH_AVATAR` (7 jours d'activité consécutive) via `RewardRules` ; le badge reste une réussite
+autonome et ne connaît pas l'avatar. Query `GetPlayerRewardsQuery` pour le BFF.
 
 **Bannière** : le profil porte `bannerUrl` (URL http(s) ≤1024, `null` = aucune), uploadée via
 `POST /api/media` (BFF → MinIO) puis attachée par `PUT /api/profiles/{userId}/banner` ; l'image est
@@ -83,7 +95,7 @@ exposée par le service.
 - `CreateProfileUseCase` — création (utilisée par le seeding système ; en nominal par la saga)
 - `CheckProfileUseCase` — vérification d'existence (`existsById`)
 - `SearchProfileUseCase` — recherche paginée (pattern SDK `SearchRequest` → `SearchResponse`)
-- `GetProgressionUseCase` — progression globale et par thème
+- `GetProgressionUseCase` — XP par thème, Elo et badges
 
 **Queries** (`domain/query/ProfileQuery.java`) : `GetProfileQuery` (consommée par
 social/matchmaking pour le pseudonyme), `ProfileExistsByIdQuery` (consommée par social),
@@ -132,12 +144,10 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   porté par `progression_entry` (`rating`, `peak_rating`, `rated_games`, `provisional`) et mis à
   jour par `AwardProgressSaga` + `PlayerProgressAggregate` ; il ne remplace pas l'XP de sujet, qui
   reste la source des titres, badges et classements par thème.
-- **Courbe de niveaux explicite et à départ accéléré** (remplace l'ancien `1 + √(xp/100)`) :
-  `ProgressionRules.xpThreshold(L) = (L−1)·(50L − 20)`, soit un palier de `100·L − 20` XP entre
-  les niveaux `L` et `L+1` — N2 = 80 XP (≈1 duel), N5 = 920 (≈8), N10 = 4 320 (≈36),
-  N20 = 18 620 (≈155). `levelFor` / `xpForNextLevel` / `xpFor` gardent leur signature ; le
-  niveau est recalculé à la lecture, la nouvelle courbe se répercute donc sans migration.
-- **Maîtrise par sujet** (`MasteryGrade`) : échelle **distincte** du niveau de compte, portée par
+- **XP par thème** : `XpAwardedEvent` porte l'XP du sujet et l'Elo. Il n'existe plus d'XP globale,
+  de niveau ni de titre de compte ; `ProgressionRules` ne conserve que le calcul d'XP de duel et
+  les identifiants d'agrégats.
+- **Maîtrise par sujet** (`MasteryGrade`) : échelle portée par
   l'XP cumulée **dans le sujet**, en 7 grades à table de seuils explicite
   (`Novice 0 · Apprenti 500 · Pratiquant 1 500 · Confirmé 4 000 · Expert 9 000 · Maître 21 000 ·
   Légende 45 000`). C'est le support des **titres thématiques**. Chaque grade porte un
@@ -218,7 +228,7 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
   reste pur).
 - **Attribution des paliers** (`BadgeRules`, règles **pures** testées sans Axon) : les badges
   vivent dans un **agrégat dédié `BadgeAggregate`** (`badges:<userId>`), séparé de
-  `PlayerProgressAggregate` (qui ne porte plus que XP/niveau/titre). La saga
+  `PlayerProgressAggregate` (qui ne porte plus que XP par thème et Elo). La saga
   **`AwardBadgesSaga`** consomme `XpAwardedEvent` (qui porte déjà tous les faits du duel) et
   envoie un `EvaluateBadgesCommand` ; `BadgeAggregate` maintient ses propres compteurs (duels et
   victoires entre joueurs, XP par sujet et **série de victoires globale** (tous sujets
@@ -273,5 +283,5 @@ partagé) — ces services ne dépendent plus de `quizup-identity-domain`.
 - `ProfileQuery.CountImageReferencesQuery(imageUrls)` → `List<ImageReferenceCount>` : comptage batch
   des bannières de profil référencées, réservé à la **console média admin** du BFF
   (`/api/admin/media`, `ROLE_ADMIN` — une suppression d'objet référencé est bloquée).
-- `GetProgressionsByIdsQuery` est désormais consommée par le BFF (niveaux des listes de personnes) ;
+- `GetProgressionsByIdsQuery` est consommée par le BFF pour l'Elo et les badges des listes de personnes ;
   `SearchProfileUseCase` / `SearchChallengeUseCase` restent pour les futures surfaces d'administration.

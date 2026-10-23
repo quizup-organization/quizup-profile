@@ -3,8 +3,7 @@ package io.github.quizup.profile.domain.model;
 import java.util.Optional;
 
 /**
- * Grade de **maîtrise d'un sujet** : échelle distincte du niveau de compte, portée par l'XP
- * cumulée **dans le sujet**. C'est le support des **titres thématiques** (« Historien
+ * Grade de **maîtrise d'un sujet** : échelle portée par l'XP cumulée **dans le sujet**. C'est le support des **titres thématiques** (« Historien
  * confirmé ») : le titre affiché est un grade + le nom du sujet (cf. {@link PlayerTitle}).
  *
  * <p>Table de seuils <b>explicite</b> (XP dans le sujet) — volontairement plus raide que la

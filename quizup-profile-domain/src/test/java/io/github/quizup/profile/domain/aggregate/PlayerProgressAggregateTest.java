@@ -11,8 +11,9 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 
 /**
- * Test Axon in-memory de {@link PlayerProgressAggregate} : attribution XP, idempotence et montée
- * de niveau. Les **badges** sont évalués par {@link BadgeAggregate} (cf. {@code BadgeAggregateTest}).
+ * Test Axon in-memory de {@link PlayerProgressAggregate} : attribution XP par thème,
+ * idempotence, maîtrise et Elo. Les **badges** sont évalués par {@link BadgeAggregate}
+ * (cf. {@code BadgeAggregateTest}).
  */
 class PlayerProgressAggregateTest {
 
@@ -46,16 +47,6 @@ class PlayerProgressAggregateTest {
                             ProgressionEvent.XpAwardedEvent xp = (ProgressionEvent.XpAwardedEvent) e;
                             return xp.botGame() && xp.xp() == 0;
                         }));
-    }
-
-    @Test
-    void crossingThreshold_appliesLevelReachedEvent() {
-        fixture
-                .givenNoPriorActivity()
-                .when(new ProgressionCommand.AwardXpCommand(ProgressionRules.progressIdFor("user-1"), "user-1", "game-1", "topic-1", 100, true, false, false, 4, 2, 0, null, null, null))
-                .expectEventsMatching(QuizUpAxonMatchers.hasPayloadMatching(
-                        ProgressionEvent.LevelReachedEvent.class,
-                        e -> ((ProgressionEvent.LevelReachedEvent) e).level() == 2));
     }
 
     @Test

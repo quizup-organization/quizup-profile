@@ -1,8 +1,8 @@
 package io.github.quizup.profile.application.handler.query;
 
 import io.github.quizup.profile.domain.model.GameXp;
+import io.github.quizup.profile.domain.model.MasteryGrade;
 import io.github.quizup.profile.domain.model.PlayerProgress;
-import io.github.quizup.profile.domain.model.ProgressionRules;
 import io.github.quizup.profile.domain.model.TopicProgress;
 import io.github.quizup.profile.domain.port.out.ProgressionAwardedGameRepositoryPort;
 import io.github.quizup.profile.domain.port.out.ProgressionRepositoryPort;
@@ -49,7 +49,7 @@ class ProgressionQueryHandlerTest {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).userId()).isEqualTo("known");
         assertThat(result.get(1).userId()).isEqualTo("unknown");
-        assertThat(result.get(1).level()).isEqualTo(1);
+        assertThat(result.get(1).xpByTopic()).isEmpty();
     }
 
     @Test
@@ -68,7 +68,7 @@ class ProgressionQueryHandlerTest {
                 .containsExactly("space", "dota", "frozen");
         assertThat(result.get(0).games()).isEqualTo(7);
         assertThat(result.get(0).xp()).isEqualTo(200);
-        assertThat(result.get(0).level()).isEqualTo(ProgressionRules.levelFor(200));
+        assertThat(result.get(0).grade()).isEqualTo(MasteryGrade.NOVICE);
         assertThat(result.get(1).games()).isEqualTo(3);
     }
 

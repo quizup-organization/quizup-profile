@@ -39,12 +39,14 @@ public class AccountDeletionHandler {
         jdbcTemplate.update("DELETE FROM progression_topic_entry WHERE user_id = ?", userId);
         jdbcTemplate.update("DELETE FROM progression_badge WHERE user_id = ?", userId);
         jdbcTemplate.update("DELETE FROM progression_entry WHERE user_id = ?", userId);
+        jdbcTemplate.update("DELETE FROM player_reward WHERE user_id = ?", userId);
         jdbcTemplate.update("DELETE FROM presence_session WHERE user_id = ?", userId);
         jdbcTemplate.update("DELETE FROM presence_entry WHERE user_id = ?", userId);
         jdbcTemplate.update("DELETE FROM profile_entry WHERE user_id = ?", userId);
         eventStoreErasureService.eraseAggregates(List.of(
                 userId,
                 "progress:" + userId,
-                "badges:" + userId));
+                "badges:" + userId,
+                "rewards:" + userId));
     }
 }

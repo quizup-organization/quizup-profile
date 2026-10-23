@@ -9,14 +9,14 @@ import java.util.Set;
 
 /**
  * Modèle domaine (read model) de la progression d'un joueur :
- * XP totale + XP par thème, parties humaines par thème, niveau, titre et badges.
+ * XP par thème, parties humaines par thème, badges, compteurs et Elo.
+ *
+ * <p>L'XP est une métrique <b>par sujet</b> ; il n'existe pas d'XP globale ni de niveau de
+ * compte. L'Elo est la seule métrique au niveau du joueur.</p>
  */
 @Builder(toBuilder = true)
 public record PlayerProgress(
         String userId,
-        int xpTotal,
-        int level,
-        String title,
         Map<String, Integer> xpByTopic,
         Map<String, Integer> gamesByTopic,
         Set<Badge> badges,
@@ -60,15 +60,11 @@ public record PlayerProgress(
     }
 
     /**
-     * Progression neutre (niveau 1, 0 XP, Elo de départ) d'un joueur n'ayant encore joué aucun
-     * duel.
+     * Progression neutre (0 XP, Elo de départ) d'un joueur n'ayant encore joué aucun duel.
      */
     public static PlayerProgress empty(String userId) {
         return PlayerProgress.builder()
                 .userId(userId)
-                .xpTotal(0)
-                .level(1)
-                .title(ProgressionRules.titleFor(1))
                 .xpByTopic(Map.of())
                 .gamesByTopic(Map.of())
                 .badges(Set.of())
@@ -102,9 +98,5 @@ public record PlayerProgress(
     /** Parties humaines jouées sur un thème (duels bot exclus). */
     public int gamesForTopic(String topicId) {
         return gamesByTopic.getOrDefault(topicId, 0);
-    }
-
-    public int xpForNextLevel() {
-        return ProgressionRules.xpForNextLevel(level);
     }
 }

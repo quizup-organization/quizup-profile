@@ -20,13 +20,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * PlayerProgressAggregate — progression d'un joueur (XP totale + XP par thème,
- * niveau, titre). Les **badges** vivent dans `BadgeAggregate`.
+ * PlayerProgressAggregate — progression d'un joueur : **XP par thème** et **Elo**. Les
+ * **badges** vivent dans `BadgeAggregate`.
  *
  * <p>Identifiant d'agrégat namespacé ({@code progress:<userId>}). Créé à la volée
  * au premier {@code AwardXpCommand} ({@link AggregateCreationPolicy#CREATE_IF_MISSING}).
  * L'attribution est idempotente : un même {@code gameId} n'est crédité qu'une fois.</p>
- *
  */
 @Aggregate
 public class PlayerProgressAggregate {
@@ -41,9 +40,6 @@ public class PlayerProgressAggregate {
     /** Nombre de duels classés contre un adversaire pour un jour local : plafond anti-farm. */
     private final Map<String, Integer> ratedOpponentDayCounts = new HashMap<>();
 
-    private int xpTotal;
-    private int level = 1;
-    private String title = ProgressionRules.titleFor(1);
     private int rating = EloRules.INITIAL_RATING;
     private int peakRating = EloRules.INITIAL_RATING;
     private int ratedGames;
@@ -67,8 +63,6 @@ public class PlayerProgressAggregate {
         }
 
         int xp = ProgressionRules.xpFor(command.gameScore(), command.won(), command.botGame());
-        int newTotal = xpTotal + xp;
-        int previousLevel = level;
         Instant now = Instant.now();
 
         int newRating = rating;
@@ -129,18 +123,6 @@ public class PlayerProgressAggregate {
                     now
             ));
         }
-
-        int newLevel = ProgressionRules.levelFor(newTotal);
-
-        if (newLevel > previousLevel) {
-            AggregateLifecycle.apply(new ProgressionEvent.LevelReachedEvent(
-                    command.userId(),
-                    newLevel,
-                    ProgressionRules.titleFor(newLevel),
-                    now
-            ));
-        }
-
     }
 
     @EventSourcingHandler
@@ -149,9 +131,6 @@ public class PlayerProgressAggregate {
         this.userId = event.userId();
         this.xpByTopic.merge(event.topicId(), event.xp(), Integer::sum);
         this.awardedGameIds.add(event.gameId());
-        this.xpTotal += event.xp();
-        this.level = ProgressionRules.levelFor(this.xpTotal);
-        this.title = ProgressionRules.titleFor(this.level);
         this.rating = event.rating();
         this.peakRating = event.peakRating();
         this.ratedGames = event.ratedGames();
@@ -161,11 +140,4 @@ public class PlayerProgressAggregate {
                     event.ratedDay() + "|" + event.ratedOpponentId(), 1, Integer::sum);
         }
     }
-
-    @EventSourcingHandler
-    public void on(ProgressionEvent.LevelReachedEvent event) {
-        this.level = event.level();
-        this.title = event.title();
-    }
-
 }

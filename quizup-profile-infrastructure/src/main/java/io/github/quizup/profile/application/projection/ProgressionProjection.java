@@ -25,7 +25,7 @@ import java.util.Set;
 
 /**
  * ProgressionProjection — maintient la projection read-only de la progression
- * (XP totale, XP par thème, niveau, titre, badges).
+ * (XP par thème, Elo, compteurs et badges).
  */
 @Component
 @ProcessingGroup("progression-projection")
@@ -64,9 +64,6 @@ public class ProgressionProjection {
 
         Map<String, Integer> xpByTopic = new HashMap<>(current.xpByTopic());
         xpByTopic.merge(event.topicId(), event.xp(), Integer::sum);
-
-        int xpTotal = current.xpTotal() + event.xp();
-        int level = ProgressionRules.levelFor(xpTotal);
 
         boolean humanDuel = !event.botGame();
         int currentWinStreak = humanDuel
@@ -113,9 +110,6 @@ public class ProgressionProjection {
         }
 
         progressionRepositoryPort.save(current.toBuilder()
-                .xpTotal(xpTotal)
-                .level(level)
-                .title(ProgressionRules.titleFor(level))
                 .xpByTopic(xpByTopic)
                 .gamesByTopic(gamesByTopic)
                 .gamesPlayed(current.gamesPlayed() + (humanDuel ? 1 : 0))
@@ -138,19 +132,8 @@ public class ProgressionProjection {
                 .provisional(event.provisional())
                 .build());
 
-        logger.info("Progression projetée: userId={}, +{} XP, total={}, Elo={} (+{})",
-                event.userId(), event.xp(), xpTotal, event.rating(), event.ratingDelta());
-    }
-
-    @EventHandler
-    @Transactional
-    public void on(ProgressionEvent.LevelReachedEvent event) {
-        progressionRepositoryPort.findById(event.userId())
-                .ifPresent(progress -> progressionRepositoryPort.save(progress.toBuilder()
-                        .level(event.level())
-                        .title(event.title())
-                        .updatedAt(event.reachedAt())
-                        .build()));
+        logger.info("Progression projetée: userId={}, sujet={}, +{} XP, Elo={} (+{})",
+                event.userId(), event.topicId(), event.xp(), event.rating(), event.ratingDelta());
     }
 
     /**

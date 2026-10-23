@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * Handler Axon — queries de progression. Retourne une progression neutre
- * (niveau 1, 0 XP) pour un joueur n'ayant encore joué aucun duel.
+ * (0 XP, Elo de départ) pour un joueur n'ayant encore joué aucun duel.
  */
 @Component
 public class ProgressionQueryHandler {
@@ -59,7 +59,7 @@ public class ProgressionQueryHandler {
     }
 
     /**
-     * Répartition par thème (XP, niveau et parties humaines), triée par parties décroissantes
+     * Répartition par thème (XP et parties humaines), triée par parties décroissantes
      * puis par XP décroissante — les thèmes joués uniquement contre bot (0 partie) restent
      * présents pour leur XP.
      */

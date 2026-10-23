@@ -8,7 +8,7 @@ public interface ProgressionQuery {
     }
 
     /**
-     * Résolution en lot des progressions (évite le fan-out N+1, ex. tri par niveau).
+     * Résolution en lot des progressions (évite le fan-out N+1, ex. tri par Elo).
      */
     record GetProgressionsByIdsQuery(List<String> userIds) implements ProgressionQuery {
     }
@@ -17,7 +17,7 @@ public interface ProgressionQuery {
     }
 
     /**
-     * Répartition de la progression par thème (XP, niveau et parties humaines), triée par
+     * Répartition de la progression par thème (XP et parties humaines), triée par
      * parties décroissantes — alimente le donut « Sujets joués » du profil.
      */
     record GetTopicProgressionsQuery(String userId) implements ProgressionQuery {
