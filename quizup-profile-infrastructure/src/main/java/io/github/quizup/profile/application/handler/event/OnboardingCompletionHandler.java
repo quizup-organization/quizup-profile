@@ -15,7 +15,7 @@ import java.time.Instant;
  * parties annulées n'émettent pas d'XP et ne déclenchent donc pas ce marquage.
  */
 @Component
-@ProcessingGroup("onboarding-completion")
+@ProcessingGroup("progression-projection")
 public class OnboardingCompletionHandler {
 
     private final CommandGateway commandGateway;
